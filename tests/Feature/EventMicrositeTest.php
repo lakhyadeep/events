@@ -50,14 +50,14 @@ class EventMicrositeTest extends TestCase
         $this->assertGreaterThan(0, Zone::count());
         $this->assertGreaterThan(0, Locality::count());
 
-        $southKolkata = Zone::where('name', 'South Kolkata')->first();
-        $this->assertNotNull($southKolkata);
-        $this->assertGreaterThan(0, $southKolkata->localities()->count());
+        $centralDibrugarh = Zone::where('name', 'Central Dibrugarh')->first();
+        $this->assertNotNull($centralDibrugarh);
+        $this->assertGreaterThan(0, $centralDibrugarh->localities()->count());
 
-        $participant = Participant::where('zone_id', $southKolkata->id)->first();
+        $participant = Participant::where('zone_id', $centralDibrugarh->id)->first();
         $this->assertNotNull($participant);
-        $this->assertEquals('South Kolkata', $participant->zone);
-        $this->assertEquals('South Kolkata', $participant->zone()->first()->name);
+        $this->assertEquals('Central Dibrugarh', $participant->zone);
+        $this->assertEquals('Central Dibrugarh', $participant->zone()->first()->name);
     }
 
     public function test_headless_api_event_endpoint_returns_json(): void
@@ -83,7 +83,7 @@ class EventMicrositeTest extends TestCase
 
     public function test_headless_api_participants_filter_by_zone(): void
     {
-        $response = $this->getJson('/api/v1/events/sharod-samman-2026/participants?zone=South Kolkata');
+        $response = $this->getJson('/api/v1/events/sharod-samman-2026/participants?zone=Central Dibrugarh');
 
         $response->assertStatus(200)
             ->assertJsonPath('success', true)
@@ -103,9 +103,9 @@ class EventMicrositeTest extends TestCase
 
         Livewire::test(ParticipantsShowcase::class, ['eventId' => $event->id])
             ->assertStatus(200)
-            ->assertSee('Ballygunge Cultural Association')
-            ->set('search', 'Ballygunge')
-            ->assertSee('Ballygunge Cultural Association')
+            ->assertSee('Chowkidinghee Sarbajanin Durga Puja Committee')
+            ->set('search', 'Chowkidinghee')
+            ->assertSee('Chowkidinghee Sarbajanin Durga Puja Committee')
             ->set('search', 'NonExistentClubXYZ')
             ->assertSee('No participants found');
     }
@@ -178,8 +178,8 @@ class EventMicrositeTest extends TestCase
         $event = Event::where('slug', 'sharod-samman-2026')->first();
 
         Livewire::test(ParticipantsShowcase::class, ['eventId' => $event->id])
-            ->call('setZone', 'South Kolkata')
-            ->assertSet('selectedZone', 'South Kolkata')
+            ->call('setZone', 'Central Dibrugarh')
+            ->assertSet('selectedZone', 'Central Dibrugarh')
             ->call('toggleShortlisted')
             ->assertSet('shortlistedOnly', true);
     }

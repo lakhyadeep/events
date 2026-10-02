@@ -23,7 +23,7 @@ class ZoneForm
                     ->schema([
                         TextInput::make('name')
                             ->label('Zone Name')
-                            ->placeholder('e.g. South Kolkata')
+                            ->placeholder('e.g. Central Dibrugarh')
                             ->required()
                             ->maxLength(191)
                             ->unique(ignoreRecord: true)
@@ -31,7 +31,7 @@ class ZoneForm
                             ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Str::slug($state ?? ''))),
                         TextInput::make('slug')
                             ->label('URL / Code Slug')
-                            ->placeholder('e.g. south-kolkata')
+                            ->placeholder('e.g. central-dibrugarh')
                             ->required()
                             ->unique(ignoreRecord: true)
                             ->maxLength(191),

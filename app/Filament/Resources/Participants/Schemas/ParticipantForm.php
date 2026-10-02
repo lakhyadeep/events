@@ -26,12 +26,12 @@ class ParticipantForm
                         ->schema([
                             TextInput::make('name')
                                 ->label('Official Name (Club / Organization)')
-                                ->placeholder('e.g. Ballygunge Cultural Association')
+                                ->placeholder('e.g. Chowkidinghee Sarbajanin Durga Puja Committee')
                                 ->required()
                                 ->maxLength(191),
                             TextInput::make('display_name')
                                 ->label('Public Display Name')
-                                ->placeholder('e.g. Ballygunge Cultural')
+                                ->placeholder('e.g. Chowkidinghee Sarbajanin')
                                 ->required()
                                 ->maxLength(191),
                             Textarea::make('address')

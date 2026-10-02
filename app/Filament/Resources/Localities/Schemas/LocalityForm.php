@@ -30,14 +30,14 @@ class LocalityForm
                             ->required(),
                         TextInput::make('name')
                             ->label('Locality Name')
-                            ->placeholder('e.g. Ballygunge Place')
+                            ->placeholder('e.g. Chowkidinghee')
                             ->required()
                             ->maxLength(191)
                             ->live(onBlur: true)
                             ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Str::slug($state ?? ''))),
                         TextInput::make('slug')
                             ->label('URL / Code Slug')
-                            ->placeholder('e.g. ballygunge-place')
+                            ->placeholder('e.g. chowkidinghee')
                             ->maxLength(191),
                         TextInput::make('sort_order')
                             ->label('Display Sort Order')
