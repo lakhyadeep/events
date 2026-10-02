@@ -5,12 +5,15 @@ namespace Database\Seeders;
 use App\Models\Award;
 use App\Models\Banner;
 use App\Models\Event;
+use App\Models\Locality;
 use App\Models\Participant;
 use App\Models\Sponsor;
 use App\Models\TimelineItem;
 use App\Models\VideoShort;
 use App\Models\Winner;
+use App\Models\Zone;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class DemoEventSeeder extends Seeder
 {
@@ -188,7 +191,47 @@ class DemoEventSeeder extends Seeder
             );
         }
 
-        // 5. Participants / Contenders (with Cultural / Puja Fields)
+        // 5. Seed Geographic Masters (Zones & Localities)
+        $zonesHierarchy = [
+            'North Kolkata' => ['Hatibagan', 'Tala', 'Shyambazar', 'Sovabazar'],
+            'South Kolkata' => ['Ballygunge Place', 'Chetla', 'New Alipore', 'Jodhpur Park'],
+            'Central Kolkata' => ['College Square', 'Bowbazar', 'Md Ali Park'],
+            'East Kolkata' => ['Kankurgachi', 'Phoolbagan', 'Beleghata'],
+            'Howrah' => ['Shibpur', 'Salkia', 'Mandirtala'],
+            'Salt Lake & New Town' => ['FD Block', 'BJ Block', 'New Town Action Area 1'],
+            'Other' => ['Suburban', 'Outstation'],
+        ];
+
+        $zoneCache = [];
+        $localityCache = [];
+        $zoneSort = 1;
+
+        foreach ($zonesHierarchy as $zName => $locs) {
+            $zoneModel = Zone::updateOrCreate(
+                ['name' => $zName],
+                [
+                    'slug' => Str::slug($zName),
+                    'sort_order' => $zoneSort++,
+                    'is_active' => true,
+                ]
+            );
+            $zoneCache[$zName] = $zoneModel;
+
+            $locSort = 1;
+            foreach ($locs as $lName) {
+                $locModel = Locality::updateOrCreate(
+                    ['zone_id' => $zoneModel->id, 'name' => $lName],
+                    [
+                        'slug' => Str::slug($lName),
+                        'sort_order' => $locSort++,
+                        'is_active' => true,
+                    ]
+                );
+                $localityCache[$zName.'::'.$lName] = $locModel;
+            }
+        }
+
+        // 6. Participants / Contenders (with Cultural / Puja Fields)
         $participantsData = [
             [
                 'name' => 'Ballygunge Cultural Association',
@@ -311,9 +354,23 @@ class DemoEventSeeder extends Seeder
 
         $createdParticipants = [];
         foreach ($participantsData as $p) {
+            $zModel = $zoneCache[$p['zone']] ?? null;
+            $lModel = $localityCache[$p['zone'].'::'.$p['locality']] ?? null;
+            if (! $lModel && $zModel && ! empty($p['locality'])) {
+                $lModel = Locality::firstOrCreate(
+                    ['zone_id' => $zModel->id, 'name' => $p['locality']],
+                    ['slug' => Str::slug($p['locality'])]
+                );
+            }
+
             $createdParticipants[] = Participant::updateOrCreate(
                 ['event_id' => $event->id, 'name' => $p['name']],
-                array_merge($p, ['year' => 2026, 'registration_status' => 'approved'])
+                array_merge($p, [
+                    'zone_id' => $zModel?->id,
+                    'locality_id' => $lModel?->id,
+                    'year' => 2026,
+                    'registration_status' => 'approved',
+                ])
             );
         }
 

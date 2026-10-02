@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Frontend;
 
-use App\Enums\Zone;
 use App\Models\Participant;
+use App\Models\Zone;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -57,12 +57,12 @@ class ParticipantsShowcase extends Component
 
     public function render()
     {
-        $zones = ['All Zones' => ''] + Zone::options();
+        $zones = ['All Zones' => ''] + Zone::active()->orderBy('sort_order')->pluck('name', 'name')->toArray();
 
         $participants = Participant::query()
             ->where('event_id', $this->eventId)
             ->approved()
-            ->when($this->selectedZone, fn ($q) => $q->where('zone', $this->selectedZone))
+            ->when($this->selectedZone, fn ($q) => $q->zone($this->selectedZone))
             ->when($this->shortlistedOnly, fn ($q) => $q->shortlisted())
             ->when($this->search, function ($q) {
                 $term = "%{$this->search}%";

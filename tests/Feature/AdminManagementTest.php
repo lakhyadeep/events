@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Filament\Resources\Events\Pages\CreateEvent;
+use App\Filament\Resources\Users\Pages\EditUser;
 use App\Models\Event;
 use App\Models\Sponsor;
 use App\Models\User;
@@ -85,12 +86,35 @@ class AdminManagementTest extends TestCase
             '/admin/winners',
             '/admin/sponsors',
             '/admin/video-shorts',
+            '/admin/zones',
+            '/admin/localities',
+            '/admin/users',
         ];
 
         foreach ($routes as $route) {
             $response = $this->actingAs($admin)->get($route);
             $response->assertStatus(200);
         }
+    }
+
+    public function test_admin_can_create_and_manage_users(): void
+    {
+        $admin = User::where('email', 'admin@dib24x7.com')->first();
+
+        $newUser = User::create([
+            'name' => 'Editor Person',
+            'email' => 'editor@dib24x7.com',
+            'password' => 'secret123',
+            'email_verified_at' => now(),
+        ]);
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'editor@dib24x7.com',
+        ]);
+
+        $response = $this->actingAs($admin)->get('/admin/users');
+        $response->assertStatus(200);
+        $response->assertSee('editor@dib24x7.com');
     }
 
     public function test_event_slug_is_automatically_generated_from_display_name(): void
@@ -105,5 +129,39 @@ class AdminManagementTest extends TestCase
             ->assertFormSet([
                 'slug' => 'kolkata-festival-2026',
             ]);
+    }
+
+    public function test_delete_action_requires_valid_administrator_password(): void
+    {
+        $admin = User::where('email', 'admin@dib24x7.com')->first();
+
+        $userToDelete = User::factory()->create([
+            'name' => 'Temporary User',
+            'email' => 'temp@dib24x7.com',
+        ]);
+
+        // Attempt delete with incorrect password
+        Livewire::actingAs($admin)
+            ->test(EditUser::class, [
+                'record' => $userToDelete->id,
+            ])
+            ->callAction('delete', data: [
+                'current_password' => 'wrong-password-123',
+            ])
+            ->assertHasActionErrors(['current_password']);
+
+        $this->assertDatabaseHas('users', ['id' => $userToDelete->id]);
+
+        // Attempt delete with correct administrator password
+        Livewire::actingAs($admin)
+            ->test(EditUser::class, [
+                'record' => $userToDelete->id,
+            ])
+            ->callAction('delete', data: [
+                'current_password' => 'password',
+            ])
+            ->assertHasNoActionErrors();
+
+        $this->assertDatabaseMissing('users', ['id' => $userToDelete->id]);
     }
 }

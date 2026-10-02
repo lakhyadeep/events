@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Enums\RegistrationStatus;
-use App\Enums\Zone;
 use App\Models\Concerns\ResolvesMediaUrl;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -19,6 +18,8 @@ class Participant extends Model
 
     protected $fillable = [
         'event_id',
+        'zone_id',
+        'locality_id',
         'mobile_number',
         'name',
         'display_name',
@@ -51,12 +52,27 @@ class Participant extends Model
     protected function casts(): array
     {
         return [
+            'zone_id' => 'integer',
+            'locality_id' => 'integer',
             'is_shortlisted' => 'boolean',
             'is_puja_contest' => 'boolean',
             'year' => 'integer',
             'first_year_of_puja' => 'integer',
             'registration_status' => RegistrationStatus::class,
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::saving(function (Participant $participant) {
+            // Keep legacy zone & locality text columns in sync if relation IDs are set
+            if ($participant->zone_id && empty($participant->zone)) {
+                $participant->zone = Zone::find($participant->zone_id)?->name ?? $participant->zone;
+            }
+            if ($participant->locality_id && empty($participant->locality)) {
+                $participant->locality = Locality::find($participant->locality_id)?->name ?? $participant->locality;
+            }
+        });
     }
 
     public function primaryImageUrl(): Attribute
@@ -118,6 +134,16 @@ class Participant extends Model
         return $this->belongsTo(Event::class);
     }
 
+    public function zone(): BelongsTo
+    {
+        return $this->belongsTo(Zone::class, 'zone_id');
+    }
+
+    public function locality(): BelongsTo
+    {
+        return $this->belongsTo(Locality::class, 'locality_id');
+    }
+
     public function winners(): HasMany
     {
         return $this->hasMany(Winner::class);
@@ -133,14 +159,23 @@ class Participant extends Model
         return $query->where('is_shortlisted', true);
     }
 
-    public function scopeZone(Builder $query, Zone|string|null $zone): Builder
+    public function scopeZone(Builder $query, Zone|string|int|null $zone): Builder
     {
         if (blank($zone)) {
             return $query;
         }
 
-        $zoneVal = $zone instanceof Zone ? $zone->value : $zone;
+        if ($zone instanceof Zone) {
+            return $query->where('zone_id', $zone->id);
+        }
 
-        return $query->where('zone', $zoneVal);
+        if (is_numeric($zone)) {
+            return $query->where('zone_id', (int) $zone);
+        }
+
+        return $query->where(function ($q) use ($zone) {
+            $q->where('zone', $zone)
+                ->orWhereHas('zone', fn ($sub) => $sub->where('name', $zone)->orWhere('slug', $zone));
+        });
     }
 }

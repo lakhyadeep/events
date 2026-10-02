@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\Participants\Schemas;
 
 use App\Enums\RegistrationStatus;
-use App\Enums\Zone;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -151,16 +150,25 @@ class ParticipantForm
                     Section::make('Zone & Geographic Location')
                         ->description('Zonal grouping and neighborhood landmarks.')
                         ->schema([
-                            Select::make('zone')
+                            Select::make('zone_id')
                                 ->label('Geographic Zone')
-                                ->options(Zone::options())
+                                ->relationship('zone', 'name')
                                 ->searchable()
+                                ->preload()
+                                ->live()
                                 ->required(),
-                            TextInput::make('locality')
+                            Select::make('locality_id')
                                 ->label('Locality / Neighborhood')
-                                ->placeholder('e.g. Ballygunge Place')
-                                ->required()
-                                ->maxLength(191),
+                                ->relationship(
+                                    name: 'locality',
+                                    titleAttribute: 'name',
+                                    modifyQueryUsing: fn ($query, $get) => $query->when(
+                                        $get('zone_id'),
+                                        fn ($q, $zoneId) => $q->where('zone_id', $zoneId)
+                                    )
+                                )
+                                ->searchable()
+                                ->preload(),
                             TextInput::make('landmark')
                                 ->label('Prominent Landmark')
                                 ->placeholder('e.g. Near Lake Market')

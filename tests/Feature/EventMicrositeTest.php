@@ -5,8 +5,10 @@ namespace Tests\Feature;
 use App\Livewire\Frontend\ParticipantsShowcase;
 use App\Models\Banner;
 use App\Models\Event;
+use App\Models\Locality;
 use App\Models\Participant;
 use App\Models\User;
+use App\Models\Zone;
 use Database\Seeders\DemoEventSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -41,6 +43,21 @@ class EventMicrositeTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('Sharod Samman 2026');
+    }
+
+    public function test_zone_and_locality_masters_exist_and_relate_to_participants(): void
+    {
+        $this->assertGreaterThan(0, Zone::count());
+        $this->assertGreaterThan(0, Locality::count());
+
+        $southKolkata = Zone::where('name', 'South Kolkata')->first();
+        $this->assertNotNull($southKolkata);
+        $this->assertGreaterThan(0, $southKolkata->localities()->count());
+
+        $participant = Participant::where('zone_id', $southKolkata->id)->first();
+        $this->assertNotNull($participant);
+        $this->assertEquals('South Kolkata', $participant->zone);
+        $this->assertEquals('South Kolkata', $participant->zone()->first()->name);
     }
 
     public function test_headless_api_event_endpoint_returns_json(): void

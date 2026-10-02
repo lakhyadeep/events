@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\Participants\Tables;
 
 use App\Enums\RegistrationStatus;
-use App\Enums\Zone;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -73,9 +72,16 @@ class ParticipantsTable
                     ->relationship('event', 'display_name')
                     ->searchable()
                     ->preload(),
-                SelectFilter::make('zone')
+                SelectFilter::make('zone_id')
                     ->label('Zone')
-                    ->options(Zone::options()),
+                    ->relationship('zone', 'name')
+                    ->searchable()
+                    ->preload(),
+                SelectFilter::make('locality_id')
+                    ->label('Locality')
+                    ->relationship('locality', 'name')
+                    ->searchable()
+                    ->preload(),
                 SelectFilter::make('registration_status')
                     ->label('Registration Status')
                     ->options(RegistrationStatus::options()),
