@@ -11,14 +11,18 @@ use App\Models\TimelineItem;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class TimelineItemResource extends Resource
 {
     protected static ?string $model = TimelineItem::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static UnitEnum|string|null $navigationGroup = 'Festival CMS';
+
+    protected static ?int $navigationSort = 3;
+
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-clock';
 
     public static function form(Schema $schema): Schema
     {

@@ -10,8 +10,9 @@ Route::get('/', [EventMicrositeController::class, 'show'])->name('home');
 // Specific Event by Slug
 Route::get('/events/{slug}', [EventMicrositeController::class, 'show'])->name('events.show');
 
-// Shared Hosting Utility: Create storage symbolic link via browser
+// Admin Utility: Create storage symbolic link via authenticated session
 Route::get('/admin-tools/storage-link', function () {
     Artisan::call('storage:link');
+
     return response('Storage link created successfully.', 200);
-})->name('admin.tools.storage-link');
+})->middleware('auth')->name('admin.tools.storage-link');

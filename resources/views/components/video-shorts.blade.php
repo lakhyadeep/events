@@ -28,7 +28,7 @@
                         
                         <!-- Thumbnail Image -->
                         <img
-                            src="{{ $short->thumbnail_image ?: 'https://images.unsplash.com/photo-1567157577867-05ccb1388e66?auto=format&fit=crop&w=600&q=80' }}"
+                            src="{{ $short->thumbnail_image_url ?: 'https://images.unsplash.com/photo-1567157577867-05ccb1388e66?auto=format&fit=crop&w=600&q=80' }}"
                             alt="{{ $short->name }}"
                             loading="lazy"
                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"

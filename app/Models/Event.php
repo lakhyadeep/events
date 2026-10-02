@@ -2,7 +2,10 @@
 
 namespace App\Models;
 
+use App\Enums\EventStatus;
+use App\Models\Concerns\ResolvesMediaUrl;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -10,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Event extends Model
 {
     use HasFactory;
+    use ResolvesMediaUrl;
 
     protected $fillable = [
         'name',
@@ -44,7 +48,15 @@ class Event extends Model
             'is_awards_active' => 'boolean',
             'is_timeline_active' => 'boolean',
             'countdown_datetime' => 'datetime',
+            'status' => EventStatus::class,
         ];
+    }
+
+    public function ogImageUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->resolveMediaUrl($this->og_image)
+        );
     }
 
     public function banners(): HasMany

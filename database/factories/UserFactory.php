@@ -42,4 +42,17 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
+
+    /**
+     * Indicate that the user is the default admin.
+     */
+    public function admin(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'name' => 'Dib 24x7 Admin',
+            'email' => 'admin@dib24x7.com',
+            'password' => static::$password ??= Hash::make('password'),
+            'email_verified_at' => now(),
+        ]);
+    }
 }

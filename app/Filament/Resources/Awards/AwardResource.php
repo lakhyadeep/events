@@ -11,14 +11,18 @@ use App\Models\Award;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class AwardResource extends Resource
 {
     protected static ?string $model = Award::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static UnitEnum|string|null $navigationGroup = 'Contenders & Judging';
+
+    protected static ?int $navigationSort = 2;
+
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-trophy';
 
     public static function form(Schema $schema): Schema
     {

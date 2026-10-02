@@ -35,8 +35,8 @@
                     
                     <!-- Responsive Picture Tag -->
                     <picture class="w-full h-full">
-                        <source media="(min-width: 768px)" srcset="{{ $banner->image_desktop }}">
-                        <img src="{{ $banner->image_mobile }}"
+                        <source media="(min-width: 768px)" srcset="{{ $banner->desktop_image_url }}">
+                        <img src="{{ $banner->mobile_image_url }}"
                              alt="{{ $banner->title }}"
                              class="w-full h-full object-cover">
                     </picture>

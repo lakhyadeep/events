@@ -2,12 +2,16 @@
 
 namespace App\Livewire\Frontend;
 
+use App\Enums\Zone;
 use App\Models\Participant;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 class ParticipantsShowcase extends Component
 {
+    use WithPagination;
+
     public int $eventId;
 
     #[Url(as: 'q')]
@@ -19,14 +23,31 @@ class ParticipantsShowcase extends Component
     #[Url(as: 'shortlisted')]
     public bool $shortlistedOnly = false;
 
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedSelectedZone(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedShortlistedOnly(): void
+    {
+        $this->resetPage();
+    }
+
     public function setZone(string $zone): void
     {
         $this->selectedZone = $this->selectedZone === $zone ? '' : $zone;
+        $this->resetPage();
     }
 
     public function toggleShortlisted(): void
     {
         $this->shortlistedOnly = ! $this->shortlistedOnly;
+        $this->resetPage();
     }
 
     public function selectCandidate(int $id): void
@@ -36,20 +57,13 @@ class ParticipantsShowcase extends Component
 
     public function render()
     {
-        $zones = [
-            'All Zones' => '',
-            'North Kolkata' => 'North Kolkata',
-            'South Kolkata' => 'South Kolkata',
-            'Central Kolkata' => 'Central Kolkata',
-            'East Kolkata' => 'East Kolkata',
-            'Howrah' => 'Howrah',
-        ];
+        $zones = ['All Zones' => ''] + Zone::options();
 
         $participants = Participant::query()
             ->where('event_id', $this->eventId)
-            ->where('registration_status', 'approved')
+            ->approved()
             ->when($this->selectedZone, fn ($q) => $q->where('zone', $this->selectedZone))
-            ->when($this->shortlistedOnly, fn ($q) => $q->where('is_shortlisted', true))
+            ->when($this->shortlistedOnly, fn ($q) => $q->shortlisted())
             ->when($this->search, function ($q) {
                 $term = "%{$this->search}%";
                 $q->where(function ($sub) use ($term) {
@@ -60,7 +74,7 @@ class ParticipantsShowcase extends Component
                 });
             })
             ->latest('is_shortlisted')
-            ->get();
+            ->paginate(12);
 
         return view('livewire.frontend.participants-showcase', [
             'participants' => $participants,

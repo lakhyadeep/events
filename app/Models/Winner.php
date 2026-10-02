@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\WinnerRank;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -24,6 +25,7 @@ class Winner extends Model
     {
         return [
             'year' => 'integer',
+            'rank_order' => WinnerRank::class,
         ];
     }
 

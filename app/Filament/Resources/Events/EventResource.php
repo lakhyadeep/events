@@ -11,14 +11,18 @@ use App\Models\Event;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class EventResource extends Resource
 {
     protected static ?string $model = Event::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static UnitEnum|string|null $navigationGroup = 'Festival CMS';
+
+    protected static ?int $navigationSort = 1;
+
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-calendar-days';
 
     public static function form(Schema $schema): Schema
     {

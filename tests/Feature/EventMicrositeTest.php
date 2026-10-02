@@ -3,7 +3,10 @@
 namespace Tests\Feature;
 
 use App\Livewire\Frontend\ParticipantsShowcase;
+use App\Models\Banner;
 use App\Models\Event;
+use App\Models\Participant;
+use App\Models\User;
 use Database\Seeders\DemoEventSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -88,5 +91,90 @@ class EventMicrositeTest extends TestCase
             ->assertSee('Ballygunge Cultural Association')
             ->set('search', 'NonExistentClubXYZ')
             ->assertSee('No participants found');
+    }
+
+    public function test_headless_api_shorts_endpoint_returns_json(): void
+    {
+        $response = $this->getJson('/api/v1/events/sharod-samman-2026/shorts');
+
+        $response->assertStatus(200)
+            ->assertJsonPath('success', true)
+            ->assertJsonStructure([
+                'success',
+                'data' => [
+                    '*' => [
+                        'id',
+                        'name',
+                        'platform',
+                        'video_url',
+                    ],
+                ],
+            ]);
+    }
+
+    public function test_headless_api_winners_endpoint_returns_json(): void
+    {
+        $response = $this->getJson('/api/v1/events/sharod-samman-2026/winners');
+
+        $response->assertStatus(200)
+            ->assertJsonPath('success', true)
+            ->assertJsonStructure([
+                'success',
+                'data' => [
+                    '*' => [
+                        'id',
+                        'rank_order',
+                        'status',
+                        'award',
+                        'participant',
+                    ],
+                ],
+            ]);
+    }
+
+    public function test_storage_link_utility_route_functions(): void
+    {
+        // Unauthenticated guests should be redirected to login
+        $guestResponse = $this->get('/admin-tools/storage-link');
+        $guestResponse->assertRedirect(route('filament.admin.auth.login'));
+
+        // Authenticated admin users can execute
+        $user = User::factory()->create();
+        $authResponse = $this->actingAs($user)->get('/admin-tools/storage-link');
+        $authResponse->assertStatus(200);
+        $this->assertStringContainsString('Storage link', $authResponse->getContent());
+    }
+
+    public function test_media_url_resolution_handles_both_http_and_relative_paths(): void
+    {
+        $participantWithHttp = new Participant([
+            'primary_display_image' => 'https://example.com/photo.jpg',
+            'image_1' => 'participants/gallery/custom.webp',
+        ]);
+
+        $this->assertEquals('https://example.com/photo.jpg', $participantWithHttp->primary_image_url);
+        $this->assertStringContainsString('/storage/participants/gallery/custom.webp', $participantWithHttp->image_1_url);
+    }
+
+    public function test_livewire_participants_showcase_zone_and_shortlist_reset_page(): void
+    {
+        $event = Event::where('slug', 'sharod-samman-2026')->first();
+
+        Livewire::test(ParticipantsShowcase::class, ['eventId' => $event->id])
+            ->call('setZone', 'South Kolkata')
+            ->assertSet('selectedZone', 'South Kolkata')
+            ->call('toggleShortlisted')
+            ->assertSet('shortlistedOnly', true);
+    }
+
+    public function test_banner_media_url_resolution(): void
+    {
+        $banner = new Banner([
+            'image_desktop' => 'banners/desktop/sample.jpg',
+            'image_mobile' => 'banners/mobile/sample.jpg',
+        ]);
+
+        $this->assertStringContainsString('/storage/banners/desktop/sample.jpg', $banner->desktop_image_url);
+        $this->assertStringContainsString('/storage/banners/mobile/sample.jpg', $banner->mobile_image_url);
     }
 }

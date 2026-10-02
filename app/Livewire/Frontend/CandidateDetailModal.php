@@ -9,7 +9,9 @@ use Livewire\Component;
 class CandidateDetailModal extends Component
 {
     public bool $isOpen = false;
+
     public ?Participant $candidate = null;
+
     public string $activeImage = '';
 
     #[On('open-candidate-modal')]
@@ -17,7 +19,7 @@ class CandidateDetailModal extends Component
     {
         $this->candidate = Participant::find($candidateId);
         if ($this->candidate) {
-            $this->activeImage = $this->candidate->primary_display_image;
+            $this->activeImage = $this->candidate->primary_image_url ?? '';
             $this->isOpen = true;
         }
     }
@@ -31,6 +33,7 @@ class CandidateDetailModal extends Component
     {
         $this->isOpen = false;
         $this->candidate = null;
+        $this->activeImage = '';
     }
 
     public function render()

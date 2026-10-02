@@ -2,7 +2,10 @@
 
 namespace App\Models;
 
+use App\Enums\VideoPlatform;
+use App\Models\Concerns\ResolvesMediaUrl;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class VideoShort extends Model
 {
     use HasFactory;
+    use ResolvesMediaUrl;
 
     protected $fillable = [
         'event_id',
@@ -27,10 +31,18 @@ class VideoShort extends Model
     protected function casts(): array
     {
         return [
+            'platform' => VideoPlatform::class,
             'is_active' => 'boolean',
             'year' => 'integer',
             'sort_order' => 'integer',
         ];
+    }
+
+    public function thumbnailImageUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->resolveMediaUrl($this->thumbnail_image)
+        );
     }
 
     public function event(): BelongsTo

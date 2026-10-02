@@ -45,7 +45,7 @@
                     <div>
                         <div class="relative h-72 sm:h-80 rounded-2xl overflow-hidden bg-zinc-100 dark:bg-zinc-800 shadow-inner">
                             <img
-                                src="{{ $activeImage ?: $candidate->primary_display_image }}"
+                                src="{{ $activeImage ?: $candidate->primary_image_url }}"
                                 alt="{{ $candidate->display_name }}"
                                 class="w-full h-full object-cover transition duration-300"
                             >
@@ -53,41 +53,53 @@
 
                         <!-- Thumbnails -->
                         <div class="flex gap-2.5 mt-3 overflow-x-auto pb-1">
-                            <button
-                                type="button"
-                                wire:click="setActiveImage('{{ $candidate->primary_display_image }}')"
-                                class="relative w-16 h-16 rounded-xl overflow-hidden border-2 flex-shrink-0 transition {{ $activeImage === $candidate->primary_display_image ? 'border-amber-500 ring-2 ring-amber-500/20' : 'border-zinc-200 dark:border-zinc-700 opacity-70 hover:opacity-100' }}"
-                            >
-                                <img src="{{ $candidate->primary_display_image }}" class="w-full h-full object-cover">
-                            </button>
-
-                            @if ($candidate->image_1)
+                            @if ($candidate->primary_image_url)
                                 <button
                                     type="button"
-                                    wire:click="setActiveImage('{{ $candidate->image_1 }}')"
-                                    class="relative w-16 h-16 rounded-xl overflow-hidden border-2 flex-shrink-0 transition {{ $activeImage === $candidate->image_1 ? 'border-amber-500 ring-2 ring-amber-500/20' : 'border-zinc-200 dark:border-zinc-700 opacity-70 hover:opacity-100' }}"
+                                    wire:click="setActiveImage('{{ $candidate->primary_image_url }}')"
+                                    class="relative w-16 h-16 rounded-xl overflow-hidden border-2 flex-shrink-0 transition {{ $activeImage === $candidate->primary_image_url ? 'border-amber-500 ring-2 ring-amber-500/20' : 'border-zinc-200 dark:border-zinc-700 opacity-70 hover:opacity-100' }}"
                                 >
-                                    <img src="{{ $candidate->image_1 }}" class="w-full h-full object-cover">
+                                    <img src="{{ $candidate->primary_image_url }}" class="w-full h-full object-cover">
                                 </button>
                             @endif
 
-                            @if ($candidate->image_2)
+                            @if ($candidate->image_1_url)
                                 <button
                                     type="button"
-                                    wire:click="setActiveImage('{{ $candidate->image_2 }}')"
-                                    class="relative w-16 h-16 rounded-xl overflow-hidden border-2 flex-shrink-0 transition {{ $activeImage === $candidate->image_2 ? 'border-amber-500 ring-2 ring-amber-500/20' : 'border-zinc-200 dark:border-zinc-700 opacity-70 hover:opacity-100' }}"
+                                    wire:click="setActiveImage('{{ $candidate->image_1_url }}')"
+                                    class="relative w-16 h-16 rounded-xl overflow-hidden border-2 flex-shrink-0 transition {{ $activeImage === $candidate->image_1_url ? 'border-amber-500 ring-2 ring-amber-500/20' : 'border-zinc-200 dark:border-zinc-700 opacity-70 hover:opacity-100' }}"
                                 >
-                                    <img src="{{ $candidate->image_2 }}" class="w-full h-full object-cover">
+                                    <img src="{{ $candidate->image_1_url }}" class="w-full h-full object-cover">
                                 </button>
                             @endif
 
-                            @if ($candidate->concept_note_image)
+                            @if ($candidate->image_2_url)
                                 <button
                                     type="button"
-                                    wire:click="setActiveImage('{{ $candidate->concept_note_image }}')"
-                                    class="relative w-16 h-16 rounded-xl overflow-hidden border-2 flex-shrink-0 transition {{ $activeImage === $candidate->concept_note_image ? 'border-amber-500 ring-2 ring-amber-500/20' : 'border-zinc-200 dark:border-zinc-700 opacity-70 hover:opacity-100' }}"
+                                    wire:click="setActiveImage('{{ $candidate->image_2_url }}')"
+                                    class="relative w-16 h-16 rounded-xl overflow-hidden border-2 flex-shrink-0 transition {{ $activeImage === $candidate->image_2_url ? 'border-amber-500 ring-2 ring-amber-500/20' : 'border-zinc-200 dark:border-zinc-700 opacity-70 hover:opacity-100' }}"
                                 >
-                                    <img src="{{ $candidate->concept_note_image }}" class="w-full h-full object-cover">
+                                    <img src="{{ $candidate->image_2_url }}" class="w-full h-full object-cover">
+                                </button>
+                            @endif
+
+                            @if ($candidate->image_3_url)
+                                <button
+                                    type="button"
+                                    wire:click="setActiveImage('{{ $candidate->image_3_url }}')"
+                                    class="relative w-16 h-16 rounded-xl overflow-hidden border-2 flex-shrink-0 transition {{ $activeImage === $candidate->image_3_url ? 'border-amber-500 ring-2 ring-amber-500/20' : 'border-zinc-200 dark:border-zinc-700 opacity-70 hover:opacity-100' }}"
+                                >
+                                    <img src="{{ $candidate->image_3_url }}" class="w-full h-full object-cover">
+                                </button>
+                            @endif
+
+                            @if ($candidate->concept_note_image_url)
+                                <button
+                                    type="button"
+                                    wire:click="setActiveImage('{{ $candidate->concept_note_image_url }}')"
+                                    class="relative w-16 h-16 rounded-xl overflow-hidden border-2 flex-shrink-0 transition {{ $activeImage === $candidate->concept_note_image_url ? 'border-amber-500 ring-2 ring-amber-500/20' : 'border-zinc-200 dark:border-zinc-700 opacity-70 hover:opacity-100' }}"
+                                >
+                                    <img src="{{ $candidate->concept_note_image_url }}" class="w-full h-full object-cover">
                                 </button>
                             @endif
                         </div>
@@ -115,43 +127,43 @@
                                 <div class="grid grid-cols-2 gap-3 text-xs">
                                     @if ($candidate->puja_theme)
                                         <div class="col-span-2">
-                                            <span class="text-zinc-500 block">Theme Concept:</span>
-                                            <span class="font-bold text-zinc-900 dark:text-zinc-100 text-sm">{{ $candidate->puja_theme }}</span>
+                                             <span class="text-zinc-500 block">Theme Concept:</span>
+                                             <span class="font-bold text-zinc-900 dark:text-zinc-100 text-sm">{{ $candidate->puja_theme }}</span>
                                         </div>
                                     @endif
 
                                     @if ($candidate->idol_artist)
                                         <div>
-                                            <span class="text-zinc-500 block">Idol Artist:</span>
-                                            <span class="font-semibold text-zinc-800 dark:text-zinc-200">{{ $candidate->idol_artist }}</span>
+                                             <span class="text-zinc-500 block">Idol Artist:</span>
+                                             <span class="font-semibold text-zinc-800 dark:text-zinc-200">{{ $candidate->idol_artist }}</span>
                                         </div>
                                     @endif
 
                                     @if ($candidate->theme_artist)
                                         <div>
-                                            <span class="text-zinc-500 block">Theme Artist:</span>
-                                            <span class="font-semibold text-zinc-800 dark:text-zinc-200">{{ $candidate->theme_artist }}</span>
+                                             <span class="text-zinc-500 block">Theme Artist:</span>
+                                             <span class="font-semibold text-zinc-800 dark:text-zinc-200">{{ $candidate->theme_artist }}</span>
                                         </div>
                                     @endif
 
                                     @if ($candidate->light_designer)
                                         <div>
-                                            <span class="text-zinc-500 block">Light Designer:</span>
-                                            <span class="font-semibold text-zinc-800 dark:text-zinc-200">{{ $candidate->light_designer }}</span>
+                                             <span class="text-zinc-500 block">Light Designer:</span>
+                                             <span class="font-semibold text-zinc-800 dark:text-zinc-200">{{ $candidate->light_designer }}</span>
                                         </div>
                                     @endif
 
                                     @if ($candidate->sound_designer)
                                         <div>
-                                            <span class="text-zinc-500 block">Sound Designer:</span>
-                                            <span class="font-semibold text-zinc-800 dark:text-zinc-200">{{ $candidate->sound_designer }}</span>
+                                             <span class="text-zinc-500 block">Sound Designer:</span>
+                                             <span class="font-semibold text-zinc-800 dark:text-zinc-200">{{ $candidate->sound_designer }}</span>
                                         </div>
                                     @endif
 
                                     @if ($candidate->first_year_of_puja)
                                         <div>
-                                            <span class="text-zinc-500 block">First Year (Est):</span>
-                                            <span class="font-semibold text-zinc-800 dark:text-zinc-200">{{ $candidate->first_year_of_puja }}</span>
+                                             <span class="text-zinc-500 block">First Year (Est):</span>
+                                             <span class="font-semibold text-zinc-800 dark:text-zinc-200">{{ $candidate->first_year_of_puja }}</span>
                                         </div>
                                     @endif
                                 </div>

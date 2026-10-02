@@ -8,8 +8,8 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-// Version 1 Headless Event Microsite API
-Route::prefix('v1')->group(function () {
+// Version 1 Headless Event Microsite API with Rate Limiting
+Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
     Route::get('/events/{slug}', [EventApiController::class, 'show']);
     Route::get('/events/{slug}/participants', [EventApiController::class, 'participants']);
     Route::get('/events/{slug}/shorts', [EventApiController::class, 'shorts']);

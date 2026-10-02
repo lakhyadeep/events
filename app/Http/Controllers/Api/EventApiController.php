@@ -2,7 +2,13 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\SponsorType;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\EventResource;
+use App\Http\Resources\ParticipantResource;
+use App\Http\Resources\SponsorResource;
+use App\Http\Resources\VideoShortResource;
+use App\Http\Resources\WinnerResource;
 use App\Models\Event;
 use App\Models\Participant;
 use Illuminate\Http\JsonResponse;
@@ -23,9 +29,9 @@ class EventApiController extends Controller
             'timelineItems' => fn ($q) => $q->orderBy('sort_order'),
         ])->where('slug', $slug)->firstOrFail();
 
-        $presentingPartner = $event->sponsors->firstWhere('sponsor_type', 'presenting_partner');
+        $presentingPartner = $event->sponsors->firstWhere('sponsor_type', SponsorType::PresentingPartner);
         $associateSponsors = $event->sponsors
-            ->where('sponsor_type', 'associate_sponsor')
+            ->where('sponsor_type', SponsorType::AssociateSponsor)
             ->sortBy('slot_order')
             ->take(5)
             ->values();
@@ -33,17 +39,17 @@ class EventApiController extends Controller
         return response()->json([
             'success' => true,
             'data' => [
-                'event' => $event,
+                'event' => new EventResource($event),
                 'masthead' => [
                     'brand' => 'Dib 24x7',
-                    'presenting_partner' => $presentingPartner,
-                    'associate_sponsors' => $associateSponsors,
+                    'presenting_partner' => $presentingPartner ? new SponsorResource($presentingPartner) : null,
+                    'associate_sponsors' => SponsorResource::collection($associateSponsors),
                 ],
                 'toggles' => [
-                    'registration_active' => $event->is_registration_active,
-                    'voting_active' => $event->is_voting_active,
-                    'awards_active' => $event->is_awards_active,
-                    'timeline_active' => $event->is_timeline_active,
+                    'registration_active' => (bool) $event->is_registration_active,
+                    'voting_active' => (bool) $event->is_voting_active,
+                    'awards_active' => (bool) $event->is_awards_active,
+                    'timeline_active' => (bool) $event->is_timeline_active,
                 ],
             ],
         ]);
@@ -58,9 +64,9 @@ class EventApiController extends Controller
 
         $participants = Participant::query()
             ->where('event_id', $event->id)
-            ->where('registration_status', 'approved')
+            ->approved()
             ->when($request->query('zone'), fn ($q, $zone) => $q->where('zone', $zone))
-            ->when($request->boolean('shortlisted'), fn ($q) => $q->where('is_shortlisted', true))
+            ->when($request->boolean('shortlisted'), fn ($q) => $q->shortlisted())
             ->when($request->query('search'), function ($q, $search) {
                 $term = "%{$search}%";
                 $q->where(function ($sub) use ($term) {
@@ -71,7 +77,8 @@ class EventApiController extends Controller
                 });
             })
             ->latest('is_shortlisted')
-            ->paginate($request->integer('per_page', 12));
+            ->paginate($request->integer('per_page', 12))
+            ->through(fn ($p) => new ParticipantResource($p));
 
         return response()->json([
             'success' => true,
@@ -93,7 +100,7 @@ class EventApiController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $shorts,
+            'data' => VideoShortResource::collection($shorts),
         ]);
     }
 
@@ -111,7 +118,7 @@ class EventApiController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $winners,
+            'data' => WinnerResource::collection($winners),
         ]);
     }
 }

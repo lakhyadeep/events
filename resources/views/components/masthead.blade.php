@@ -41,7 +41,7 @@
                         <span class="text-[10px] uppercase font-bold tracking-widest text-zinc-400 whitespace-nowrap">PRESENTED BY</span>
                         <a href="{{ $presentingPartner->landing_url ?: '#' }}" target="_blank" rel="noopener noreferrer" class="group transition transform hover:scale-105" title="{{ $presentingPartner->title }}">
                             <div class="h-9 px-3 py-1 bg-white/95 rounded-lg flex items-center justify-center border border-zinc-700 shadow-sm">
-                                <img src="{{ $presentingPartner->logo }}" alt="{{ $presentingPartner->display_name }}" class="max-h-7 max-w-[90px] object-contain">
+                                <img src="{{ $presentingPartner->logo_url }}" alt="{{ $presentingPartner->display_name }}" class="max-h-7 max-w-[90px] object-contain">
                             </div>
                         </a>
                     </div>
@@ -59,7 +59,7 @@
                                    class="group transition-all hover:scale-105"
                                    title="Slot {{ $sponsor->slot_order }}: {{ $sponsor->display_name }}">
                                     <div class="h-8 w-16 sm:w-20 px-2 py-0.5 bg-zinc-900 hover:bg-zinc-850 rounded-lg border border-zinc-800 flex items-center justify-center transition">
-                                        <img src="{{ $sponsor->logo }}" alt="{{ $sponsor->display_name }}" class="max-h-6 max-w-full object-contain filter grayscale group-hover:grayscale-0 transition-all opacity-80 group-hover:opacity-100">
+                                        <img src="{{ $sponsor->logo_url }}" alt="{{ $sponsor->display_name }}" class="max-h-6 max-w-full object-contain filter grayscale group-hover:grayscale-0 transition-all opacity-80 group-hover:opacity-100">
                                     </div>
                                 </a>
                             @endforeach

@@ -53,7 +53,7 @@
                 <!-- Card Image -->
                 <div class="relative h-56 w-full overflow-hidden bg-zinc-100 dark:bg-zinc-800">
                     <img
-                        src="{{ $participant->primary_display_image }}"
+                        src="{{ $participant->primary_image_url }}"
                         alt="{{ $participant->display_name }}"
                         loading="lazy"
                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
@@ -146,4 +146,11 @@
             </div>
         @endforelse
     </div>
+
+    <!-- Pagination Links -->
+    @if ($participants->hasPages())
+        <div class="mt-10">
+            {{ $participants->links() }}
+        </div>
+    @endif
 </div>

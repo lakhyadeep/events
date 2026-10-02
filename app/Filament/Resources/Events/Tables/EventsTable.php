@@ -2,12 +2,16 @@
 
 namespace App\Filament\Resources\Events\Tables;
 
+use App\Enums\EventStatus;
+use App\Models\Event;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 
 class EventsTable
@@ -16,51 +20,64 @@ class EventsTable
     {
         return $table
             ->columns([
-                TextColumn::make('name')
-                    ->searchable(),
                 TextColumn::make('display_name')
-                    ->searchable(),
+                    ->label('Event Name')
+                    ->searchable()
+                    ->sortable()
+                    ->weight('bold'),
                 TextColumn::make('year')
-                    ->numeric()
-                    ->sortable(),
+                    ->label('Year')
+                    ->sortable()
+                    ->badge(),
                 TextColumn::make('slug')
-                    ->searchable(),
-                IconColumn::make('is_registration_active')
-                    ->boolean(),
+                    ->label('Slug')
+                    ->searchable()
+                    ->copyable()
+                    ->color('gray'),
+                TextColumn::make('status')
+                    ->badge()
+                    ->color(fn ($state): string => match ($state instanceof EventStatus ? $state->value : (string) $state) {
+                        'active' => 'success',
+                        'draft' => 'warning',
+                        'archived' => 'gray',
+                        default => 'primary',
+                    }),
                 IconColumn::make('is_voting_active')
+                    ->label('Voting')
+                    ->boolean(),
+                IconColumn::make('is_registration_active')
+                    ->label('Registration')
                     ->boolean(),
                 IconColumn::make('is_awards_active')
+                    ->label('Awards')
                     ->boolean(),
                 IconColumn::make('is_timeline_active')
+                    ->label('Timeline')
                     ->boolean(),
-                TextColumn::make('tagline')
-                    ->searchable(),
                 TextColumn::make('countdown_datetime')
-                    ->dateTime()
-                    ->sortable(),
-                ImageColumn::make('og_image'),
-                TextColumn::make('meta_title')
-                    ->searchable(),
-                TextColumn::make('contact_email')
-                    ->searchable(),
-                TextColumn::make('contact_phone')
-                    ->searchable(),
-                TextColumn::make('external_link')
-                    ->searchable(),
-                TextColumn::make('status')
-                    ->searchable(),
-                TextColumn::make('created_at')
-                    ->dateTime()
+                    ->label('Target Date')
+                    ->dateTime('M d, Y H:i')
                     ->sortable()
+                    ->toggleable(),
+                TextColumn::make('contact_email')
+                    ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
-            ])
+                SelectFilter::make('status')
+                    ->options(EventStatus::options()),
+                SelectFilter::make('year')
+                    ->options(fn () => Event::distinct()->pluck('year', 'year')->toArray()),
+                TernaryFilter::make('is_voting_active')
+                    ->label('Voting Open'),
+                TernaryFilter::make('is_registration_active')
+                    ->label('Registration Open'),
+            ], layout: FiltersLayout::AboveContent)
+            ->filtersFormColumns(4)
             ->recordActions([
                 EditAction::make(),
             ])

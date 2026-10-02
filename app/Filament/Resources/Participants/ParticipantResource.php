@@ -11,14 +11,18 @@ use App\Models\Participant;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class ParticipantResource extends Resource
 {
     protected static ?string $model = Participant::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static UnitEnum|string|null $navigationGroup = 'Contenders & Judging';
+
+    protected static ?int $navigationSort = 1;
+
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-user-group';
 
     public static function form(Schema $schema): Schema
     {
