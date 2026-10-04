@@ -7,6 +7,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -16,7 +17,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        if ($publicPath = env('APP_PUBLIC_PATH')) {
+            $this->app->usePublicPath(
+                str_starts_with($publicPath, '/') || preg_match('/^[a-zA-Z]:/', $publicPath)
+                    ? $publicPath
+                    : base_path($publicPath)
+            );
+        }
     }
 
     /**
@@ -24,6 +31,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if (str_starts_with(config('app.url'), 'https://') || app()->environment('production')) {
+            URL::forceScheme('https');
+        }
+
         Schema::defaultStringLength(191);
 
         FileUpload::configureUsing(function (FileUpload $fileUpload): void {

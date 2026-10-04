@@ -24,11 +24,16 @@ class EventMicrositeController extends Controller
         ]);
 
         $event = $slug
-            ? $query->where('slug', $slug)->firstOrFail()
+            ? $query->where('slug', $slug)->first()
             : $query->where('status', 'active')->latest('year')->first();
 
+        // Fallback: If no event matched slug or none is active, show the latest created event
         if (! $event) {
-            abort(404, 'No active event found.');
+            $event = $query->latest('year')->latest('id')->first();
+        }
+
+        if (! $event) {
+            return view('frontend.no-events');
         }
 
         // Segregate sponsor tiers for the masthead

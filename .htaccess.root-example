@@ -1,0 +1,20 @@
+# ----------------------------------------------------------------------
+# Root .htaccess for Shared Hosting Subdirectory Deployments
+# Use this ONLY if you place all Laravel files inside public_html/event-demo/
+# ----------------------------------------------------------------------
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /event-demo/
+
+    RewriteRule ^\.env - [F,L,NC]
+    RewriteRule \.(sqlite|sqlite3|db)$ - [F,L,NC]
+    RewriteRule ^composer\.(json|lock) - [F,L,NC]
+    RewriteRule ^package(-lock)?\.json - [F,L,NC]
+    RewriteRule ^(app|bootstrap|config|database|resources|routes|storage|tests)/ - [F,L,NC]
+    RewriteRule ^artisan - [F,L,NC]
+
+    # 2. Rewrite all public traffic to the public/ subfolder
+    RewriteCond %{REQUEST_URI} !^/event-demo/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>

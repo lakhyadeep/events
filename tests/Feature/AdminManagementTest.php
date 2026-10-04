@@ -49,6 +49,11 @@ class AdminManagementTest extends TestCase
         $response->assertSee('Puja Contest Entries');
         $response->assertSee('Shortlisted Contenders');
         $response->assertDontSee('Filament community');
+
+        // Test second visit when stats are loaded from cache
+        $cachedResponse = $this->actingAs($admin)->get('/admin');
+        $cachedResponse->assertStatus(200);
+        $cachedResponse->assertSee('Active Events');
     }
 
     public function test_associate_sponsors_scope_limits_to_five(): void
