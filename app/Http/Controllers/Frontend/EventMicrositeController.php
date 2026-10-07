@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
 use App\Models\Event;
+use App\Models\Zone;
 use Illuminate\View\View;
 
 class EventMicrositeController extends Controller
@@ -52,12 +53,23 @@ class EventMicrositeController extends Controller
         $publishedWinners = $event->winners
             ->where('status', 'published');
 
+        // Approved participants with zones for showcase
+        $participants = $event->participants()
+            ->approved()
+            ->with(['zone', 'locality'])
+            ->orderByDesc('is_shortlisted')
+            ->get();
+
+        $zones = ['All Zones' => ''] + Zone::active()->orderBy('sort_order')->pluck('name', 'name')->toArray();
+
         return view('frontend.event', compact(
             'event',
             'presentingPartner',
             'associateSponsors',
             'otherSponsors',
-            'publishedWinners'
+            'publishedWinners',
+            'participants',
+            'zones'
         ));
     }
 }

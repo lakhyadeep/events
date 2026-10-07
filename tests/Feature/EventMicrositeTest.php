@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Livewire\Frontend\ParticipantsShowcase;
 use App\Models\Banner;
 use App\Models\Event;
 use App\Models\Locality;
@@ -11,7 +10,6 @@ use App\Models\User;
 use App\Models\Zone;
 use Database\Seeders\DemoEventSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Livewire\Livewire;
 use Tests\TestCase;
 
 class EventMicrositeTest extends TestCase
@@ -29,12 +27,13 @@ class EventMicrositeTest extends TestCase
         $response = $this->get('/');
 
         $response->assertStatus(200);
-        $response->assertSee('Dib 24x7');
-        $response->assertSee('Sharod Samman 2026');
-        $response->assertSee('PRESENTED BY');
-        $response->assertSee('Fortune');
-        $response->assertSee('Senco Gold');
+        $response->assertSee('Dibrugarh 24x7');
+        $response->assertSee('About Dibrugarh Durgo Utsav 2026');
+        $response->assertSee('ORGANISED BY');
+        $response->assertSee('TITLE SPONSOR');
+        $response->assertSee('ASSOCIATE PARTNERS');
         $response->assertSee('Vote Now');
+        $response->assertSee('Thana Chariali Sarbajanin');
     }
 
     public function test_slug_based_event_route_works(): void
@@ -42,7 +41,7 @@ class EventMicrositeTest extends TestCase
         $response = $this->get('/events/sharod-samman-2026');
 
         $response->assertStatus(200);
-        $response->assertSee('Sharod Samman 2026');
+        $response->assertSee('Dibrugarh 24x7');
     }
 
     public function test_zone_and_locality_masters_exist_and_relate_to_participants(): void
@@ -97,17 +96,15 @@ class EventMicrositeTest extends TestCase
             ]);
     }
 
-    public function test_livewire_participants_showcase_component_filters_candidates(): void
+    public function test_standard_blade_participants_showcase_renders_candidates(): void
     {
-        $event = Event::where('slug', 'sharod-samman-2026')->first();
+        $response = $this->get('/events/sharod-samman-2026');
 
-        Livewire::test(ParticipantsShowcase::class, ['eventId' => $event->id])
-            ->assertStatus(200)
-            ->assertSee('Chowkidinghee Sarbajanin Durga Puja Committee')
-            ->set('search', 'Chowkidinghee')
-            ->assertSee('Chowkidinghee Sarbajanin Durga Puja Committee')
-            ->set('search', 'NonExistentClubXYZ')
-            ->assertSee('No participants found');
+        $response->assertStatus(200);
+        $response->assertSee('Thana Chariali Sarbajanin');
+        $response->assertSee('Vote for the Best');
+        $response->assertViewHas('participants');
+        $response->assertViewHas('zones');
     }
 
     public function test_headless_api_shorts_endpoint_returns_json(): void
@@ -173,15 +170,17 @@ class EventMicrositeTest extends TestCase
         $this->assertStringContainsString('/storage/participants/gallery/custom.webp', $participantWithHttp->image_1_url);
     }
 
-    public function test_livewire_participants_showcase_zone_and_shortlist_reset_page(): void
+    public function test_standard_blade_participants_data_contains_shortlisted_candidates(): void
     {
         $event = Event::where('slug', 'sharod-samman-2026')->first();
+        $this->assertNotNull($event);
 
-        Livewire::test(ParticipantsShowcase::class, ['eventId' => $event->id])
-            ->call('setZone', 'Central Dibrugarh')
-            ->assertSet('selectedZone', 'Central Dibrugarh')
-            ->call('toggleShortlisted')
-            ->assertSet('shortlistedOnly', true);
+        $shortlistedCount = $event->participants()->shortlisted()->count();
+        $this->assertGreaterThan(0, $shortlistedCount);
+
+        $response = $this->get('/events/sharod-samman-2026');
+        $response->assertStatus(200);
+        $response->assertSee('shortlisted entries');
     }
 
     public function test_banner_media_url_resolution(): void
