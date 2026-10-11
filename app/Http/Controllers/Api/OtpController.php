@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Event;
 use App\Services\Otp\OtpService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -21,9 +22,34 @@ class OtpController extends Controller
         $validated = $request->validate([
             'phone' => ['required', 'string', 'min:7', 'max:20'],
             'purpose' => ['nullable', 'string', 'max:50'],
+            'event_id' => ['nullable', 'integer', 'exists:events,id'],
+            'award_id' => ['nullable', 'integer', 'exists:awards,id'],
         ]);
 
         $purpose = $validated['purpose'] ?? 'verification';
+
+        // Pre-flight check for voting to avoid wasting SMS credits if user already voted
+        if ($purpose === 'voting' && ! empty($validated['event_id'])) {
+            $event = Event::find($validated['event_id']);
+            if ($event) {
+                if (! $event->is_voting_active) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Voting is currently closed for this event.',
+                    ], 422);
+                }
+
+                $awardId = ! empty($validated['award_id']) ? (int) $validated['award_id'] : null;
+                $check = $event->canMobileVote($validated['phone'], $awardId);
+                if (! $check['allowed']) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $check['message'],
+                    ], 422);
+                }
+            }
+        }
+
         $result = $this->otpService->sendOtp($validated['phone'], $purpose, $request->ip());
 
         if (! $result->successful) {

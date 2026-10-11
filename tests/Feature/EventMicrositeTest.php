@@ -300,4 +300,28 @@ class EventMicrositeTest extends TestCase
         $response->assertDontSee('id="btnLoadMore"', false);
         $response->assertSee('window.dynamicPujasData = []', false);
     }
+
+    public function test_public_page_includes_otp_meta_and_modal_elements(): void
+    {
+        $response = $this->get('/');
+
+        $response->assertStatus(200);
+        $response->assertSee('name="csrf-token"', false);
+        $response->assertSee('name="otp-length"', false);
+        $response->assertSee('id="voteModal"', false);
+        $response->assertSee('id="otpModal"', false);
+        $response->assertSee('id="otpInputContainer"', false);
+        $response->assertSee('btnVerifyOtp', false);
+        $response->assertSee('btnResendOtp', false);
+    }
+
+    public function test_all_pujas_page_includes_otp_modal_elements(): void
+    {
+        $response = $this->get('/all-pujas');
+
+        $response->assertStatus(200);
+        $response->assertSee('name="csrf-token"', false);
+        $response->assertSee('id="otpModal"', false);
+        $response->assertSee('id="otpInputContainer"', false);
+    }
 }

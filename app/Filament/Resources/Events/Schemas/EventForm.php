@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Events\Schemas;
 
 use App\Enums\EventStatus;
+use App\Enums\VotingMode;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
@@ -12,6 +13,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
@@ -116,7 +118,14 @@ class EventForm
                                 ->helperText('Allow candidate signups'),
                             Toggle::make('is_voting_active')
                                 ->label('Voting Active')
-                                ->helperText('Show Vote Now button'),
+                                ->helperText('Show Vote Now button')
+                                ->live(),
+                            Select::make('voting_mode')
+                                ->label('Voting Ballot Mode')
+                                ->options(VotingMode::options())
+                                ->default(VotingMode::Participant->value)
+                                ->visible(fn (Get $get): bool => (bool) $get('is_voting_active'))
+                                ->helperText('Participant: 1 vote per mobile overall. Participant + Award: 1 vote per mobile per award category.'),
                             Toggle::make('is_awards_active')
                                 ->label('Awards Active')
                                 ->helperText('Reveal winners podium'),

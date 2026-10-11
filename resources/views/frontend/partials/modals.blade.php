@@ -112,16 +112,43 @@
 
                 <div class="modal-body pt-3">
                     <h4 class="fw-bold mb-1" id="voteModalLabel">Cast Your Vote</h4>
-                    <p class="text-muted small mb-4">Choose your favorite Pandal committee for the 2026 People's Choice
-                        Award.</p>
+                    <p class="text-muted small mb-4">Choose your favorite Pandal committee for the {{ $event->year ?? 2026 }} People's Choice Award.</p>
 
                     <form id="voteForm">
+                        <input type="hidden" id="voteEventId" value="{{ $event->id ?? '' }}">
+                        <input type="hidden" id="voteVotingMode" value="{{ (isset($event) && $event->voting_mode) ? $event->voting_mode->value : 'participant' }}">
+
+                        @php
+                            $isAwardMode = isset($event) && $event->voting_mode === \App\Enums\VotingMode::ParticipantAndAward;
+                            $activeAwards = (isset($event) && $event->awards) ? $event->awards->where('is_active', true) : collect();
+                        @endphp
+
+                        @if ($isAwardMode)
+                            <div class="mb-3" id="awardCategoryGroup">
+                                <label class="form-label small fw-bold">Select Award Category</label>
+                                <select class="form-select" id="awardSelect" required>
+                                    @if ($activeAwards->isNotEmpty())
+                                        @foreach ($activeAwards as $award)
+                                            <option value="{{ $award->id }}" {{ $loop->first ? 'selected' : '' }}>
+                                                {{ $award->display_name ?: $award->name }}
+                                            </option>
+                                        @endforeach
+                                    @else
+                                        <option value="" disabled selected>No active award categories</option>
+                                    @endif
+                                </select>
+                                <div class="form-text">Choose the award category you wish to vote under.</div>
+                            </div>
+                        @else
+                            <input type="hidden" id="awardSelect" value="">
+                        @endif
+
                         <div class="mb-3">
                             <label class="form-label small fw-bold">Select Committee</label>
                             <select class="form-select" id="pandalSelect" required>
                                 @if (isset($participants) && $participants->isNotEmpty())
                                     @foreach ($participants as $pandal)
-                                        <option value="{{ $pandal->name }}" {{ $loop->first ? 'selected' : '' }}>
+                                        <option value="{{ $pandal->id }}" data-name="{{ $pandal->name }}" {{ $loop->first ? 'selected' : '' }}>
                                             {{ $pandal->display_name ?: $pandal->name }} ({{ $pandal->locality ?: ($pandal->zone ?: 'Dibrugarh') }})
                                         </option>
                                     @endforeach
@@ -138,14 +165,21 @@
                                 <input type="tel" class="form-control" id="voterMobile"
                                     placeholder="Enter 10-digit number" maxlength="10" required pattern="[0-9]{10}">
                             </div>
-                            <div class="form-text">One vote per phone number to ensure fair community polling.</div>
+                            @if ($isAwardMode)
+                                <div class="form-text">
+                                    <i class="bi bi-shield-check text-success me-1"></i>One vote per phone number <strong>for each award category</strong>.
+                                </div>
+                            @else
+                                <div class="form-text">
+                                    <i class="bi bi-shield-check text-success me-1"></i>One vote per phone number for this entire event.
+                                </div>
+                            @endif
                         </div>
 
                         <!-- Already Voted Warning Message -->
                         <div id="alreadyVotedAlert" class="alert alert-danger d-none py-2 px-3 small mt-2">
                             <i class="bi bi-exclamation-triangle-fill me-1"></i>
-                            <span id="alreadyVotedMsg">This mobile number has already cast a vote in Sharad Samman 2026.
-                                Only 1 vote per mobile number is permitted.</span>
+                            <span id="alreadyVotedMsg">This mobile number has already cast a vote according to event voting rules.</span>
                         </div>
 
                         <div class="d-grid mt-4">
@@ -160,6 +194,9 @@
         </div>
     </div>
 
+    @php
+        $configuredOtpLength = \App\Models\OtpSetting::current()->otp_length ?? 6;
+    @endphp
     <!-- OTP Verification Modal -->
     <div class="modal fade" id="otpModal" tabindex="-1" aria-labelledby="otpModalLabel" aria-hidden="true"
         data-bs-backdrop="static">
@@ -184,27 +221,23 @@
                     </div>
                     <h4 class="fw-bold mb-1" id="otpModalLabel">Enter Verification Code</h4>
                     <p class="text-muted small mb-3">
-                        We have sent a 4-digit OTP to <strong id="displayMobileNum" class="text-dark">+91 XXXXX
+                        We have sent a <span id="displayOtpLength">{{ $configuredOtpLength }}</span>-digit OTP to <strong id="displayMobileNum" class="text-dark">+91 XXXXX
                             XXXXX</strong>
                     </p>
 
                     <form id="otpForm">
-                        <!-- 4 Digit OTP Input Boxes -->
-                        <div class="d-flex justify-content-center gap-2 my-3" id="otpInputContainer">
-                            <input type="text" class="form-control text-center fs-4 fw-bold otp-digit-box" maxlength="1"
-                                pattern="[0-9]" inputmode="numeric" required autocomplete="off" data-index="1">
-                            <input type="text" class="form-control text-center fs-4 fw-bold otp-digit-box" maxlength="1"
-                                pattern="[0-9]" inputmode="numeric" required autocomplete="off" data-index="2">
-                            <input type="text" class="form-control text-center fs-4 fw-bold otp-digit-box" maxlength="1"
-                                pattern="[0-9]" inputmode="numeric" required autocomplete="off" data-index="3">
-                            <input type="text" class="form-control text-center fs-4 fw-bold otp-digit-box" maxlength="1"
-                                pattern="[0-9]" inputmode="numeric" required autocomplete="off" data-index="4">
+                        <!-- Dynamic Digit OTP Input Boxes -->
+                        <div class="d-flex justify-content-center flex-wrap gap-2 my-3" id="otpInputContainer" data-otp-length="{{ $configuredOtpLength }}">
+                            @for ($i = 1; $i <= $configuredOtpLength; $i++)
+                                <input type="text" class="form-control text-center fs-4 fw-bold otp-digit-box" maxlength="1"
+                                    pattern="[0-9]" inputmode="numeric" required autocomplete="off" data-index="{{ $i }}"
+                                    style="width: 44px; height: 52px; border-radius: 10px; border: 2px solid #dee2e6;">
+                            @endfor
                         </div>
 
                         <!-- Invalid OTP Alert Message -->
                         <div id="otpInvalidAlert" class="alert alert-danger d-none py-2 px-3 small text-start mb-3">
-                            <i class="bi bi-x-circle-fill me-1"></i> <span id="otpInvalidMsg">Invalid OTP entered!
-                                Please enter the correct 4-digit code (Demo: 1234).</span>
+                            <i class="bi bi-x-circle-fill me-1"></i> <span id="otpInvalidMsg">Invalid OTP entered. Please try again.</span>
                         </div>
 
                         <!-- Valid OTP Alert Message -->
@@ -221,8 +254,7 @@
 
                         <!-- Resend OTP Alert Toast Message -->
                         <div id="otpResendAlert" class="alert alert-warning d-none py-2 px-3 small text-start mb-3">
-                            <i class="bi bi-send-check-fill me-1"></i> A new 4-digit OTP has been sent to your mobile
-                            number! (Demo: 1234)
+                            <i class="bi bi-send-check-fill me-1"></i> <span id="otpResendMsg">A new verification code has been dispatched to your mobile number!</span>
                         </div>
 
                         <div class="d-grid gap-2 mt-4">
@@ -233,7 +265,7 @@
                             </button>
                             <button type="button" class="btn btn-sm btn-link text-muted text-decoration-none mt-1"
                                 id="btnResendOtp">
-                                Didn't receive OTP? <span class="text-danger fw-semibold">Resend OTP</span>
+                                Didn't receive OTP? <span id="resendBtnText" class="text-danger fw-semibold">Resend OTP</span>
                             </button>
                         </div>
                     </form>
