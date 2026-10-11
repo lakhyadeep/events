@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Pages\Auth\RegisterSuperadmin;
 use App\Filament\Resources\Events\Pages\CreateEvent;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Models\Event;
@@ -12,6 +13,7 @@ use App\Models\Winner;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -30,6 +32,51 @@ class AdminManagementTest extends TestCase
         $response = $this->get('/admin/login');
 
         $response->assertStatus(200);
+    }
+
+    public function test_login_page_shows_setup_text_only_when_zero_users_exist(): void
+    {
+        $this->assertGreaterThan(0, User::count());
+        $response = $this->get('/admin/login');
+        $response->assertStatus(200);
+        $response->assertDontSee('Initial Setup: Create Superadmin');
+
+        User::query()->delete();
+
+        $responseEmpty = $this->get('/admin/login');
+        $responseEmpty->assertStatus(200);
+        $responseEmpty->assertSee('Initial Setup: Create Superadmin');
+    }
+
+    public function test_superadmin_can_register_via_ui_when_zero_users_exist(): void
+    {
+        User::query()->delete();
+
+        $component = Livewire::test(RegisterSuperadmin::class)
+            ->fillForm([
+                'name' => 'Initial Superadmin',
+                'email' => 'superadmin@dib24x7.com',
+                'password' => 'SecurePass123!',
+                'passwordConfirmation' => 'SecurePass123!',
+            ])
+            ->call('register')
+            ->assertHasNoFormErrors()
+            ->assertRedirect('/admin');
+
+        $user = User::where('email', 'superadmin@dib24x7.com')->first();
+        $this->assertNotNull($user);
+        $this->assertEquals('Initial Superadmin', $user->name);
+        $this->assertNotNull($user->email_verified_at);
+        $this->assertTrue(Hash::check('SecurePass123!', $user->password));
+    }
+
+    public function test_registration_is_permanently_locked_once_user_exists(): void
+    {
+        $this->assertGreaterThan(0, User::count());
+
+        $response = $this->get('/admin/register');
+
+        $response->assertRedirect('/admin/login');
     }
 
     public function test_fixed_admin_credentials_can_authenticate(): void

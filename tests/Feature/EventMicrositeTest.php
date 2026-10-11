@@ -44,6 +44,22 @@ class EventMicrositeTest extends TestCase
         $response->assertSee('Dibrugarh 24x7');
     }
 
+    public function test_no_events_view_renders_when_no_events_exist(): void
+    {
+        Event::query()->delete();
+
+        $response = $this->get('/');
+
+        $response->assertStatus(200);
+        $response->assertSee('No Active Event Configured Yet');
+        $response->assertSee('Initial Setup: Create Superadmin');
+
+        User::factory()->create();
+
+        $responseWithUser = $this->get('/');
+        $responseWithUser->assertSee('Go to Admin Dashboard');
+    }
+
     public function test_zone_and_locality_masters_exist_and_relate_to_participants(): void
     {
         $this->assertGreaterThan(0, Zone::count());
