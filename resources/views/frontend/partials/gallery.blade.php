@@ -80,40 +80,6 @@
                                 </div>
                             </div>
                         @endforeach
-                    @else
-                        <!-- Fallback Reel 1 -->
-                        <div class="reel-card" data-index="0" data-pandal="Santipara 2nd Lane Puja"
-                            data-likes="14.2K" data-theme="Swarna Mandir Golden Splendor & Dhaki Rhythms"
-                            data-splash="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=700&q=80"
-                            data-video="https://www.pexels.com/download/video/34945624/">
-                            <video class="reel-bg"
-                                poster="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=700&q=80"
-                                src="https://www.pexels.com/download/video/34945624/" muted loop playsinline></video>
-                            <div class="reel-overlay"></div>
-                            <div class="reel-play-btn" title="Watch Short">
-                                <svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"></polygon></svg>
-                            </div>
-                            <div class="reel-caption-wrap">
-                                <p class="reel-title">Santipara 2nd Lane Puja</p>
-                            </div>
-                        </div>
-
-                        <!-- Fallback Reel 2 -->
-                        <div class="reel-card" data-index="1" data-pandal="Chowkidingee Charali Puja"
-                            data-likes="28.9K" data-theme="Neon Crystal Illumination & Modern Laser Art"
-                            data-splash="https://images.unsplash.com/photo-1508739773434-c26b3d09e071?auto=format&fit=crop&w=700&q=80"
-                            data-video="https://www.pexels.com/download/video/34945624/">
-                            <video class="reel-bg"
-                                poster="https://images.unsplash.com/photo-1508739773434-c26b3d09e071?auto=format&fit=crop&w=700&q=80"
-                                src="https://www.pexels.com/download/video/34945624/" muted loop playsinline></video>
-                            <div class="reel-overlay"></div>
-                            <div class="reel-play-btn" title="Watch Short">
-                                <svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"></polygon></svg>
-                            </div>
-                            <div class="reel-caption-wrap">
-                                <p class="reel-title">Chowkidingee Charali Puja</p>
-                            </div>
-                        </div>
                     @endif
                 </div>
             </div>

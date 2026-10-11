@@ -165,46 +165,6 @@
                     </div>
                 </div>
             @endforeach
-        @else
-            <!-- Fallback Category 1: Best Puja -->
-            <div class="mb-5">
-                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4 pb-2 border-bottom border-danger border-opacity-25">
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="badge bg-danger text-white rounded-pill px-3 py-2 fs-6">
-                            <i class="bi bi-trophy-fill me-1"></i> CATEGORY 01
-                        </span>
-                        <h3 class="fw-bold mb-0 text-dark">Best Puja — Announced Winners</h3>
-                    </div>
-                    <span class="text-muted small"><i class="bi bi-star-fill text-warning me-1"></i> Grand Flagship Title</span>
-                </div>
-
-                <div class="row g-4 justify-content-center">
-                    <div class="col-12 col-md-6 col-lg-4">
-                        <div class="winner-podium-card winner-gold h-100">
-                            <span class="winner-rank-badge badge-gold">
-                                <i class="bi bi-crown-fill me-1"></i> 1st Place • Winner
-                            </span>
-                            <div class="winner-img-wrap">
-                                <img src="https://images.unsplash.com/photo-1728921957375-877340feaf6a?q=80&w=2070&auto=format&fit=crop" alt="Winner">
-                                <div class="winner-img-overlay d-flex justify-content-between align-items-end">
-                                    <span class="winner-vote-pill text-warning"><i class="bi bi-fire me-1"></i> 5,537 Votes</span>
-                                    <span class="badge bg-warning text-dark fw-bold">GOLD MEDAL</span>
-                                </div>
-                            </div>
-                            <div class="p-3 text-center">
-                                <div class="mb-2">
-                                    <div class="winner-trophy-ring ring-gold mx-auto"><i class="bi bi-trophy-fill"></i></div>
-                                </div>
-                                <h4 class="fw-bold mb-1 text-dark">New Market Durga Puja</h4>
-                                <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill text-danger me-1"></i> New Market Road, Dibrugarh</p>
-                                <div class="p-2 rounded bg-warning bg-opacity-10 text-dark small fw-medium">
-                                    Winner of Best Puja 2026 for Exceptional Architecture & Theme Excellence.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
         @endif
 
     </div>

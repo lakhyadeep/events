@@ -18,51 +18,6 @@
                         <div class="p-4 bg-white rounded-4 shadow-sm border border-light-subtle terms-dynamic-content" style="font-size: 0.95rem; line-height: 1.7;">
                             {!! $event->terms_and_conditions !!}
                         </div>
-                    @else
-                        <ul class="terms-bullet-list list-unstyled mb-0">
-                            <li class="terms-bullet-item d-flex align-items-start gap-3 mb-3 border-bottom border-light">
-                                <span class="terms-check-icon text-danger flex-shrink-0 mt-1"><i class="bi bi-check-circle-fill fs-5"></i></span>
-                                <div>
-                                    <strong class="text-dark">1. One Vote Per Category:</strong> Each voter is entitled to cast only 1 vote per award category (Best Puja, Best Pratima, Best Lighting) during the active voting period.
-                                </div>
-                            </li>
-                            <li class="terms-bullet-item d-flex align-items-start gap-3 mb-3 border-bottom border-light">
-                                <span class="terms-check-icon text-danger flex-shrink-0 mt-1"><i class="bi bi-check-circle-fill fs-5"></i></span>
-                                <div>
-                                    <strong class="text-dark">2. Fair Play &amp; Anti-Spam Protection:</strong> All votes are verified in real time. Automated bot scripts, IP manipulation, or duplicate spam votes will be automatically detected and purged.
-                                </div>
-                            </li>
-                            <li class="terms-bullet-item d-flex align-items-start gap-3 mb-3 border-bottom border-light">
-                                <span class="terms-check-icon text-danger flex-shrink-0 mt-1"><i class="bi bi-check-circle-fill fs-5"></i></span>
-                                <div>
-                                    <strong class="text-dark">3. Nominated Committee Eligibility:</strong> Only officially registered and shortlisted Sarbajanin Durga Puja committees within Dibrugarh municipality boundaries are eligible for voting.
-                                </div>
-                            </li>
-                            <li class="terms-bullet-item d-flex align-items-start gap-3 mb-3 border-bottom border-light">
-                                <span class="terms-check-icon text-danger flex-shrink-0 mt-1"><i class="bi bi-check-circle-fill fs-5"></i></span>
-                                <div>
-                                    <strong class="text-dark">4. Jury &amp; Public Weighted Score:</strong> Winners of Dibrugarh Sharad Samman 2026 are determined by a weighted combination of verified public voting and independent jury panel evaluations.
-                                </div>
-                            </li>
-                            <li class="terms-bullet-item d-flex align-items-start gap-3 mb-3 border-bottom border-light">
-                                <span class="terms-check-icon text-danger flex-shrink-0 mt-1"><i class="bi bi-check-circle-fill fs-5"></i></span>
-                                <div>
-                                    <strong class="text-dark">5. Safety &amp; Environmental Compliance:</strong> Participating committees must strictly adhere to eco-friendly idol guidelines, fire safety, noise limiters, and crowd management standards.
-                                </div>
-                            </li>
-                            <li class="terms-bullet-item d-flex align-items-start gap-3 mb-3 border-bottom border-light">
-                                <span class="terms-check-icon text-danger flex-shrink-0 mt-1"><i class="bi bi-check-circle-fill fs-5"></i></span>
-                                <div>
-                                    <strong class="text-dark">6. Voting Timeline Adherence:</strong> Online voting schedule is regulated strictly by the official timeline. Votes received after the cutoff will not be accepted.
-                                </div>
-                            </li>
-                            <li class="terms-bullet-item d-flex align-items-start gap-3">
-                                <span class="terms-check-icon text-danger flex-shrink-0 mt-1"><i class="bi bi-check-circle-fill fs-5"></i></span>
-                                <div>
-                                    <strong class="text-dark">7. Final Decision Authority:</strong> The final decision of the Organising Committee and Jury Board is binding and non-contestable.
-                                </div>
-                            </li>
-                        </ul>
                     @endif
                 </div>
             </div>

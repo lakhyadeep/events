@@ -239,9 +239,65 @@ class EventMicrositeTest extends TestCase
         $response = $this->get('/');
 
         $response->assertStatus(200);
-        $response->assertSee('Explore All 36+ Dibrugarh Durga Pujas');
+        $response->assertSee('Explore All Registered Durga Pujas');
         $response->assertSee('otpModal');
         $response->assertSee('voterMobile');
         $response->assertSee('alreadyVotedAlert');
+    }
+
+    public function test_frontend_sections_hidden_when_dynamic_data_not_available_while_nav_is_retained(): void
+    {
+        $bareEvent = Event::create([
+            'name' => 'Bare Minimal Event',
+            'display_name' => 'Bare Minimal Event',
+            'year' => 2026,
+            'slug' => 'bare-minimal-event',
+            'status' => 'active',
+            'is_voting_active' => false,
+            'about_text' => null,
+            'terms_and_conditions' => null,
+        ]);
+
+        $response = $this->get('/events/bare-minimal-event');
+
+        $response->assertStatus(200);
+
+        // Sections must NOT be rendered when dynamic data is absent
+        $response->assertDontSee('<section class="durgo-utsav-section', false);
+        $response->assertDontSee('<section class="sponsors-section-wrapper"', false);
+        $response->assertDontSee('<section class="pujas-voting-section"', false);
+        $response->assertDontSee('<div class="awards-embedded-box', false);
+        $response->assertDontSee('<section class="awards-announced-section', false);
+        $response->assertDontSee('<section class="glimpses-section"', false);
+        $response->assertDontSee('<section class="timeline-section"', false);
+        $response->assertDontSee('<section class="terms-conditions-section', false);
+
+        // Nav links and vote button ARE retained in the navigation
+        $response->assertSee('data-target="about"', false);
+        $response->assertSee('data-target="pujas"', false);
+        $response->assertSee('data-target="awards-announced"', false);
+        $response->assertSee('data-target="gallery"', false);
+        $response->assertSee('data-target="events"', false);
+        $response->assertSee('id="btnVoteModal"', false);
+    }
+
+    public function test_all_pujas_shows_empty_state_without_fake_fallback_data(): void
+    {
+        $bareEvent = Event::create([
+            'name' => 'Empty Directory Event',
+            'display_name' => 'Empty Directory Event',
+            'year' => 2026,
+            'slug' => 'empty-directory-event',
+            'status' => 'active',
+        ]);
+
+        $response = $this->get('/events/empty-directory-event/all-pujas');
+
+        $response->assertStatus(200);
+        $response->assertSee('No Pujas Found');
+        $response->assertSee('No registered pandals available yet.');
+        $response->assertDontSee('id="pujaSearchInput"', false);
+        $response->assertDontSee('id="btnLoadMore"', false);
+        $response->assertSee('window.dynamicPujasData = []', false);
     }
 }

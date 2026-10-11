@@ -1,3 +1,8 @@
+@php
+    $contestants = isset($participants) && $participants->isNotEmpty() ? $participants : collect();
+@endphp
+
+@if ($contestants->isNotEmpty())
 <div class="container">
     <div class="d-flex flex-column align-items-center mb-4 text-center pujas-header-box">
         <span class="pujas-badge-tag mb-2">
@@ -38,7 +43,7 @@
                     <div id="modalMedalPreview" class="mb-3 d-inline-block"></div>
                     <h4 class="fw-bold mb-1" id="modalRankText" style="color: #7c0b15;">Winner TBA</h4>
                     <p class="text-muted small mb-3" id="modalStatusDesc">The official winner for this category
-                        will be announced live on Dashami evening following jury assessments and public voting.
+                        will be announced live following jury assessments and public voting.
                     </p>
 
                     <div class="text-start p-3 rounded-3"
@@ -65,10 +70,6 @@
     </div>
     <!-- End of Embedded Awards Box -->
 
-    @php
-        $contestants = isset($participants) && $participants->isNotEmpty() ? $participants : collect();
-    @endphp
-
     <!-- CATEGORY 1: BEST PUJA -->
     <div class="category-section-block cat-puja-theme">
         <div class="category-title-wrapper" id="cat-best-puja">
@@ -89,59 +90,37 @@
         </div>
 
         <div class="row g-4">
-            @if ($contestants->isNotEmpty())
-                @foreach ($contestants as $p)
-                    <div class="col-md-4">
-                        <div class="vote-card h-100 p-3">
-                            <div class="position-relative mb-3">
-                                <img src="{{ $p->primary_image_url ?: ($p->image_1_url ?: 'https://images.unsplash.com/photo-1728921957375-877340feaf6a?q=80&w=2070&auto=format&fit=crop') }}"
-                                    alt="{{ $p->display_name ?: $p->name }}" class="img-fluid rounded-3 w-100"
-                                    style="height: 200px; object-fit: cover;">
-                            </div>
-                            <h5 class="fw-bold mb-1">{{ $p->display_name ?: $p->name }}</h5>
-                            <p class="text-muted small mb-2">
-                                <i class="bi bi-geo-alt-fill text-danger me-1"></i>
-                                {{ $p->locality ? $p->locality . ', ' : '' }}{{ $p->zone ?: 'Dibrugarh' }}
-                            </p>
-                            @if (!empty($p->puja_theme))
-                                <p class="small text-secondary mb-3 fst-italic" style="font-size: 0.8rem;">
-                                    <i class="bi bi-palette me-1 text-warning"></i> Theme: {{ $p->puja_theme }}
-                                </p>
-                            @endif
-                            <div class="d-flex justify-content-between align-items-center pt-2 border-top mt-auto">
-                                <div>
-                                    <small class="text-muted d-block">Zone</small>
-                                    <span class="fw-bold fs-6 text-danger">{{ $p->zone ?: 'Central' }}</span>
-                                </div>
-                                <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn"
-                                    data-pandal="{{ $p->name }}">
-                                    <i class="bi bi-hand-thumbs-up me-1"></i> Vote
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
-            @else
+            @foreach ($contestants as $p)
                 <div class="col-md-4">
                     <div class="vote-card h-100 p-3">
                         <div class="position-relative mb-3">
-                            <img src="https://images.unsplash.com/photo-1728921957375-877340feaf6a?q=80&w=2070&auto=format&fit=crop"
-                                alt="Thana Chariali Puja" class="img-fluid rounded-3 w-100" style="height: 200px; object-fit: cover;">
+                            <img src="{{ $p->primary_image_url ?: ($p->image_1_url ?: 'https://images.unsplash.com/photo-1728921957375-877340feaf6a?q=80&w=2070&auto=format&fit=crop') }}"
+                                alt="{{ $p->display_name ?: $p->name }}" class="img-fluid rounded-3 w-100"
+                                style="height: 200px; object-fit: cover;">
                         </div>
-                        <h5 class="fw-bold mb-1">Thana Chariali Sarbajanin</h5>
-                        <p class="text-muted small mb-3"><i class="bi bi-geo-alt-fill text-danger me-1"></i> Thana Chariali, Dibrugarh</p>
-                        <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                        <h5 class="fw-bold mb-1">{{ $p->display_name ?: $p->name }}</h5>
+                        <p class="text-muted small mb-2">
+                            <i class="bi bi-geo-alt-fill text-danger me-1"></i>
+                            {{ $p->locality ? $p->locality . ', ' : '' }}{{ $p->zone ?: 'Dibrugarh' }}
+                        </p>
+                        @if (!empty($p->puja_theme))
+                            <p class="small text-secondary mb-3 fst-italic" style="font-size: 0.8rem;">
+                                <i class="bi bi-palette me-1 text-warning"></i> Theme: {{ $p->puja_theme }}
+                            </p>
+                        @endif
+                        <div class="d-flex justify-content-between align-items-center pt-2 border-top mt-auto">
                             <div>
-                                <small class="text-muted d-block">Current Count</small>
-                                <span class="fw-bold fs-6 text-danger">4,812 votes</span>
+                                <small class="text-muted d-block">Zone</small>
+                                <span class="fw-bold fs-6 text-danger">{{ $p->zone ?: 'Central' }}</span>
                             </div>
-                            <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn" data-pandal="Thana Chariali Sarbajanin">
+                            <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn"
+                                data-pandal="{{ $p->name }}">
                                 <i class="bi bi-hand-thumbs-up me-1"></i> Vote
                             </button>
                         </div>
                     </div>
                 </div>
-            @endif
+            @endforeach
         </div>
     </div>
 
@@ -167,59 +146,37 @@
         </div>
 
         <div class="row g-4">
-            @if ($contestants->isNotEmpty())
-                @foreach ($contestants as $p)
-                    <div class="col-md-4">
-                        <div class="vote-card h-100 p-3">
-                            <div class="position-relative mb-3">
-                                <img src="{{ $p->image_1_url ?: ($p->primary_image_url ?: 'https://images.unsplash.com/photo-1756399220348-7964d338cb19?q=80&w=1074&auto=format&fit=crop') }}"
-                                    alt="{{ $p->display_name ?: $p->name }}" class="img-fluid rounded-3 w-100"
-                                    style="height: 200px; object-fit: cover;">
-                            </div>
-                            <h5 class="fw-bold mb-1">{{ $p->display_name ?: $p->name }}</h5>
-                            <p class="text-muted small mb-2">
-                                <i class="bi bi-geo-alt-fill text-danger me-1"></i>
-                                {{ $p->locality ? $p->locality . ', ' : '' }}{{ $p->zone ?: 'Dibrugarh' }}
-                            </p>
-                            @if (!empty($p->idol_artist))
-                                <p class="small text-secondary mb-3" style="font-size: 0.8rem;">
-                                    <i class="bi bi-brush me-1 text-primary"></i> Sculptor: {{ $p->idol_artist }}
-                                </p>
-                            @endif
-                            <div class="d-flex justify-content-between align-items-center pt-2 border-top mt-auto">
-                                <div>
-                                    <small class="text-muted d-block">Zone</small>
-                                    <span class="fw-bold fs-6 text-dark">{{ $p->zone ?: 'Central' }}</span>
-                                </div>
-                                <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn"
-                                    data-pandal="{{ $p->name }}">
-                                    <i class="bi bi-hand-thumbs-up me-1"></i> Vote
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
-            @else
+            @foreach ($contestants as $p)
                 <div class="col-md-4">
                     <div class="vote-card h-100 p-3">
                         <div class="position-relative mb-3">
-                            <img src="https://images.unsplash.com/photo-1756399220348-7964d338cb19?q=80&w=1074&auto=format&fit=crop"
-                                alt="Pratima" class="img-fluid rounded-3 w-100" style="height: 200px; object-fit: cover;">
+                            <img src="{{ $p->image_1_url ?: ($p->primary_image_url ?: 'https://images.unsplash.com/photo-1756399220348-7964d338cb19?q=80&w=1074&auto=format&fit=crop') }}"
+                                alt="{{ $p->display_name ?: $p->name }}" class="img-fluid rounded-3 w-100"
+                                style="height: 200px; object-fit: cover;">
                         </div>
-                        <h5 class="fw-bold mb-1">Thana Chariali Sarbajanin</h5>
-                        <p class="text-muted small mb-3"><i class="bi bi-geo-alt-fill text-danger me-1"></i> Thana Chariali, Dibrugarh</p>
-                        <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                        <h5 class="fw-bold mb-1">{{ $p->display_name ?: $p->name }}</h5>
+                        <p class="text-muted small mb-2">
+                            <i class="bi bi-geo-alt-fill text-danger me-1"></i>
+                            {{ $p->locality ? $p->locality . ', ' : '' }}{{ $p->zone ?: 'Dibrugarh' }}
+                        </p>
+                        @if (!empty($p->idol_artist))
+                            <p class="small text-secondary mb-3" style="font-size: 0.8rem;">
+                                <i class="bi bi-brush me-1 text-primary"></i> Sculptor: {{ $p->idol_artist }}
+                            </p>
+                        @endif
+                        <div class="d-flex justify-content-between align-items-center pt-2 border-top mt-auto">
                             <div>
-                                <small class="text-muted d-block">Current Count</small>
-                                <span class="fw-bold fs-6 text-danger">4,115 votes</span>
+                                <small class="text-muted d-block">Zone</small>
+                                <span class="fw-bold fs-6 text-dark">{{ $p->zone ?: 'Central' }}</span>
                             </div>
-                            <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn" data-pandal="Thana Chariali Sarbajanin">
+                            <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn"
+                                data-pandal="{{ $p->name }}">
                                 <i class="bi bi-hand-thumbs-up me-1"></i> Vote
                             </button>
                         </div>
                     </div>
                 </div>
-            @endif
+            @endforeach
         </div>
     </div>
 
@@ -245,59 +202,37 @@
         </div>
 
         <div class="row g-4">
-            @if ($contestants->isNotEmpty())
-                @foreach ($contestants as $p)
-                    <div class="col-md-4">
-                        <div class="vote-card h-100 p-3">
-                            <div class="position-relative mb-3">
-                                <img src="{{ $p->image_2_url ?: ($p->primary_image_url ?: 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=800&q=80') }}"
-                                    alt="{{ $p->display_name ?: $p->name }}" class="img-fluid rounded-3 w-100"
-                                    style="height: 200px; object-fit: cover;">
-                            </div>
-                            <h5 class="fw-bold mb-1">{{ $p->display_name ?: $p->name }}</h5>
-                            <p class="text-muted small mb-2">
-                                <i class="bi bi-geo-alt-fill text-danger me-1"></i>
-                                {{ $p->locality ? $p->locality . ', ' : '' }}{{ $p->zone ?: 'Dibrugarh' }}
-                            </p>
-                            @if (!empty($p->light_designer))
-                                <p class="small text-secondary mb-3" style="font-size: 0.8rem;">
-                                    <i class="bi bi-lightbulb me-1 text-warning"></i> Illumination: {{ $p->light_designer }}
-                                </p>
-                            @endif
-                            <div class="d-flex justify-content-between align-items-center pt-2 border-top mt-auto">
-                                <div>
-                                    <small class="text-muted d-block">Zone</small>
-                                    <span class="fw-bold fs-6 text-warning">{{ $p->zone ?: 'Central' }}</span>
-                                </div>
-                                <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn"
-                                    data-pandal="{{ $p->name }}">
-                                    <i class="bi bi-hand-thumbs-up me-1"></i> Vote
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
-            @else
+            @foreach ($contestants as $p)
                 <div class="col-md-4">
                     <div class="vote-card h-100 p-3">
                         <div class="position-relative mb-3">
-                            <img src="https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=800&q=80"
-                                alt="Lighting" class="img-fluid rounded-3 w-100" style="height: 200px; object-fit: cover;">
+                            <img src="{{ $p->image_2_url ?: ($p->primary_image_url ?: 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=800&q=80') }}"
+                                alt="{{ $p->display_name ?: $p->name }}" class="img-fluid rounded-3 w-100"
+                                style="height: 200px; object-fit: cover;">
                         </div>
-                        <h5 class="fw-bold mb-1">Thana Chariali Sarbajanin</h5>
-                        <p class="text-muted small mb-3"><i class="bi bi-geo-alt-fill text-danger me-1"></i> Thana Chariali, Dibrugarh</p>
-                        <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                        <h5 class="fw-bold mb-1">{{ $p->display_name ?: $p->name }}</h5>
+                        <p class="text-muted small mb-2">
+                            <i class="bi bi-geo-alt-fill text-danger me-1"></i>
+                            {{ $p->locality ? $p->locality . ', ' : '' }}{{ $p->zone ?: 'Dibrugarh' }}
+                        </p>
+                        @if (!empty($p->light_designer))
+                            <p class="small text-secondary mb-3" style="font-size: 0.8rem;">
+                                <i class="bi bi-lightbulb me-1 text-warning"></i> Illumination: {{ $p->light_designer }}
+                            </p>
+                        @endif
+                        <div class="d-flex justify-content-between align-items-center pt-2 border-top mt-auto">
                             <div>
-                                <small class="text-muted d-block">Current Count</small>
-                                <span class="fw-bold fs-6 text-danger">3,890 votes</span>
+                                <small class="text-muted d-block">Zone</small>
+                                <span class="fw-bold fs-6 text-warning">{{ $p->zone ?: 'Central' }}</span>
                             </div>
-                            <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn" data-pandal="Thana Chariali Sarbajanin">
+                            <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn"
+                                data-pandal="{{ $p->name }}">
                                 <i class="bi bi-hand-thumbs-up me-1"></i> Vote
                             </button>
                         </div>
                     </div>
                 </div>
-            @endif
+            @endforeach
         </div>
     </div>
 
@@ -308,7 +243,7 @@
                 <span class="badge bg-danger text-white rounded-pill px-3 py-1 mb-2 fw-semibold">
                     <i class="bi bi-grid-3x3-gap-fill me-1"></i> Full Directory
                 </span>
-                <h4 class="fw-bold mb-1" style="color: #8c0c16;">Explore All 36+ Dibrugarh Durga Pujas</h4>
+                <h4 class="fw-bold mb-1" style="color: #8c0c16;">Explore All Registered Durga Pujas</h4>
                 <p class="text-muted small mb-0">Search all pandals with real-time auto-suggestions, lazy loading directory, and live community voting.</p>
             </div>
             <div class="col-md-4 text-center text-md-end">
@@ -322,3 +257,4 @@
         </div>
     </div>
 </div>
+@endif

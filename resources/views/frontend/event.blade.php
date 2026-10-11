@@ -11,33 +11,49 @@
         @include('frontend.partials.hero')
 
         <!-- Durgo Utsav About & Mandala Section -->
-        @include('frontend.partials.about')
+        @if (!empty($event->about_text))
+            @include('frontend.partials.about')
+        @endif
 
         <!-- Sponsor Tiers (Organised by, Title, Hospitality, Trophy & Associate Partners) -->
-        @include('frontend.partials.sponsors')
+        @if ($event->sponsors && $event->sponsors->where('is_active', true)->isNotEmpty())
+            @include('frontend.partials.sponsors')
+        @endif
 
         <!-- Vote for the Best — Sharad Samman 2026 Section -->
-        <section class="pujas-voting-section" id="pujas">
-            <!-- Awards to be Presented Matrix -->
-            @include('frontend.partials.awards')
+        @if (($event->awards && $event->awards->where('is_active', true)->isNotEmpty()) || (isset($participants) && $participants->isNotEmpty()))
+            <section class="pujas-voting-section" id="pujas">
+                <!-- Awards to be Presented Matrix -->
+                @if ($event->awards && $event->awards->where('is_active', true)->isNotEmpty())
+                    @include('frontend.partials.awards')
+                @endif
 
-            <!-- Voting Hub (Best Puja, Best Pratima, Best Lighting) -->
-            @include('frontend.partials.voting')
-        </section>
+                <!-- Voting Hub (Best Puja, Best Pratima, Best Lighting) -->
+                @if (isset($participants) && $participants->isNotEmpty())
+                    @include('frontend.partials.voting')
+                @endif
+            </section>
+        @endif
 
+        <!-- Official Award Winners Section -->
+        @if (isset($publishedWinners) && $publishedWinners->isNotEmpty())
             @include('frontend.partials.awards-announced')
+        @endif
 
-
-
-
-        <!-- Glimpses of Puja 2026 (Vertical 9:16 Video Shorts Carousel) -->
-        @include('frontend.partials.gallery')
+        <!-- Glimpses of Puja (Vertical 9:16 Video Shorts Carousel) -->
+        @if ($event->videoShorts && $event->videoShorts->where('is_active', true)->isNotEmpty())
+            @include('frontend.partials.gallery')
+        @endif
 
         <!-- Event Timeline Tracker -->
-        @include('frontend.partials.timeline')
+        @if ($event->timelineItems && $event->timelineItems->isNotEmpty())
+            @include('frontend.partials.timeline')
+        @endif
 
         <!-- Official Guidelines & Terms -->
-        @include('frontend.partials.terms')
+        @if (!empty($event->terms_and_conditions))
+            @include('frontend.partials.terms')
+        @endif
     </main>
 
     <!-- Site Footer & Social Links -->

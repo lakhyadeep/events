@@ -21,17 +21,17 @@
                 </div>
             </div>
 
-            <!-- 2. TITLE SPONSOR: DYNAMIC WITH FALLBACK -->
-            <div class="col-6 col-lg-3 divider-col-right">
-                <div class="sponsor-box" data-brand="{{ $presentingPartner?->display_name ?? 'JSB Infrastructures' }}">
-                    <div class="sponsor-title-wrap">
-                        <span class="title-line"></span>
-                        <span class="sponsor-title-text">{{ strtoupper($presentingPartner?->sponsor_tag ?: 'TITLE SPONSOR') }}</span>
-                        <span class="title-line"></span>
-                    </div>
-                    <div class="sponsor-logo-canvas">
-                        <div class="d-flex flex-column align-items-center justify-content-center">
-                            @if ($presentingPartner && $presentingPartner->logo_url)
+            <!-- 2. TITLE SPONSOR: DYNAMIC ONLY -->
+            @if ($presentingPartner && $presentingPartner->logo_url)
+                <div class="col-6 col-lg-3 divider-col-right">
+                    <div class="sponsor-box" data-brand="{{ $presentingPartner->display_name ?: $presentingPartner->title }}">
+                        <div class="sponsor-title-wrap">
+                            <span class="title-line"></span>
+                            <span class="sponsor-title-text">{{ strtoupper($presentingPartner->sponsor_tag ?: 'TITLE SPONSOR') }}</span>
+                            <span class="title-line"></span>
+                        </div>
+                        <div class="sponsor-logo-canvas">
+                            <div class="d-flex flex-column align-items-center justify-content-center">
                                 @if ($presentingPartner->landing_url)
                                     <a href="{{ $presentingPartner->landing_url }}" target="_blank" rel="noopener noreferrer">
                                         <img src="{{ $presentingPartner->logo_url }}" alt="{{ $presentingPartner->display_name ?: $presentingPartner->title }}" class="img-fluid" style="max-height: 80px; object-fit: contain;">
@@ -39,15 +39,13 @@
                                 @else
                                     <img src="{{ $presentingPartner->logo_url }}" alt="{{ $presentingPartner->display_name ?: $presentingPartner->title }}" class="img-fluid" style="max-height: 80px; object-fit: contain;">
                                 @endif
-                            @else
-                                <img src="{{ asset('event-assets/images/logo-jsb.jpg') }}" alt="JSB Infrastructures" class="img-fluid" style="max-height: 80px; object-fit: contain;">
-                            @endif
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            @endif
 
-            <!-- 3 & 4. OTHER PARTNERS / HOSPITALITY & TROPHY -->
+            <!-- 3 & 4. OTHER PARTNERS / HOSPITALITY & TROPHY (DYNAMIC ONLY) -->
             @php
                 $topOtherSponsors = isset($otherSponsors) ? $otherSponsors->take(2) : collect();
             @endphp
@@ -74,58 +72,23 @@
                         </div>
                     </div>
                 @endforeach
-            @else
-                <!-- Fallback: Hospitality Sponsor -->
-                <div class="col-6 col-lg-3 divider-col-right">
-                    <div class="sponsor-box" data-brand="Badoco Tasty Treat">
-                        <div class="sponsor-title-wrap">
-                            <span class="title-line"></span>
-                            <span class="sponsor-title-text">HOSPITALITY SPONSOR</span>
-                            <span class="title-line"></span>
-                        </div>
-                        <div class="sponsor-logo-canvas">
-                            <div class="d-flex flex-column align-items-center justify-content-center">
-                                <img src="{{ asset('event-assets/images/logo-tasty.jpg') }}" alt="Badoco Tasty Treat" class="img-fluid" style="max-height: 80px; object-fit: contain;">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Fallback: Trophy Sponsor -->
-                <div class="col-6 col-lg-3">
-                    <div class="sponsor-box" data-brand="TONI&GUY Hairdressing">
-                        <div class="sponsor-title-wrap">
-                            <span class="title-line"></span>
-                            <span class="sponsor-title-text">TROPHY SPONSOR</span>
-                            <span class="title-line"></span>
-                        </div>
-                        <div class="sponsor-logo-canvas">
-                            <div class="d-flex flex-column align-items-center justify-content-center text-center">
-                                <img src="{{ asset('event-assets/images/logo-tg.jpg') }}" alt="TONI&GUY Hairdressing" class="img-fluid" style="max-height: 80px; object-fit: contain;">
-                            </div>
-                        </div>
-                    </div>
-                </div>
             @endif
 
         </div>
 
         <!-- ==============================================
-             MIDDLE DIVIDER: ASSOCIATE PARTNERS
+             BOTTOM ROW: ASSOCIATE PARTNERS (DYNAMIC ONLY)
              ============================================== -->
-        <div class="associate-divider-wrap">
-            <div class="long-divider-line"></div>
-            <div class="associate-title-pill">
-                <i class="bi bi-award-fill me-1" style="color: #ffcc00;"></i> ASSOCIATE PARTNERS
+        @if (isset($associateSponsors) && $associateSponsors->isNotEmpty())
+            <div class="associate-divider-wrap">
+                <div class="long-divider-line"></div>
+                <div class="associate-title-pill">
+                    <i class="bi bi-award-fill me-1" style="color: #ffcc00;"></i> ASSOCIATE PARTNERS
+                </div>
+                <div class="long-divider-line"></div>
             </div>
-            <div class="long-divider-line"></div>
-        </div>
 
-        <!-- ==============================================
-             BOTTOM ROW: ASSOCIATE PARTNERS
-             ============================================== -->
-        <div class="row g-2 g-md-3 justify-content-center align-items-stretch">
-            @if (isset($associateSponsors) && $associateSponsors->isNotEmpty())
+            <div class="row g-2 g-md-3 justify-content-center align-items-stretch">
                 @foreach ($associateSponsors as $partner)
                     <div class="col-6 col-md-4 col-lg partner-divider-right">
                         <div class="partner-box" data-brand="{{ $partner->display_name ?: $partner->title }}">
@@ -151,39 +114,7 @@
                         </div>
                     </div>
                 @endforeach
-            @else
-                <!-- Fallback 1: DIGITAL PILOT -->
-                <div class="col-12 col-md-3 partner-divider-right">
-                    <div class="partner-box" data-brand="Digital Pilot">
-                        <div class="d-flex align-items-center gap-2">
-                            <img src="{{ asset('event-assets/images/logo-dp.png') }}" alt="Digital Pilot" class="img-fluid">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Fallback 2: CONCEPTCORE LEARNING -->
-                <div class="col-12 col-md-3 partner-divider-right">
-                    <div class="partner-box" data-brand="ConceptCore Learning">
-                        <div class="d-flex align-items-center gap-2">
-                            <img src="{{ asset('event-assets/images/logo-cc.png') }}" alt="ConceptCore Learning" class="img-fluid">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Fallback 3: KINLEY -->
-                <div class="col-12 col-md-3">
-                    <div class="partner-box" data-brand="Kinley - With Added Minerals">
-                        <div class="d-flex flex-column align-items-center">
-                            <div class="d-flex align-items-baseline position-relative">
-                                <img src="{{ asset('event-assets/images/logo-kinley.png') }}" alt="Kinley" class="img-fluid">
-                            </div>
-                            <div style="font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.55rem; color: #0077b6; letter-spacing: 0.4px; margin-top: 1px;">
-                                With Added Minerals
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            @endif
-        </div>
+            </div>
+        @endif
     </div>
 </section>

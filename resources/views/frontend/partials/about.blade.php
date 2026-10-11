@@ -33,12 +33,6 @@
         <div class="durgo-description">
             @if (!empty($event->about_text))
                 {!! $event->about_text !!}
-            @else
-                <p>
-                    Dibrugarh Durgo Utsav celebrates the city's vibrant Durga Puja traditions, bringing together
-                    devotion, creativity, art and community spirit. Discover the city's celebrated pujas, explore their
-                    unique themes and cast your vote for the ones that inspire you.
-                </p>
             @endif
         </div>
     </div>

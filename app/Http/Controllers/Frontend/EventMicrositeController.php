@@ -101,33 +101,37 @@ class EventMicrositeController extends Controller
 
         $zones = Zone::active()->orderBy('sort_order')->get();
 
+        $event->loadMissing([
+            'banners' => fn ($q) => $q->where('is_active', true)->orderBy('sort_order'),
+            'sponsors' => fn ($q) => $q->where('is_active', true)->orderBy('slot_order'),
+            'awards' => fn ($q) => $q->where('is_active', true)->orderBy('sort_order'),
+            'winners.award',
+            'winners.participant',
+            'videoShorts' => fn ($q) => $q->where('is_active', true)->orderBy('sort_order'),
+            'timelineItems' => fn ($q) => $q->orderBy('sort_order'),
+        ]);
+
+        $publishedWinners = $event->winners->where('status', 'published');
+
         // Transform participants into directory schema
         $pujasData = $participants->map(function ($p) {
-            $zoneName = $p->zone()->first()?->name ?? ($p->zone ?: 'Central Dibrugarh');
-            $localityName = $p->locality()->first()?->name ?? ($p->locality ?: 'Dibrugarh');
+            $zoneName = $p->zone?->name ?? ($p->getRawOriginal('zone') ?: '');
+            $localityName = $p->locality?->name ?? ($p->getRawOriginal('locality') ?: '');
 
             return [
                 'id' => $p->id,
                 'name' => $p->display_name ?: $p->name,
-                'location' => trim(($localityName ? $localityName.', ' : '').$zoneName),
+                'location' => trim(($localityName ? $localityName.($zoneName ? ', ' : '') : '').$zoneName),
                 'zone' => $zoneName,
                 'category' => $p->is_shortlisted ? 'Best Puja' : 'General Entry',
                 'categoryPill' => $p->is_shortlisted ? 'Flagship Award' : 'Community Puja',
                 'categoryClass' => $p->is_shortlisted ? 'tag-best-puja' : 'tag-general',
-                'votes' => (int) ($p->votes_count ?? (3000 + (($p->id * 173) % 2500))),
-                'established' => $p->first_year_of_puja ? 'Est. '.$p->first_year_of_puja : 'Est. 1960',
-                'theme' => $p->puja_theme ?: ($p->short_introduction ?: 'Traditional Durga Puja celebration'),
-                'image' => $p->primary_image_url ?: 'https://images.unsplash.com/photo-1728921957375-877340feaf6a?q=80&w=800&auto=format&fit=crop',
+                'votes' => (int) ($p->votes_count ?? 0),
+                'established' => $p->first_year_of_puja ? 'Est. '.$p->first_year_of_puja : '',
+                'theme' => $p->puja_theme ?: ($p->short_introduction ?: ''),
+                'image' => $p->primary_image_url ?: asset('event-assets/images/hero.png'),
             ];
         })->values()->toArray();
-
-        // Fallback to default 36 pandals dataset if no participants in DB yet
-        if (empty($pujasData)) {
-            $defaultJsonPath = storage_path('pujas_36.json');
-            if (file_exists($defaultJsonPath)) {
-                $pujasData = json_decode(file_get_contents($defaultJsonPath), true) ?: [];
-            }
-        }
 
         $totalPujasCount = count($pujasData);
 
@@ -177,6 +181,7 @@ class EventMicrositeController extends Controller
         return view('frontend.all-pujas', compact(
             'event',
             'participants',
+            'publishedWinners',
             'zones',
             'pujasData',
             'totalPujasCount',

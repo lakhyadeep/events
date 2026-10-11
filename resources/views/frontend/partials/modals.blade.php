@@ -126,11 +126,7 @@
                                         </option>
                                     @endforeach
                                 @else
-                                    <option value="Thana Chariali Sarbajanin" selected>Thana Chariali Sarbajanin</option>
-                                    <option value="Graham Bazar Sarbajanin">Graham Bazar Sarbajanin</option>
-                                    <option value="New Market Durga Puja">New Market Durga Puja</option>
-                                    <option value="Marwari Patty Sarbajanin">Marwari Patty Sarbajanin</option>
-                                    <option value="Railway Colony Puja Samiti">Railway Colony Puja Samiti</option>
+                                    <option value="" disabled selected>No committees available for voting</option>
                                 @endif
                             </select>
                         </div>

@@ -23,85 +23,91 @@
                 <h1 class="allpujas-title mb-1">Dibrugarh Durga Pujas</h1>
                 <p class="allpujas-subtitle mb-3">Search and vote for your favourite puja committee</p>
 
-                <!-- Search Field with Auto Suggestion -->
-                <div class="search-box-wrapper">
-                    <div class="search-input-container">
-                        <span class="search-icon-decor" aria-hidden="true">
-                            <i class="bi bi-search"></i>
-                        </span>
-                        <input type="text" id="pujaSearchInput" class="search-field-input"
-                            placeholder="Search by puja name, location, or theme..."
-                            autocomplete="off" aria-label="Search all Dibrugarh pujas">
-                        <button type="button" id="searchClearBtn" class="search-clear-btn" aria-label="Clear search">
-                            <i class="bi bi-x-circle-fill"></i>
-                        </button>
-                        <button type="button" class="search-submit-btn d-none d-sm-inline-flex" id="searchSubmitBtn">
-                            <span>Search</span>
-                            <i class="bi bi-arrow-right"></i>
-                        </button>
-                    </div>
-
-                    <!-- Auto Suggestion Floating Dropdown -->
-                    <div id="searchSuggestionsDropdown" class="autosuggest-dropdown text-start" role="listbox">
-                        <div class="autosuggest-header">
-                            <span><i class="bi bi-lightning-charge-fill me-1 text-warning"></i> Suggestions</span>
-                            <span id="suggestionsHeaderCount" class="text-muted">0 matches</span>
-                        </div>
-                        <ul id="suggestionsList" class="autosuggest-list">
-                            <!-- Populated dynamically via allpujas.js -->
-                        </ul>
-                        <div class="autosuggest-footer">
-                            <span><i class="bi bi-arrow-down-up me-1"></i> Navigate with &uarr; &darr;, Enter to pick</span>
-                            <span>Esc to close</span>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </section>
-
-        <!-- Filter Chips & Sorting Control Bar -->
-        <section class="pujas-controls-bar sticky-top">
-            <div class="container">
-                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-
-                    <!-- Zone / Location Filter Chips -->
-                    <div class="filter-chips-wrap">
-                        <button class="filter-chip-btn active" data-zone="all">
-                            <i class="bi bi-grid-fill"></i> All Pujas
-                            <span class="chip-count">{{ $totalPujasCount }}</span>
-                        </button>
-                        @foreach ($filterZones as $fz)
-                            <button class="filter-chip-btn" data-zone="{{ $fz['name'] }}">
-                                <i class="bi {{ $fz['icon'] }}" @if(!empty($fz['color'])) style="color: {{ $fz['color'] }};" @endif></i> {{ $fz['label'] }}
-                                <span class="chip-count">{{ $fz['count'] }}</span>
+                @if ($totalPujasCount > 0)
+                    <!-- Search Field with Auto Suggestion -->
+                    <div class="search-box-wrapper">
+                        <div class="search-input-container">
+                            <span class="search-icon-decor" aria-hidden="true">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" id="pujaSearchInput" class="search-field-input"
+                                placeholder="Search by puja name, location, or theme..."
+                                autocomplete="off" aria-label="Search all Dibrugarh pujas">
+                            <button type="button" id="searchClearBtn" class="search-clear-btn" aria-label="Clear search">
+                                <i class="bi bi-x-circle-fill"></i>
                             </button>
-                        @endforeach
-                    </div>
+                            <button type="button" class="search-submit-btn d-none d-sm-inline-flex" id="searchSubmitBtn">
+                                <span>Search</span>
+                                <i class="bi bi-arrow-right"></i>
+                            </button>
+                        </div>
 
-                    <!-- Result Counter & Sort By Dropdown -->
-                    <div
-                        class="d-flex align-items-center justify-content-between justify-content-md-end gap-3 flex-shrink-0">
-                        <span class="badge bg-light text-dark border px-3 py-2 rounded-pill fw-semibold"
-                            id="resultCountBadge">
-                            Showing {{ min(12, $totalPujasCount) }} of {{ $totalPujasCount }} Pujas
-                        </span>
-
-                        <div class="d-flex align-items-center gap-2">
-                            <label for="pujasSortSelect"
-                                class="small text-muted fw-bold text-nowrap mb-0 d-none d-sm-inline">Sort:</label>
-                            <select class="form-select form-select-sm rounded-pill border" id="pujasSortSelect"
-                                style="min-width: 160px;">
-                                <option value="popular" selected>Most Votes</option>
-                                <option value="name-asc">Name (A &rarr; Z)</option>
-                                <option value="name-desc">Name (Z &rarr; A)</option>
-                            </select>
+                        <!-- Auto Suggestion Floating Dropdown -->
+                        <div id="searchSuggestionsDropdown" class="autosuggest-dropdown text-start" role="listbox">
+                            <div class="autosuggest-header">
+                                <span><i class="bi bi-lightning-charge-fill me-1 text-warning"></i> Suggestions</span>
+                                <span id="suggestionsHeaderCount" class="text-muted">0 matches</span>
+                            </div>
+                            <ul id="suggestionsList" class="autosuggest-list">
+                                <!-- Populated dynamically via allpujas.js -->
+                            </ul>
+                            <div class="autosuggest-footer">
+                                <span><i class="bi bi-arrow-down-up me-1"></i> Navigate with &uarr; &darr;, Enter to pick</span>
+                                <span>Esc to close</span>
+                            </div>
                         </div>
                     </div>
+                @endif
 
-                </div>
             </div>
         </section>
+
+        @if ($totalPujasCount > 0)
+            <!-- Filter Chips & Sorting Control Bar -->
+            <section class="pujas-controls-bar sticky-top">
+                <div class="container">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+
+                        <!-- Zone / Location Filter Chips -->
+                        <div class="filter-chips-wrap">
+                            <button class="filter-chip-btn active" data-zone="all">
+                                <i class="bi bi-grid-fill"></i> All Pujas
+                                <span class="chip-count">{{ $totalPujasCount }}</span>
+                            </button>
+                            @foreach ($filterZones as $fz)
+                                @if ($fz['count'] > 0)
+                                    <button class="filter-chip-btn" data-zone="{{ $fz['name'] }}">
+                                        <i class="bi {{ $fz['icon'] }}" @if(!empty($fz['color'])) style="color: {{ $fz['color'] }};" @endif></i> {{ $fz['label'] }}
+                                        <span class="chip-count">{{ $fz['count'] }}</span>
+                                    </button>
+                                @endif
+                            @endforeach
+                        </div>
+
+                        <!-- Result Counter & Sort By Dropdown -->
+                        <div
+                            class="d-flex align-items-center justify-content-between justify-content-md-end gap-3 flex-shrink-0">
+                            <span class="badge bg-light text-dark border px-3 py-2 rounded-pill fw-semibold"
+                                id="resultCountBadge">
+                                Showing {{ min(12, $totalPujasCount) }} of {{ $totalPujasCount }} Pujas
+                            </span>
+
+                            <div class="d-flex align-items-center gap-2">
+                                <label for="pujasSortSelect"
+                                    class="small text-muted fw-bold text-nowrap mb-0 d-none d-sm-inline">Sort:</label>
+                                <select class="form-select form-select-sm rounded-pill border" id="pujasSortSelect"
+                                    style="min-width: 160px;">
+                                    <option value="popular" selected>Most Votes</option>
+                                    <option value="name-asc">Name (A &rarr; Z)</option>
+                                    <option value="name-desc">Name (Z &rarr; A)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+        @endif
 
         <!-- All Pujas Cards Grid Section with Lazy Load -->
         <section class="pujas-grid-section py-4">
@@ -158,27 +164,29 @@
                     @endforelse
                 </div>
 
-                <!-- Lazy Load Spinner & Load More Controls -->
-                <div class="lazy-load-section" id="lazyLoadTriggerSection">
-                    <div id="lazySpinner" class="lazy-spinner-container" style="display: none;">
-                        <span class="pulsing-dots">
-                            <span></span><span></span><span></span>
-                        </span>
-                        <span>Loading more Dibrugarh pandals...</span>
+                @if ($totalPujasCount > 0)
+                    <!-- Lazy Load Spinner & Load More Controls -->
+                    <div class="lazy-load-section" id="lazyLoadTriggerSection">
+                        <div id="lazySpinner" class="lazy-spinner-container" style="display: none;">
+                            <span class="pulsing-dots">
+                                <span></span><span></span><span></span>
+                            </span>
+                            <span>Loading more Dibrugarh pandals...</span>
+                        </div>
+
+                        <button id="btnLoadMore" class="btn btn-load-more-pujas">
+                            <i class="bi bi-chevron-down me-1"></i> Load More Pujas
+                        </button>
+
+                        <div id="allLoadedIndicator" class="text-muted small py-3" style="display: none;">
+                            <i class="bi bi-check-circle-fill text-success me-1"></i> You've explored all {{ $totalPujasCount }} {{ $event->display_name ?? 'Dibrugarh' }}
+                            Pandals • Don't forget to cast your vote!
+                        </div>
+
+                        <!-- Intersection Observer Sentinel -->
+                        <div id="lazyLoadSentinel" style="height: 20px; width: 100%;"></div>
                     </div>
-
-                    <button id="btnLoadMore" class="btn btn-load-more-pujas">
-                        <i class="bi bi-chevron-down me-1"></i> Load More Pujas
-                    </button>
-
-                    <div id="allLoadedIndicator" class="text-muted small py-3" style="display: none;">
-                        <i class="bi bi-check-circle-fill text-success me-1"></i> You've explored all {{ $totalPujasCount }} {{ $event->display_name ?? 'Dibrugarh' }}
-                        Pandals • Don't forget to cast your vote!
-                    </div>
-
-                    <!-- Intersection Observer Sentinel -->
-                    <div id="lazyLoadSentinel" style="height: 20px; width: 100%;"></div>
-                </div>
+                @endif
             </div>
         </section>
 

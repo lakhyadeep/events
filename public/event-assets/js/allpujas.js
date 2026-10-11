@@ -479,9 +479,9 @@ const INITIAL_BATCH = 12;
 const BATCH_SIZE = 6;
 
 // Dynamic Dataset Resolution
-const allPujasData = (typeof window !== 'undefined' && Array.isArray(window.dynamicPujasData) && window.dynamicPujasData.length > 0)
+const allPujasData = (typeof window !== 'undefined' && Array.isArray(window.dynamicPujasData))
     ? window.dynamicPujasData
-    : defaultPujasData;
+    : (typeof window !== 'undefined' && window.dynamicPujasData === undefined ? defaultPujasData : []);
 
 let currentZone = "all";
 let currentSearchQuery = "";

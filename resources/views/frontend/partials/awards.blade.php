@@ -141,34 +141,6 @@
                         </div>
                     </div>
                 @endforeach
-            @else
-                <!-- Default Fallback Card: Best Puja -->
-                <div class="col-12 col-md-6 col-lg-4">
-                    <div class="award-card" data-category="Best Puja" data-header-color="crimson">
-                        <div class="award-card-header header-crimson">
-                            <span class="award-header-icon">
-                                <i class="bi bi-trophy-fill fs-5"></i>
-                            </span>
-                            <h3 class="award-header-title">Best Puja</h3>
-                        </div>
-                        <div class="award-card-body">
-                            <div class="row g-1 text-center">
-                                <div class="col-4">
-                                    <div class="award-position-title">Winner</div>
-                                    <div class="award-tba-status">TBA</div>
-                                </div>
-                                <div class="col-4">
-                                    <div class="award-position-title">Runner Up</div>
-                                    <div class="award-tba-status">TBA</div>
-                                </div>
-                                <div class="col-4">
-                                    <div class="award-position-title">Second Runner Up</div>
-                                    <div class="award-tba-status">TBA</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             @endif
         </div>
     </div>
