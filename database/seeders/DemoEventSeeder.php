@@ -13,15 +13,65 @@ use App\Models\VideoShort;
 use App\Models\Winner;
 use App\Models\Zone;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class DemoEventSeeder extends Seeder
 {
     /**
+     * Ensure a media file exists on the public storage disk, copying from local fallback or downloading.
+     */
+    protected function ensureUploadedMedia(string $diskPath, ?string $fallbackLocalPath = null, ?string $fallbackUrl = null): string
+    {
+        if (Storage::disk('public')->exists($diskPath)) {
+            return $diskPath;
+        }
+
+        // 1. If a local file path is given and exists, copy it
+        if ($fallbackLocalPath && file_exists($fallbackLocalPath)) {
+            Storage::disk('public')->put($diskPath, file_get_contents($fallbackLocalPath));
+
+            return $diskPath;
+        }
+
+        // 2. If a fallback URL is given, try downloading it
+        if ($fallbackUrl && (str_starts_with($fallbackUrl, 'http://') || str_starts_with($fallbackUrl, 'https://'))) {
+            try {
+                $response = Http::timeout(8)->get($fallbackUrl);
+                if ($response->successful() && strlen($response->body()) > 500) {
+                    Storage::disk('public')->put($diskPath, $response->body());
+
+                    return $diskPath;
+                }
+            } catch (\Throwable $e) {
+                // fall through to default asset
+            }
+        }
+
+        // 3. Fallback to bundled hero asset
+        $defaultLocal = public_path('event-assets/images/hero.png');
+        if (file_exists($defaultLocal)) {
+            Storage::disk('public')->put($diskPath, file_get_contents($defaultLocal));
+        }
+
+        return $diskPath;
+    }
+
+    /**
      * Run the database seeds.
      */
     public function run(): void
     {
+        // 0. Ensure public storage subdirectories
+        Storage::disk('public')->makeDirectory('events/og');
+        Storage::disk('public')->makeDirectory('banners/desktop');
+        Storage::disk('public')->makeDirectory('banners/mobile');
+        Storage::disk('public')->makeDirectory('sponsors/logos');
+        Storage::disk('public')->makeDirectory('participants/primary');
+        Storage::disk('public')->makeDirectory('participants/gallery');
+        Storage::disk('public')->makeDirectory('shorts/thumbnails');
+
         // 1. Create Flagship Event
         $event = Event::updateOrCreate(
             ['slug' => 'sharod-samman-2026'],
@@ -40,7 +90,7 @@ class DemoEventSeeder extends Seeder
                 'closure_message' => 'Voting and registration for Dib 24x7 Sharod Samman 2026 have formally concluded. Thank you to all participating committees and citizens of Upper Assam!',
                 'countdown_datetime' => '2026-10-18 19:00:00',
                 'terms_and_conditions' => '<p>1. Only officially registered community clubs and Puja committees in Dibrugarh and Upper Assam are eligible.<br>2. All submissions must adhere to district administration, fire safety, and electrical regulations.<br>3. Public voting results are tabulated under independent audit observation.<br>4. Decisions of the grand jury and organizing committee are final and binding.</p>',
-                'og_image' => 'https://images.unsplash.com/photo-1567157577867-05ccb1388e66?auto=format&fit=crop&w=1200&q=80',
+                'og_image' => $this->ensureUploadedMedia('events/og/sharod-samman-2026.png', public_path('event-assets/images/logo-award2026.png')),
                 'meta_title' => 'Dib 24x7 Sharod Samman 2026 | Dibrugarh Grand Festival Microsite',
                 'meta_description' => 'Explore the finest pandals in Dibrugarh, vote for your favorite club, and watch live event shorts on Dib 24x7 Sharod Samman 2026.',
                 'contact_email' => 'events@dib24x7.com',
@@ -57,7 +107,7 @@ class DemoEventSeeder extends Seeder
                 'display_name' => 'Fortune',
                 'sponsor_type' => 'presenting_partner',
                 'sponsor_tag' => 'Title Presenting Partner',
-                'logo' => 'https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?auto=format&fit=crop&w=300&q=80',
+                'logo' => $this->ensureUploadedMedia('sponsors/logos/fortune.jpg', public_path('event-assets/images/logo-jsb.jpg')),
                 'landing_url' => 'https://dib24x7.com/fortune',
                 'slot_order' => 1,
             ],
@@ -66,7 +116,7 @@ class DemoEventSeeder extends Seeder
                 'display_name' => 'Senco Gold',
                 'sponsor_type' => 'associate_sponsor',
                 'sponsor_tag' => 'Associate Sponsor 1',
-                'logo' => 'https://images.unsplash.com/photo-1516876437184-593fda40c7ce?auto=format&fit=crop&w=300&q=80',
+                'logo' => $this->ensureUploadedMedia('sponsors/logos/senco-gold.jpg', public_path('event-assets/images/logo-tasty.jpg')),
                 'landing_url' => 'https://dib24x7.com/senco',
                 'slot_order' => 1,
             ],
@@ -75,7 +125,7 @@ class DemoEventSeeder extends Seeder
                 'display_name' => 'Asian Paints',
                 'sponsor_type' => 'associate_sponsor',
                 'sponsor_tag' => 'Associate Sponsor 2',
-                'logo' => 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=300&q=80',
+                'logo' => $this->ensureUploadedMedia('sponsors/logos/asian-paints.jpg', public_path('event-assets/images/logo-tg.jpg')),
                 'landing_url' => 'https://dib24x7.com/asianpaints',
                 'slot_order' => 2,
             ],
@@ -84,7 +134,7 @@ class DemoEventSeeder extends Seeder
                 'display_name' => 'Boroline',
                 'sponsor_type' => 'associate_sponsor',
                 'sponsor_tag' => 'Associate Sponsor 3',
-                'logo' => 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=300&q=80',
+                'logo' => $this->ensureUploadedMedia('sponsors/logos/boroline.png', public_path('event-assets/images/logo-dp.png')),
                 'landing_url' => 'https://dib24x7.com/boroline',
                 'slot_order' => 3,
             ],
@@ -93,7 +143,7 @@ class DemoEventSeeder extends Seeder
                 'display_name' => 'Tata Tea Gold',
                 'sponsor_type' => 'associate_sponsor',
                 'sponsor_tag' => 'Associate Sponsor 4',
-                'logo' => 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=300&q=80',
+                'logo' => $this->ensureUploadedMedia('sponsors/logos/tata-tea-gold.png', public_path('event-assets/images/logo-cc.png')),
                 'landing_url' => 'https://dib24x7.com/tatatea',
                 'slot_order' => 4,
             ],
@@ -102,7 +152,7 @@ class DemoEventSeeder extends Seeder
                 'display_name' => 'Kalyan Jewellers',
                 'sponsor_type' => 'associate_sponsor',
                 'sponsor_tag' => 'Associate Sponsor 5',
-                'logo' => 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80',
+                'logo' => $this->ensureUploadedMedia('sponsors/logos/kalyan-jewellers.png', public_path('event-assets/images/logo-kinley.png')),
                 'landing_url' => 'https://dib24x7.com/kalyan',
                 'slot_order' => 5,
             ],
@@ -119,15 +169,15 @@ class DemoEventSeeder extends Seeder
         $bannersData = [
             [
                 'title' => 'The Grand Celebration of Art & Devotion in Dibrugarh',
-                'image_desktop' => 'https://images.unsplash.com/photo-1601972599720-36938d4ecd31?auto=format&fit=crop&w=1920&q=80',
-                'image_mobile' => 'https://images.unsplash.com/photo-1601972599720-36938d4ecd31?auto=format&fit=crop&w=768&q=80',
+                'image_desktop' => $this->ensureUploadedMedia('banners/desktop/01M3XCHZ62T8A8JRQHRFYA5ZT4.jpg', public_path('event-assets/images/hero.png')),
+                'image_mobile' => $this->ensureUploadedMedia('banners/mobile/01M3XCHZ6ECNP9DCHD2VE277Z1.jpg', public_path('event-assets/images/hero.png')),
                 'cta_link' => '#participants',
                 'sort_order' => 1,
             ],
             [
                 'title' => 'Cast Your Vote for People\'s Choice Award 2026',
-                'image_desktop' => 'https://images.unsplash.com/photo-1567157577867-05ccb1388e66?auto=format&fit=crop&w=1920&q=80',
-                'image_mobile' => 'https://images.unsplash.com/photo-1567157577867-05ccb1388e66?auto=format&fit=crop&w=768&q=80',
+                'image_desktop' => $this->ensureUploadedMedia('banners/desktop/01M4NE7K48VSWX80WAAK2AZSQT.jpg', public_path('event-assets/images/hero.png')),
+                'image_mobile' => $this->ensureUploadedMedia('banners/mobile/01M4NE7K4MS2WD49JPGA0MX8F4.jpg', public_path('event-assets/images/hero.png')),
                 'cta_link' => '#vote',
                 'sort_order' => 2,
             ],
@@ -396,6 +446,18 @@ class DemoEventSeeder extends Seeder
                 $localityCache[$p['zone'].'::'.$p['locality']] = $lModel;
             }
 
+            $slug = Str::slug($p['name']);
+            $primaryImg = $this->ensureUploadedMedia(
+                'participants/primary/'.$slug.'.jpg',
+                public_path('event-assets/images/hero.png'),
+                $p['primary_display_image'] ?? null
+            );
+            $galleryImg = $this->ensureUploadedMedia(
+                'participants/gallery/'.$slug.'-1.jpg',
+                public_path('event-assets/images/hero.png'),
+                $p['image_1'] ?? null
+            );
+
             $createdParticipants[] = Participant::updateOrCreate(
                 ['event_id' => $event->id, 'name' => $p['name']],
                 array_merge($p, [
@@ -403,6 +465,10 @@ class DemoEventSeeder extends Seeder
                     'locality_id' => $lModel?->id,
                     'year' => 2026,
                     'registration_status' => 'approved',
+                    'primary_display_image' => $primaryImg,
+                    'image_1' => $galleryImg,
+                    'image_2' => $galleryImg,
+                    'image_3' => $galleryImg,
                 ])
             );
         }
@@ -456,7 +522,7 @@ class DemoEventSeeder extends Seeder
                 'video_url' => 'https://www.youtube.com/shorts/dQw4w9WgXcQ',
                 'video_id' => 'dQw4w9WgXcQ',
                 'caption' => 'Master artisans crafting bamboo and cane wonders at Chowkidinghee.',
-                'thumbnail_image' => 'https://images.unsplash.com/photo-1567157577867-05ccb1388e66?auto=format&fit=crop&w=400&q=80',
+                'thumbnail_image' => $this->ensureUploadedMedia('shorts/thumbnails/short-1.jpg', null, 'https://images.unsplash.com/photo-1567157577867-05ccb1388e66?auto=format&fit=crop&w=400&q=80'),
                 'sort_order' => 1,
             ],
             [
@@ -465,7 +531,7 @@ class DemoEventSeeder extends Seeder
                 'video_url' => 'https://www.youtube.com/shorts/jNQXAC9IVRw',
                 'video_id' => 'jNQXAC9IVRw',
                 'caption' => 'Over 100,000 LEDs creating an aquatic wonderland in West Dibrugarh.',
-                'thumbnail_image' => 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=400&q=80',
+                'thumbnail_image' => $this->ensureUploadedMedia('shorts/thumbnails/short-2.jpg', null, 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=400&q=80'),
                 'sort_order' => 2,
             ],
             [
@@ -474,7 +540,7 @@ class DemoEventSeeder extends Seeder
                 'video_url' => 'https://www.youtube.com/shorts/3JZ_D3ELwOQ',
                 'video_id' => '3JZ_D3ELwOQ',
                 'caption' => 'Exclusive walkthrough of traditional idol craftsmanship and cultural exhibitions.',
-                'thumbnail_image' => 'https://images.unsplash.com/photo-1516876437184-593fda40c7ce?auto=format&fit=crop&w=400&q=80',
+                'thumbnail_image' => $this->ensureUploadedMedia('shorts/thumbnails/short-3.jpg', null, 'https://images.unsplash.com/photo-1516876437184-593fda40c7ce?auto=format&fit=crop&w=400&q=80'),
                 'sort_order' => 3,
             ],
         ];
