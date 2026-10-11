@@ -1,66 +1,65 @@
 <x-layouts.microsite
-    :meta-title="$event->meta_title ?: $event->display_name"
-    :meta-description="$event->meta_description ?: $event->tagline"
+    :meta-title="$event->meta_title ?: 'Dibrugarh 24x7 - Festive Awards & Navigation'"
+    :meta-description="$event->meta_description ?: 'Dibrugarh Durgo Utsav 2026'"
     :og-image="$event->og_image"
 >
-    <!-- Top Masthead: Dib 24x7 + Event + Presenting Partner + 5 Associate Sponsors -->
-    <x-masthead
-        :event="$event"
-        :presenting-partner="$presentingPartner"
-        :associate-sponsors="$associateSponsors"
-    />
+    <!-- Top Navigation Header -->
+    @include('frontend.partials.header')
 
-    <!-- Sticky Main Navigation Bar with 'Vote Now' CTA -->
-    <x-navbar :event="$event" />
+    <main>
+        <!-- Festive Awards Hero Section -->
+        @include('frontend.partials.hero')
 
-    <!-- Above-The-Fold (ATF) Banner Carousel (Desktop & Mobile Responsive) -->
-    <x-banner-carousel :banners="$event->banners" />
+        <!-- Durgo Utsav About & Mandala Section -->
+        @if (!empty($event->about_text))
+            @include('frontend.partials.about')
+        @endif
 
-    <!-- Live Countdown Ticker & Editorial Overview -->
-    <x-countdown :event="$event" />
+        <!-- Sponsor Tiers (Organised by, Title, Hospitality, Trophy & Associate Partners) -->
+        @if ($event->sponsors && $event->sponsors->where('is_active', true)->isNotEmpty())
+            @include('frontend.partials.sponsors')
+        @endif
 
-    <!-- Participants / Candidates Showcase Section -->
-    <section id="participants" class="py-14 sm:py-20 bg-zinc-950 text-white relative">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
-                <div>
-                    <span class="text-xs uppercase font-extrabold tracking-widest text-amber-500 block mb-1">
-                        CANDIDATE DIRECTORY
-                    </span>
-                    <h2 class="text-2xl sm:text-4xl font-black tracking-tight text-white">
-                        Participants Showcase
-                    </h2>
-                </div>
-                <p class="text-xs text-zinc-400 max-w-sm">
-                    Filter by Kolkata zones, explore pandal concept themes, and discover master idol sculptors.
-                </p>
-            </div>
+        <!-- Vote for the Best — Sharad Samman 2026 Section -->
+        @if (($event->awards && $event->awards->where('is_active', true)->isNotEmpty()) || (isset($participants) && $participants->isNotEmpty()))
+            <section class="pujas-voting-section" id="pujas">
+                <!-- Awards to be Presented Matrix -->
+                @if ($event->awards && $event->awards->where('is_active', true)->isNotEmpty())
+                    @include('frontend.partials.awards')
+                @endif
 
-            <!-- Livewire 4 Reactive Showcase Component -->
-            <livewire:frontend.participants-showcase :event-id="$event->id" />
-        </div>
-    </section>
+                <!-- Voting Hub (Best Puja, Best Pratima, Best Lighting) -->
+                @if (isset($participants) && $participants->isNotEmpty())
+                    @include('frontend.partials.voting')
+                @endif
+            </section>
+        @endif
 
-    <!-- Reactive Lightbox Modal for Candidate Details & Puja Attributes -->
-    <livewire:frontend.candidate-detail-modal />
+        <!-- Official Award Winners Section -->
+        @if (isset($publishedWinners) && $publishedWinners->isNotEmpty())
+            @include('frontend.partials.awards-announced')
+        @endif
 
-    <!-- Event Video Shorts (Vertical 9:16 Carousel) -->
-    <x-video-shorts :shorts="$event->videoShorts" />
+        <!-- Glimpses of Puja (Vertical 9:16 Video Shorts Carousel) -->
+        @if ($event->videoShorts && $event->videoShorts->where('is_active', true)->isNotEmpty())
+            @include('frontend.partials.gallery')
+        @endif
 
-    <!-- Awards Matrix & Winners Podium -->
-    <x-awards-winners
-        :event="$event"
-        :awards="$event->awards"
-        :winners="$publishedWinners"
-    />
+        <!-- Event Timeline Tracker -->
+        @if ($event->timelineItems && $event->timelineItems->isNotEmpty())
+            @include('frontend.partials.timeline')
+        @endif
 
-    <!-- Event Timeline & Milestones Tracker -->
-    <x-timeline
-        :event="$event"
-        :items="$event->timelineItems"
-    />
+        <!-- Official Guidelines & Terms -->
+        @if (!empty($event->terms_and_conditions))
+            @include('frontend.partials.terms')
+        @endif
+    </main>
 
-    <!-- Terms and Conditions Accordion & Network Footer -->
-    <x-terms-footer :event="$event" />
+    <!-- Site Footer & Social Links -->
+    @include('frontend.partials.footer')
+
+    <!-- Interactive Lightbox & Voting Modals -->
+    @include('frontend.partials.modals')
 
 </x-layouts.microsite>
