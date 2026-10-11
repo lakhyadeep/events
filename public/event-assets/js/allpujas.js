@@ -537,7 +537,7 @@ function populateBallotOptions() {
     $pandalSelect.empty();
     allPujasData.forEach((puja, index) => {
         const isSelected = index === 0 ? 'selected' : '';
-        $pandalSelect.append(`<option value="${escapeHtml(puja.name)}" ${isSelected}>${escapeHtml(puja.name)} (${escapeHtml(puja.location)})</option>`);
+        $pandalSelect.append(`<option value="${puja.id}" data-name="${escapeHtml(puja.name)}" ${isSelected}>${escapeHtml(puja.name)} (${escapeHtml(puja.location)})</option>`);
     });
 }
 
@@ -951,77 +951,192 @@ function triggerLazyBatch() {
 // 7. VOTING & OTP VERIFICATION FLOW
 // ==========================================================================
 function setupVotingHandlers() {
+    let pendingVoteData = { mobile: '', pandal: '', pujaId: null, purpose: 'voting' };
+    let resendTimerInterval = null;
+
+    function getCsrfToken() {
+        return $('meta[name="csrf-token"]').attr('content') || '';
+    }
+
+    function getExpectedOtpLength() {
+        const len = parseInt($('#otpInputContainer').attr('data-otp-length'), 10);
+        return (len >= 4 && len <= 8) ? len : 6;
+    }
+
+    function getVotedNumbers() {
+        try {
+            const stored = localStorage.getItem('dibru_voted_mobiles');
+            return stored ? JSON.parse(stored) : [];
+        } catch (e) {
+            return [];
+        }
+    }
+
+    function markMobileVoted(mobile) {
+        try {
+            const list = getVotedNumbers();
+            if (list.indexOf(mobile) === -1) {
+                list.push(mobile);
+                localStorage.setItem('dibru_voted_mobiles', JSON.stringify(list));
+            }
+        } catch (e) {}
+    }
+
+    function isMobileVoted(mobile) {
+        return getVotedNumbers().indexOf(mobile) !== -1;
+    }
+
+    function startResendCountdown(seconds) {
+        if (resendTimerInterval) {
+            clearInterval(resendTimerInterval);
+        }
+
+        let remaining = seconds || 60;
+        const $btn = $('#btnResendOtp');
+        const $text = $('#resendBtnText');
+
+        $btn.prop('disabled', true).addClass('pe-none opacity-50');
+        $text.text('Resend in ' + remaining + 's');
+
+        resendTimerInterval = setInterval(function () {
+            remaining--;
+            if (remaining <= 0) {
+                clearInterval(resendTimerInterval);
+                resendTimerInterval = null;
+                $btn.prop('disabled', false).removeClass('pe-none opacity-50');
+                $text.text('Resend OTP');
+            } else {
+                $text.text('Resend in ' + remaining + 's');
+            }
+        }, 1000);
+    }
 
     // Trigger Vote Modal from any Card (event delegation)
     $(document).on('click', '.vote-trigger-btn', function () {
-        const pandalName = $(this).attr('data-pandal');
-        const pujaId = $(this).attr('data-puja-id');
+        const pandalName = $(this).attr('data-pandal') || '';
+        const pujaId = $(this).attr('data-puja-id') || $(this).attr('data-participant-id') || '';
+        const awardId = $(this).attr('data-award-id') || '';
 
-        pendingVoteData.pandal = pandalName;
-        pendingVoteData.pujaId = pujaId;
+        pendingVoteData.pandalName = pandalName;
+        pendingVoteData.participantId = pujaId;
+        pendingVoteData.awardId = awardId;
 
-        $('#pandalSelect').val(pandalName);
+        if (pujaId) {
+            $('#pandalSelect').val(pujaId);
+        } else if (pandalName) {
+            const opt = $('#pandalSelect option[data-name="' + pandalName + '"]');
+            if (opt.length) {
+                opt.prop('selected', true);
+            }
+        }
+
+        if (awardId && $('#awardSelect').length) {
+            $('#awardSelect').val(awardId);
+        }
+
         $('#alreadyVotedAlert').addClass('d-none');
 
-        const voteModal = new bootstrap.Modal(document.getElementById('voteModal'));
-        voteModal.show();
+        const voteModalEl = document.getElementById('voteModal');
+        if (voteModalEl) {
+            const voteModal = new bootstrap.Modal(voteModalEl);
+            voteModal.show();
+        }
     });
 
-    // Step 1: Submit Mobile Number to trigger OTP or show Already Voted alert
+    // Step 1: Submit Mobile Number to request OTP via API (with server-side pre-flight check)
     $('#voteForm').on('submit', function (e) {
         e.preventDefault();
         $('#alreadyVotedAlert').addClass('d-none');
 
         const mobile = $('#voterMobile').val().trim();
-        const pandal = $('#pandalSelect').val();
+        const participantId = $('#pandalSelect').val();
+        const pandalName = $('#pandalSelect option:selected').text().trim();
+        const eventId = $('#voteEventId').val() || '';
+        const awardId = ($('#awardSelect').length ? $('#awardSelect').val() : '') || null;
+        const votingMode = $('#voteVotingMode').val() || 'participant';
 
         if (mobile.length !== 10 || !/^\d{10}$/.test(mobile)) {
             alert('Please enter a valid 10-digit mobile number.');
             return;
         }
 
-        // Check if Mobile Number has already voted
-        if (votedMobileNumbers.has(mobile)) {
-            $('#alreadyVotedMsg').html('Mobile number <strong>+91 ' + mobile + '</strong> has already cast a vote in Sharad Samman 2026. Only 1 vote per phone number is permitted.');
-            $('#alreadyVotedAlert').removeClass('d-none').hide().fadeIn(300);
-            return;
-        }
-
         pendingVoteData.mobile = mobile;
-        pendingVoteData.pandal = pandal;
+        pendingVoteData.participantId = participantId;
+        pendingVoteData.pandalName = pandalName;
+        pendingVoteData.awardId = awardId;
+        pendingVoteData.eventId = eventId;
+        pendingVoteData.votingMode = votingMode;
 
-        // Hide Vote Modal & Show OTP Modal
-        const voteModalEl = document.getElementById('voteModal');
-        const voteModalInstance = bootstrap.Modal.getInstance(voteModalEl);
-        if (voteModalInstance) {
-            voteModalInstance.hide();
-        }
+        const $submitBtn = $('#btnSendOtp');
+        const originalBtnHtml = $submitBtn.html();
+        $submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Sending OTP...');
 
-        // Prepare OTP Modal
-        $('#displayMobileNum').text('+91 ' + mobile);
-        $('.otp-digit-box').val('').removeClass('is-invalid');
-        $('#otpInvalidAlert, #otpValidAlert, #voteSubmittedAlert, #otpResendAlert').addClass('d-none');
-        $('#btnVerifyOtp').prop('disabled', false).html('<span>Verify OTP &amp; Cast Vote</span> <i class="bi bi-check-lg ms-1"></i>');
+        // Dispatch OTP via backend API (with server-side eligibility check)
+        $.ajax({
+            url: '/api/v1/otp/send',
+            type: 'POST',
+            dataType: 'json',
+            contentType: 'application/json',
+            headers: {
+                'X-CSRF-TOKEN': getCsrfToken(),
+                'Accept': 'application/json'
+            },
+            data: JSON.stringify({
+                phone: mobile,
+                purpose: 'voting',
+                event_id: eventId ? parseInt(eventId, 10) : null,
+                award_id: awardId ? parseInt(awardId, 10) : null
+            }),
+            success: function (response) {
+                $submitBtn.prop('disabled', false).html(originalBtnHtml);
 
-        setTimeout(function () {
-            const otpModal = new bootstrap.Modal(document.getElementById('otpModal'));
-            otpModal.show();
-            setTimeout(function () {
-                $('.otp-digit-box[data-index="1"]').focus();
-            }, 300);
-        }, 300);
+                // Hide Vote Modal & Show OTP Modal
+                const voteModalEl = document.getElementById('voteModal');
+                const voteModalInstance = bootstrap.Modal.getInstance(voteModalEl);
+                if (voteModalInstance) {
+                    voteModalInstance.hide();
+                }
+
+                // Prepare and open OTP Modal
+                $('#displayMobileNum').text('+91 ' + mobile.substring(0, 5) + ' ' + mobile.substring(5));
+                $('.otp-digit-box').val('').removeClass('is-invalid');
+                $('#otpInvalidAlert, #otpValidAlert, #voteSubmittedAlert, #otpResendAlert').addClass('d-none');
+                $('#btnVerifyOtp').prop('disabled', false).html('<span>Verify OTP &amp; Cast Vote</span> <i class="bi bi-check-lg ms-1"></i>');
+
+                const cooldownSec = (response.data && response.data.resend_after_seconds) ? response.data.resend_after_seconds : 60;
+                startResendCountdown(cooldownSec);
+
+                setTimeout(function () {
+                    const otpModal = new bootstrap.Modal(document.getElementById('otpModal'));
+                    otpModal.show();
+                    setTimeout(function () {
+                        $('.otp-digit-box[data-index="1"]').focus();
+                    }, 350);
+                }, 300);
+            },
+            error: function (xhr) {
+                $submitBtn.prop('disabled', false).html(originalBtnHtml);
+                let errorMsg = 'Failed to dispatch verification code. Please check your mobile number and try again.';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMsg = xhr.responseJSON.message;
+                }
+                $('#alreadyVotedMsg').text(errorMsg);
+                $('#alreadyVotedAlert').removeClass('d-none').hide().fadeIn(300);
+            }
+        });
     });
 
     // OTP Input Boxes Auto-Tab & Backspace Logic
-    $('.otp-digit-box').on('input keyup', function (e) {
+    $(document).on('input keyup', '.otp-digit-box', function (e) {
         const $this = $(this);
         const val = $this.val();
-        const index = parseInt($this.attr('data-index'));
+        const index = parseInt($this.attr('data-index'), 10);
+        const totalLength = getExpectedOtpLength();
 
         $('.otp-digit-box').removeClass('is-invalid');
         $('#otpInvalidAlert').addClass('d-none');
 
-        if (val.length === 1 && index < 4 && e.key !== 'Backspace') {
+        if (val.length === 1 && index < totalLength && e.key !== 'Backspace') {
             $('.otp-digit-box[data-index="' + (index + 1) + '"]').focus();
         }
 
@@ -1030,80 +1145,165 @@ function setupVotingHandlers() {
         }
     });
 
-    // Handle Paste into OTP Input
-    $('.otp-digit-box').on('paste', function (e) {
+    // Handle Paste into OTP Inputs
+    $(document).on('paste', '.otp-digit-box', function (e) {
         e.preventDefault();
         const pasteData = (e.originalEvent.clipboardData || window.clipboardData).getData('text').trim();
-        if (/^\d{4}$/.test(pasteData)) {
-            const digits = pasteData.split('');
+        const digitsOnly = pasteData.replace(/[^0-9]/g, '');
+        const expectedLen = getExpectedOtpLength();
+
+        if (digitsOnly.length > 0) {
+            const digits = digitsOnly.split('');
             $('.otp-digit-box').each(function (idx) {
-                $(this).val(digits[idx]).removeClass('is-invalid');
+                if (idx < digits.length && idx < expectedLen) {
+                    $(this).val(digits[idx]).removeClass('is-invalid');
+                }
             });
-            $('.otp-digit-box[data-index="4"]').focus();
+
+            const targetIndex = Math.min(digits.length, expectedLen);
+            $('.otp-digit-box[data-index="' + targetIndex + '"]').focus();
+
+            // Auto-submit if all digits were pasted
+            if (digits.length >= expectedLen) {
+                $('#otpForm').trigger('submit');
+            }
         }
     });
 
-    // Step 2: Submit OTP Form & Verification Handler
+    // Step 2: Submit OTP Form & Verification Handler via API
     $('#otpForm').on('submit', function (e) {
         e.preventDefault();
 
         let enteredOtp = '';
+        const expectedLen = getExpectedOtpLength();
+
         $('.otp-digit-box').each(function () {
             enteredOtp += $(this).val().trim();
         });
 
         $('#otpInvalidAlert, #otpValidAlert, #voteSubmittedAlert, #otpResendAlert').addClass('d-none');
 
-        // Check Demo OTP: 1234 is VALID
-        if (enteredOtp === '1234') {
-            $('#otpValidAlert').removeClass('d-none').hide().fadeIn(200);
-            $('#btnVerifyOtp').prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Verifying &amp; Recording Vote...');
+        if (enteredOtp.length < expectedLen) {
+            $('#otpInvalidMsg').text('Please enter all ' + expectedLen + ' digits of your verification code.');
+            $('#otpInvalidAlert').removeClass('d-none').hide().fadeIn(200);
+            return;
+        }
 
-            setTimeout(function () {
-                // Register mobile number as already voted
-                if (pendingVoteData.mobile) {
-                    votedMobileNumbers.add(pendingVoteData.mobile);
-                }
+        const $verifyBtn = $('#btnVerifyOtp');
+        $verifyBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Verifying OTP &amp; Casting Vote...');
+
+        $.ajax({
+            url: '/api/v1/votes/cast',
+            type: 'POST',
+            dataType: 'json',
+            contentType: 'application/json',
+            headers: {
+                'X-CSRF-TOKEN': getCsrfToken(),
+                'Accept': 'application/json'
+            },
+            data: JSON.stringify({
+                event_id: parseInt(pendingVoteData.eventId, 10),
+                participant_id: parseInt(pendingVoteData.participantId, 10),
+                award_id: pendingVoteData.awardId ? parseInt(pendingVoteData.awardId, 10) : null,
+                phone: pendingVoteData.mobile,
+                otp: enteredOtp
+            }),
+            success: function (response) {
+                $('#otpValidAlert').removeClass('d-none').hide().fadeIn(200);
+                const successMsg = response.message || 'Vote recorded successfully!';
+                $('#voteSubmittedMsg').text(successMsg);
 
                 // Increment vote count in dataset & in DOM
-                const pandalName = pendingVoteData.pandal;
-                const matchedPuja = allPujasData.find(p => p.name === pandalName);
-                if (matchedPuja) {
-                    matchedPuja.votes += 1;
-                    $(`#count-puja-${matchedPuja.id}`).text(matchedPuja.votes.toLocaleString() + ' votes');
+                const pujaId = pendingVoteData.participantId;
+                if (typeof allPujasData !== 'undefined' && Array.isArray(allPujasData)) {
+                    const matchedPuja = allPujasData.find(p => p.id == pujaId);
+                    if (matchedPuja) {
+                        matchedPuja.votes = (matchedPuja.votes || 0) + 1;
+                        $(`#count-puja-${matchedPuja.id}`).text(matchedPuja.votes.toLocaleString() + ' votes');
+                    }
                 }
 
-                $('#otpValidAlert').addClass('d-none');
-                $('#voteSubmittedAlert').removeClass('d-none').hide().fadeIn(200);
-                $('#btnVerifyOtp').html('<i class="bi bi-check-circle-fill me-1"></i> Vote Submitted Successfully!');
+                setTimeout(function () {
+                    $('#otpValidAlert').addClass('d-none');
+                    $('#voteSubmittedAlert').removeClass('d-none').hide().fadeIn(200);
+                    $('#btnVerifyOtp').html('<i class="bi bi-check-circle-fill me-1"></i> Vote Recorded Successfully!');
+
+                    setTimeout(function () {
+                        const otpModalEl = document.getElementById('otpModal');
+                        const otpModalInstance = bootstrap.Modal.getInstance(otpModalEl);
+                        if (otpModalInstance) {
+                            otpModalInstance.hide();
+                        }
+                        $('#voteForm')[0].reset();
+                        $('#otpForm')[0].reset();
+                    }, 1800);
+                }, 600);
+            },
+            error: function (xhr) {
+                $verifyBtn.prop('disabled', false).html('<span>Verify OTP &amp; Cast Vote</span> <i class="bi bi-check-lg ms-1"></i>');
+                $('.otp-digit-box').addClass('is-invalid');
+
+                let errorMsg = 'Invalid verification code or vote submission failed. Please try again.';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMsg = xhr.responseJSON.message;
+                }
+                $('#otpInvalidMsg').text(errorMsg);
+                $('#otpInvalidAlert').removeClass('d-none').hide().fadeIn(200);
 
                 setTimeout(function () {
-                    const otpModalEl = document.getElementById('otpModal');
-                    const otpModalInstance = bootstrap.Modal.getInstance(otpModalEl);
-                    if (otpModalInstance) {
-                        otpModalInstance.hide();
-                    }
-                    $('#voteForm')[0].reset();
-                    $('#otpForm')[0].reset();
-                }, 1600);
-
-            }, 900);
-
-        } else {
-            $('.otp-digit-box').addClass('is-invalid');
-            $('#otpInvalidAlert').removeClass('d-none').hide().fadeIn(200);
-            setTimeout(function () {
-                $('.otp-digit-box[data-index="1"]').focus().select();
-            }, 300);
-        }
+                    $('.otp-digit-box[data-index="1"]').focus().select();
+                }, 200);
+            }
+        });
     });
 
-    // Resend OTP Button Click
+    // Resend OTP Button Click via API
     $('#btnResendOtp').on('click', function () {
-        $('.otp-digit-box').val('').removeClass('is-invalid');
-        $('#otpInvalidAlert, #otpValidAlert, #voteSubmittedAlert').addClass('d-none');
-        $('#otpResendAlert').removeClass('d-none').hide().fadeIn(200).delay(3500).fadeOut(300);
-        $('.otp-digit-box[data-index="1"]').focus();
+        if ($(this).prop('disabled') || !pendingVoteData.mobile) {
+            return;
+        }
+
+        const $btn = $(this);
+        const originalText = $('#resendBtnText').text();
+        $('#resendBtnText').html('<span class="spinner-border spinner-border-sm"></span>');
+
+        $.ajax({
+            url: '/api/v1/otp/send',
+            type: 'POST',
+            dataType: 'json',
+            contentType: 'application/json',
+            headers: {
+                'X-CSRF-TOKEN': getCsrfToken(),
+                'Accept': 'application/json'
+            },
+            data: JSON.stringify({
+                phone: pendingVoteData.mobile,
+                purpose: 'voting',
+                event_id: pendingVoteData.eventId ? parseInt(pendingVoteData.eventId, 10) : null,
+                award_id: pendingVoteData.awardId ? parseInt(pendingVoteData.awardId, 10) : null
+            }),
+            success: function (response) {
+                $('.otp-digit-box').val('').removeClass('is-invalid');
+                $('#otpInvalidAlert, #otpValidAlert, #voteSubmittedAlert').addClass('d-none');
+
+                const successMsg = response.message || 'A new verification code has been dispatched to your mobile number!';
+                $('#otpResendMsg').text(successMsg);
+                $('#otpResendAlert').removeClass('d-none').hide().fadeIn(200).delay(4000).fadeOut(300);
+
+                const cooldownSec = (response.data && response.data.resend_after_seconds) ? response.data.resend_after_seconds : 60;
+                startResendCountdown(cooldownSec);
+                $('.otp-digit-box[data-index="1"]').focus();
+            },
+            error: function (xhr) {
+                $('#resendBtnText').text(originalText);
+                let errorMsg = 'Unable to resend OTP at this time.';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMsg = xhr.responseJSON.message;
+                }
+                $('#otpInvalidMsg').text(errorMsg);
+                $('#otpInvalidAlert').removeClass('d-none').hide().fadeIn(200);
+            }
+        });
     });
 
     // Navbar Elevation on Scroll

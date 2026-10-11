@@ -13,6 +13,8 @@
         <meta property="og:image" content="{{ $ogImage }}">
     @endif
     <meta property="og:type" content="website">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="otp-length" content="{{ \App\Models\OtpSetting::current()->otp_length }}">
 
     <!-- Google Fonts: Poppins & Playfair Display -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

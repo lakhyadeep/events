@@ -1,5 +1,9 @@
 @php
     $contestants = isset($participants) && $participants->isNotEmpty() ? $participants : collect();
+    $eventAwards = (isset($event) && $event->awards) ? $event->awards->where('is_active', true) : collect();
+    $pujaAward = $eventAwards->first(fn($a) => str_contains(strtolower($a->name), 'puja') && !str_contains(strtolower($a->name), 'people')) ?? $eventAwards->first();
+    $pratimaAward = $eventAwards->first(fn($a) => str_contains(strtolower($a->name), 'pratima') || str_contains(strtolower($a->name), 'idol')) ?? $eventAwards->skip(1)->first();
+    $lightingAward = $eventAwards->first(fn($a) => str_contains(strtolower($a->name), 'light') || str_contains(strtolower($a->name), 'illumination')) ?? $eventAwards->skip(2)->first();
 @endphp
 
 @if ($contestants->isNotEmpty())
@@ -114,7 +118,9 @@
                                 <span class="fw-bold fs-6 text-danger">{{ $p->zone ?: 'Central' }}</span>
                             </div>
                             <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn"
-                                data-pandal="{{ $p->name }}">
+                                data-pandal="{{ $p->name }}"
+                                data-participant-id="{{ $p->id }}"
+                                data-award-id="{{ $pujaAward?->id ?? '' }}">
                                 <i class="bi bi-hand-thumbs-up me-1"></i> Vote
                             </button>
                         </div>
@@ -170,7 +176,9 @@
                                 <span class="fw-bold fs-6 text-dark">{{ $p->zone ?: 'Central' }}</span>
                             </div>
                             <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn"
-                                data-pandal="{{ $p->name }}">
+                                data-pandal="{{ $p->name }}"
+                                data-participant-id="{{ $p->id }}"
+                                data-award-id="{{ $pratimaAward?->id ?? '' }}">
                                 <i class="bi bi-hand-thumbs-up me-1"></i> Vote
                             </button>
                         </div>
@@ -226,7 +234,9 @@
                                 <span class="fw-bold fs-6 text-warning">{{ $p->zone ?: 'Central' }}</span>
                             </div>
                             <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn"
-                                data-pandal="{{ $p->name }}">
+                                data-pandal="{{ $p->name }}"
+                                data-participant-id="{{ $p->id }}"
+                                data-award-id="{{ $lightingAward?->id ?? '' }}">
                                 <i class="bi bi-hand-thumbs-up me-1"></i> Vote
                             </button>
                         </div>

@@ -13,76 +13,165 @@ $(document).ready(function () {
     });
 
     // ==========================================================================
-    // 2. VOTING MODAL PRE-SELECTION, ALREADY VOTED CHECK & OTP VERIFICATION
+    // 2. VOTING MODAL PRE-SELECTION, ALREADY VOTED CHECK & REAL OTP VERIFICATION
     // ==========================================================================
-    // Store already voted mobile numbers (seeded with test numbers)
-    var votedMobileNumbers = new Set(['9876543210', '9999999999']);
-    var pendingVoteData = { mobile: '', pandal: '' };
+    var pendingVoteData = { mobile: '', participantId: '', pandalName: '', awardId: '', eventId: '', votingMode: 'participant', purpose: 'voting' };
+    var resendTimerInterval = null;
+
+    function getCsrfToken() {
+        return $('meta[name="csrf-token"]').attr('content') || '';
+    }
+
+    function getExpectedOtpLength() {
+        var len = parseInt($('#otpInputContainer').attr('data-otp-length'), 10);
+        return (len >= 4 && len <= 8) ? len : 6;
+    }
+
+    function startResendCountdown(seconds) {
+        if (resendTimerInterval) {
+            clearInterval(resendTimerInterval);
+        }
+
+        var remaining = seconds || 60;
+        var $btn = $('#btnResendOtp');
+        var $text = $('#resendBtnText');
+
+        $btn.prop('disabled', true).addClass('pe-none opacity-50');
+        $text.text('Resend in ' + remaining + 's');
+
+        resendTimerInterval = setInterval(function () {
+            remaining--;
+            if (remaining <= 0) {
+                clearInterval(resendTimerInterval);
+                resendTimerInterval = null;
+                $btn.prop('disabled', false).removeClass('pe-none opacity-50');
+                $text.text('Resend OTP');
+            } else {
+                $text.text('Resend in ' + remaining + 's');
+            }
+        }, 1000);
+    }
 
     $('.vote-trigger-btn').on('click', function () {
-        var pandalName = $(this).attr('data-pandal');
-        $('#pandalSelect').val(pandalName);
+        var pandalName = $(this).attr('data-pandal') || '';
+        var participantId = $(this).attr('data-participant-id') || '';
+        var awardId = $(this).attr('data-award-id') || '';
+
+        if (participantId) {
+            $('#pandalSelect').val(participantId);
+        } else if (pandalName) {
+            var opt = $('#pandalSelect option[data-name="' + pandalName + '"]');
+            if (opt.length) {
+                opt.prop('selected', true);
+            }
+        }
+
+        if (awardId && $('#awardSelect').length) {
+            $('#awardSelect').val(awardId);
+        }
+
         $('#alreadyVotedAlert').addClass('d-none');
-        var voteModal = new bootstrap.Modal(document.getElementById('voteModal'));
-        voteModal.show();
+        var voteModalEl = document.getElementById('voteModal');
+        if (voteModalEl) {
+            var voteModal = new bootstrap.Modal(voteModalEl);
+            voteModal.show();
+        }
     });
 
-    // Step 1: Submit Mobile Number to trigger OTP or show Already Voted alert
+    // Step 1: Submit Mobile Number to request OTP via API (with server-side pre-flight eligibility check)
     $('#voteForm').on('submit', function (e) {
         e.preventDefault();
         $('#alreadyVotedAlert').addClass('d-none');
 
         var mobile = $('#voterMobile').val().trim();
-        var pandal = $('#pandalSelect').val();
+        var participantId = $('#pandalSelect').val();
+        var pandalName = $('#pandalSelect option:selected').text().trim();
+        var eventId = $('#voteEventId').val() || '';
+        var awardId = ($('#awardSelect').length ? $('#awardSelect').val() : '') || null;
+        var votingMode = $('#voteVotingMode').val() || 'participant';
 
         if (mobile.length !== 10 || !/^\d{10}$/.test(mobile)) {
             alert('Please enter a valid 10-digit mobile number.');
             return;
         }
 
-        // Check if Mobile Number has already voted
-        if (votedMobileNumbers.has(mobile)) {
-            $('#alreadyVotedMsg').html('Mobile number <strong>+91 ' + mobile + '</strong> has already cast a vote in Sharad Samman 2026. Only 1 vote per phone number is permitted.');
-            $('#alreadyVotedAlert').removeClass('d-none').hide().fadeIn(300);
-            return;
-        }
-
-        // Store pending vote data
         pendingVoteData.mobile = mobile;
-        pendingVoteData.pandal = pandal;
+        pendingVoteData.participantId = participantId;
+        pendingVoteData.pandalName = pandalName;
+        pendingVoteData.awardId = awardId;
+        pendingVoteData.eventId = eventId;
+        pendingVoteData.votingMode = votingMode;
 
-        // Hide Vote Modal & Show OTP Modal
-        var voteModalEl = document.getElementById('voteModal');
-        var voteModalInstance = bootstrap.Modal.getInstance(voteModalEl);
-        if (voteModalInstance) {
-            voteModalInstance.hide();
-        }
+        var $submitBtn = $('#btnSendOtp');
+        var originalBtnHtml = $submitBtn.html();
+        $submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Sending OTP...');
 
-        // Prepare OTP Modal
-        $('#displayMobileNum').text('+91 ' + mobile);
-        $('.otp-digit-box').val('').removeClass('is-invalid');
-        $('#otpInvalidAlert, #otpValidAlert, #voteSubmittedAlert, #otpResendAlert').addClass('d-none');
-        $('#btnVerifyOtp').prop('disabled', false).html('<span>Verify OTP &amp; Cast Vote</span> <i class="bi bi-check-lg ms-1"></i>');
+        // Dispatch OTP via backend API (which automatically pre-checks voting eligibility)
+        $.ajax({
+            url: '/api/v1/otp/send',
+            type: 'POST',
+            dataType: 'json',
+            contentType: 'application/json',
+            headers: {
+                'X-CSRF-TOKEN': getCsrfToken(),
+                'Accept': 'application/json'
+            },
+            data: JSON.stringify({
+                phone: mobile,
+                purpose: 'voting',
+                event_id: eventId ? parseInt(eventId, 10) : null,
+                award_id: awardId ? parseInt(awardId, 10) : null
+            }),
+            success: function (response) {
+                $submitBtn.prop('disabled', false).html(originalBtnHtml);
 
-        setTimeout(function () {
-            var otpModal = new bootstrap.Modal(document.getElementById('otpModal'));
-            otpModal.show();
-            setTimeout(function () {
-                $('.otp-digit-box[data-index="1"]').focus();
-            }, 300);
-        }, 300);
+                // Hide Vote Modal & Show OTP Modal
+                var voteModalEl = document.getElementById('voteModal');
+                var voteModalInstance = bootstrap.Modal.getInstance(voteModalEl);
+                if (voteModalInstance) {
+                    voteModalInstance.hide();
+                }
+
+                // Prepare and open OTP Modal
+                $('#displayMobileNum').text('+91 ' + mobile.substring(0, 5) + ' ' + mobile.substring(5));
+                $('.otp-digit-box').val('').removeClass('is-invalid');
+                $('#otpInvalidAlert, #otpValidAlert, #voteSubmittedAlert, #otpResendAlert').addClass('d-none');
+                $('#btnVerifyOtp').prop('disabled', false).html('<span>Verify OTP &amp; Cast Vote</span> <i class="bi bi-check-lg ms-1"></i>');
+
+                var cooldownSec = (response.data && response.data.resend_after_seconds) ? response.data.resend_after_seconds : 60;
+                startResendCountdown(cooldownSec);
+
+                setTimeout(function () {
+                    var otpModal = new bootstrap.Modal(document.getElementById('otpModal'));
+                    otpModal.show();
+                    setTimeout(function () {
+                        $('.otp-digit-box[data-index="1"]').focus();
+                    }, 350);
+                }, 300);
+            },
+            error: function (xhr) {
+                $submitBtn.prop('disabled', false).html(originalBtnHtml);
+                var errorMsg = 'Failed to dispatch verification code. Please check your mobile number and try again.';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMsg = xhr.responseJSON.message;
+                }
+                $('#alreadyVotedMsg').text(errorMsg);
+                $('#alreadyVotedAlert').removeClass('d-none').hide().fadeIn(300);
+            }
+        });
     });
 
     // OTP Input Boxes Auto-Tab & Backspace Logic
-    $('.otp-digit-box').on('input keyup', function (e) {
+    $(document).on('input keyup', '.otp-digit-box', function (e) {
         var $this = $(this);
         var val = $this.val();
-        var index = parseInt($this.attr('data-index'));
+        var index = parseInt($this.attr('data-index'), 10);
+        var totalLength = getExpectedOtpLength();
 
         $('.otp-digit-box').removeClass('is-invalid');
         $('#otpInvalidAlert').addClass('d-none');
 
-        if (val.length === 1 && index < 4 && e.key !== 'Backspace') {
+        if (val.length === 1 && index < totalLength && e.key !== 'Backspace') {
             $('.otp-digit-box[data-index="' + (index + 1) + '"]').focus();
         }
 
@@ -91,81 +180,161 @@ $(document).ready(function () {
         }
     });
 
-    // Handle Paste into OTP Input
-    $('.otp-digit-box').on('paste', function (e) {
+    // Handle Paste into OTP Inputs
+    $(document).on('paste', '.otp-digit-box', function (e) {
         e.preventDefault();
         var pasteData = (e.originalEvent.clipboardData || window.clipboardData).getData('text').trim();
-        if (/^\d{4}$/.test(pasteData)) {
-            var digits = pasteData.split('');
+        var digitsOnly = pasteData.replace(/[^0-9]/g, '');
+        var expectedLen = getExpectedOtpLength();
+
+        if (digitsOnly.length > 0) {
+            var digits = digitsOnly.split('');
             $('.otp-digit-box').each(function (idx) {
-                $(this).val(digits[idx]).removeClass('is-invalid');
+                if (idx < digits.length && idx < expectedLen) {
+                    $(this).val(digits[idx]).removeClass('is-invalid');
+                }
             });
-            $('.otp-digit-box[data-index="4"]').focus();
+
+            var targetIndex = Math.min(digits.length, expectedLen);
+            $('.otp-digit-box[data-index="' + targetIndex + '"]').focus();
+
+            // Auto-submit if all digits were pasted
+            if (digits.length >= expectedLen) {
+                $('#otpForm').trigger('submit');
+            }
         }
     });
 
-    // Step 2: Submit OTP Form & Verification Handler
+    // Step 2: Submit OTP Form & Verification Handler via API
     $('#otpForm').on('submit', function (e) {
         e.preventDefault();
 
         var enteredOtp = '';
+        var expectedLen = getExpectedOtpLength();
+
         $('.otp-digit-box').each(function () {
             enteredOtp += $(this).val().trim();
         });
 
         $('#otpInvalidAlert, #otpValidAlert, #voteSubmittedAlert, #otpResendAlert').addClass('d-none');
 
-        // Check Demo OTP: 1234 is VALID, any other code is INVALID
-        if (enteredOtp === '1234') {
-            // STEP 1: SHOW VALID OTP MESSAGE
-            $('#otpValidAlert').removeClass('d-none').hide().fadeIn(200);
-            $('#btnVerifyOtp').prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Verifying &amp; Recording Vote...');
+        if (enteredOtp.length < expectedLen) {
+            $('#otpInvalidMsg').text('Please enter all ' + expectedLen + ' digits of your verification code.');
+            $('#otpInvalidAlert').removeClass('d-none').hide().fadeIn(200);
+            return;
+        }
 
-            setTimeout(function () {
-                // Register mobile number as already voted
-                if (pendingVoteData.mobile) {
-                    votedMobileNumbers.add(pendingVoteData.mobile);
-                }
+        var $verifyBtn = $('#btnVerifyOtp');
+        $verifyBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Verifying OTP &amp; Casting Vote...');
 
-                // Increment vote counter if present
-                var currentTotal = parseInt($('#liveTotalCounter').text().replace(/,/g, '')) || 0;
+        $.ajax({
+            url: '/api/v1/votes/cast',
+            type: 'POST',
+            dataType: 'json',
+            contentType: 'application/json',
+            headers: {
+                'X-CSRF-TOKEN': getCsrfToken(),
+                'Accept': 'application/json'
+            },
+            data: JSON.stringify({
+                event_id: parseInt(pendingVoteData.eventId, 10),
+                participant_id: parseInt(pendingVoteData.participantId, 10),
+                award_id: pendingVoteData.awardId ? parseInt(pendingVoteData.awardId, 10) : null,
+                phone: pendingVoteData.mobile,
+                otp: enteredOtp
+            }),
+            success: function (response) {
+                $('#otpValidAlert').removeClass('d-none').hide().fadeIn(200);
+                var successMsg = response.message || 'Vote recorded successfully!';
+                $('#voteSubmittedMsg').text(successMsg);
+
+                // Increment live vote counter if present
+                var currentTotal = parseInt($('#liveTotalCounter').text().replace(/,/g, ''), 10) || 0;
                 if (currentTotal > 0) {
                     $('#liveTotalCounter').text((currentTotal + 1).toLocaleString());
                 }
 
-                // STEP 2: SHOW VOTE SUBMITTED SUCCESS MESSAGE
-                $('#otpValidAlert').addClass('d-none');
-                $('#voteSubmittedAlert').removeClass('d-none').hide().fadeIn(200);
-                $('#btnVerifyOtp').html('<i class="bi bi-check-circle-fill me-1"></i> Vote Submitted Successfully!');
+                setTimeout(function () {
+                    $('#otpValidAlert').addClass('d-none');
+                    $('#voteSubmittedAlert').removeClass('d-none').hide().fadeIn(200);
+                    $('#btnVerifyOtp').html('<i class="bi bi-check-circle-fill me-1"></i> Vote Recorded Successfully!');
+
+                    setTimeout(function () {
+                        var otpModalEl = document.getElementById('otpModal');
+                        var otpModalInstance = bootstrap.Modal.getInstance(otpModalEl);
+                        if (otpModalInstance) {
+                            otpModalInstance.hide();
+                        }
+                        $('#voteForm')[0].reset();
+                        $('#otpForm')[0].reset();
+                    }, 1800);
+                }, 600);
+            },
+            error: function (xhr) {
+                $verifyBtn.prop('disabled', false).html('<span>Verify OTP &amp; Cast Vote</span> <i class="bi bi-check-lg ms-1"></i>');
+                $('.otp-digit-box').addClass('is-invalid');
+
+                var errorMsg = 'Invalid verification code or vote submission failed. Please try again.';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMsg = xhr.responseJSON.message;
+                }
+                $('#otpInvalidMsg').text(errorMsg);
+                $('#otpInvalidAlert').removeClass('d-none').hide().fadeIn(200);
 
                 setTimeout(function () {
-                    var otpModalEl = document.getElementById('otpModal');
-                    var otpModalInstance = bootstrap.Modal.getInstance(otpModalEl);
-                    if (otpModalInstance) {
-                        otpModalInstance.hide();
-                    }
-                    $('#voteForm')[0].reset();
-                    $('#otpForm')[0].reset();
-                }, 1600);
-
-            }, 900);
-
-        } else {
-            // INVALID OTP MESSAGE
-            $('.otp-digit-box').addClass('is-invalid');
-            $('#otpInvalidAlert').removeClass('d-none').hide().fadeIn(200);
-            setTimeout(function () {
-                $('.otp-digit-box[data-index="1"]').focus().select();
-            }, 300);
-        }
+                    $('.otp-digit-box[data-index="1"]').focus().select();
+                }, 200);
+            }
+        });
     });
 
-    // Resend OTP Button Click
+    // Resend OTP Button Click via API
     $('#btnResendOtp').on('click', function () {
-        $('.otp-digit-box').val('').removeClass('is-invalid');
-        $('#otpInvalidAlert, #otpValidAlert, #voteSubmittedAlert').addClass('d-none');
-        $('#otpResendAlert').removeClass('d-none').hide().fadeIn(200).delay(3500).fadeOut(300);
-        $('.otp-digit-box[data-index="1"]').focus();
+        if ($(this).prop('disabled') || !pendingVoteData.mobile) {
+            return;
+        }
+
+        var $btn = $(this);
+        var originalText = $('#resendBtnText').text();
+        $('#resendBtnText').html('<span class="spinner-border spinner-border-sm"></span>');
+
+        $.ajax({
+            url: '/api/v1/otp/send',
+            type: 'POST',
+            dataType: 'json',
+            contentType: 'application/json',
+            headers: {
+                'X-CSRF-TOKEN': getCsrfToken(),
+                'Accept': 'application/json'
+            },
+            data: JSON.stringify({
+                phone: pendingVoteData.mobile,
+                purpose: 'voting',
+                event_id: pendingVoteData.eventId ? parseInt(pendingVoteData.eventId, 10) : null,
+                award_id: pendingVoteData.awardId ? parseInt(pendingVoteData.awardId, 10) : null
+            }),
+            success: function (response) {
+                $('.otp-digit-box').val('').removeClass('is-invalid');
+                $('#otpInvalidAlert, #otpValidAlert, #voteSubmittedAlert').addClass('d-none');
+
+                var successMsg = response.message || 'A new verification code has been dispatched to your mobile number!';
+                $('#otpResendMsg').text(successMsg);
+                $('#otpResendAlert').removeClass('d-none').hide().fadeIn(200).delay(4000).fadeOut(300);
+
+                var cooldownSec = (response.data && response.data.resend_after_seconds) ? response.data.resend_after_seconds : 60;
+                startResendCountdown(cooldownSec);
+                $('.otp-digit-box[data-index="1"]').focus();
+            },
+            error: function (xhr) {
+                $('#resendBtnText').text(originalText);
+                var errorMsg = 'Unable to resend OTP at this time.';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMsg = xhr.responseJSON.message;
+                }
+                $('#otpInvalidMsg').text(errorMsg);
+                $('#otpInvalidAlert').removeClass('d-none').hide().fadeIn(200);
+            }
+        });
     });
 
     // ==========================================================================

@@ -178,4 +178,9 @@ class Participant extends Model
                 ->orWhereHas('zone', fn ($sub) => $sub->where('name', $zone)->orWhere('slug', $zone));
         });
     }
+
+    public function votes(): HasMany
+    {
+        return $this->hasMany(Vote::class);
+    }
 }

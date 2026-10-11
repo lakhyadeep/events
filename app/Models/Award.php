@@ -43,6 +43,11 @@ class Award extends Model
         return $this->hasMany(Winner::class);
     }
 
+    public function votes(): HasMany
+    {
+        return $this->hasMany(Vote::class);
+    }
+
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);
