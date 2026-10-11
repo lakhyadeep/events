@@ -3,7 +3,7 @@
             <div class="container-fluid px-lg-5 px-3">
 
                 <!-- Logo Branding -->
-                <a class="brand-logo-container" href="#home" id="brandLogo">
+                <a class="brand-logo-container" href="{{ (request()->routeIs('all-pujas') || request()->routeIs('events.all-pujas')) ? (isset($event) && $event->slug ? route('events.show', $event->slug) : route('home')) : '#home' }}" id="brandLogo">
                     <img src="{{ asset('event-assets/images/logo-dibru.png') }}" alt="Dibrugarh 24x7" class="img-fluid navbar-brand-logo">
                 </a>
 
@@ -17,21 +17,31 @@
                 <!-- Navbar Collapsible Menu (Centered links) -->
                 <div class="collapse navbar-collapse" id="navbarFestiveMenu">
                     <ul class="navbar-nav mx-auto custom-nav my-3 my-lg-0">
+                        @php
+                            $isAllPujasPage = request()->routeIs('all-pujas') || request()->routeIs('events.all-pujas');
+                            $homeUrl = isset($event) && $event->slug ? route('events.show', $event->slug) : route('home');
+                            $allPujasUrl = isset($event) && $event->slug ? route('events.all-pujas', $event->slug) : route('all-pujas');
+                        @endphp
                         <li class="nav-item">
-                            <a class="nav-link active" data-target="home" href="#home">Home</a>
+                            <a class="nav-link {{ !$isAllPujasPage ? 'active' : '' }}" data-target="home" href="{{ $isAllPujasPage ? $homeUrl . '#home' : '#home' }}">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" data-target="pujas" href="#pujas">Pujas</a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link" data-target="gallery" href="#gallery">Gallery</a>
+                            <a class="nav-link" data-target="pujas" href="{{ $isAllPujasPage ? $homeUrl . '#pujas' : '#pujas' }}">Pujas</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" data-target="events" href="#events">Events</a>
+                            <a class="nav-link {{ $isAllPujasPage ? 'active' : '' }}" href="{{ $allPujasUrl }}">All Pujas</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" data-target="about" href="#about">About</a>
+                            <a class="nav-link" data-target="awards-announced" href="{{ $isAllPujasPage ? $homeUrl . '#awards-announced' : '#awards-announced' }}">Winners</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-target="gallery" href="{{ $isAllPujasPage ? $homeUrl . '#gallery' : '#gallery' }}">Gallery</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-target="events" href="{{ $isAllPujasPage ? $homeUrl . '#events' : '#events' }}">Events</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-target="about" href="{{ $isAllPujasPage ? $homeUrl . '#about' : '#about' }}">About</a>
                         </li>
                     </ul>
 

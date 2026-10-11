@@ -10,6 +10,10 @@ Route::get('/', [EventMicrositeController::class, 'show'])->name('home');
 // Specific Event by Slug
 Route::get('/events/{slug}', [EventMicrositeController::class, 'show'])->name('events.show');
 
+// All Pujas Directory
+Route::get('/all-pujas', [EventMicrositeController::class, 'allPujas'])->name('all-pujas');
+Route::get('/events/{slug}/all-pujas', [EventMicrositeController::class, 'allPujas'])->name('events.all-pujas');
+
 // Fallback GET handler for Boost browser logs endpoint
 Route::get('/_boost/browser-logs', fn () => redirect()->route('home'));
 

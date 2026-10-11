@@ -13,40 +13,159 @@ $(document).ready(function () {
     });
 
     // ==========================================================================
-    // 2. VOTING MODAL PRE-SELECTION & FORM SUBMISSION
+    // 2. VOTING MODAL PRE-SELECTION, ALREADY VOTED CHECK & OTP VERIFICATION
     // ==========================================================================
+    // Store already voted mobile numbers (seeded with test numbers)
+    var votedMobileNumbers = new Set(['9876543210', '9999999999']);
+    var pendingVoteData = { mobile: '', pandal: '' };
+
     $('.vote-trigger-btn').on('click', function () {
         var pandalName = $(this).attr('data-pandal');
         $('#pandalSelect').val(pandalName);
+        $('#alreadyVotedAlert').addClass('d-none');
         var voteModal = new bootstrap.Modal(document.getElementById('voteModal'));
         voteModal.show();
     });
 
+    // Step 1: Submit Mobile Number to trigger OTP or show Already Voted alert
     $('#voteForm').on('submit', function (e) {
         e.preventDefault();
-        var submitBtn = $(this).find('button[type="submit"]');
+        $('#alreadyVotedAlert').addClass('d-none');
 
-        submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Recording...');
+        var mobile = $('#voterMobile').val().trim();
+        var pandal = $('#pandalSelect').val();
+
+        if (mobile.length !== 10 || !/^\d{10}$/.test(mobile)) {
+            alert('Please enter a valid 10-digit mobile number.');
+            return;
+        }
+
+        // Check if Mobile Number has already voted
+        if (votedMobileNumbers.has(mobile)) {
+            $('#alreadyVotedMsg').html('Mobile number <strong>+91 ' + mobile + '</strong> has already cast a vote in Sharad Samman 2026. Only 1 vote per phone number is permitted.');
+            $('#alreadyVotedAlert').removeClass('d-none').hide().fadeIn(300);
+            return;
+        }
+
+        // Store pending vote data
+        pendingVoteData.mobile = mobile;
+        pendingVoteData.pandal = pandal;
+
+        // Hide Vote Modal & Show OTP Modal
+        var voteModalEl = document.getElementById('voteModal');
+        var voteModalInstance = bootstrap.Modal.getInstance(voteModalEl);
+        if (voteModalInstance) {
+            voteModalInstance.hide();
+        }
+
+        // Prepare OTP Modal
+        $('#displayMobileNum').text('+91 ' + mobile);
+        $('.otp-digit-box').val('').removeClass('is-invalid');
+        $('#otpInvalidAlert, #otpValidAlert, #voteSubmittedAlert, #otpResendAlert').addClass('d-none');
+        $('#btnVerifyOtp').prop('disabled', false).html('<span>Verify OTP &amp; Cast Vote</span> <i class="bi bi-check-lg ms-1"></i>');
 
         setTimeout(function () {
-            var currentTotal = parseInt($('#liveTotalCounter').text().replace(/,/g, '')) || 0;
-            $('#liveTotalCounter').text((currentTotal + 1).toLocaleString());
+            var otpModal = new bootstrap.Modal(document.getElementById('otpModal'));
+            otpModal.show();
+            setTimeout(function () {
+                $('.otp-digit-box[data-index="1"]').focus();
+            }, 300);
+        }, 300);
+    });
 
-            $('#voteAlert').removeClass('d-none').hide().fadeIn(300);
-            submitBtn.prop('disabled', false).html('<span>Vote Submitted!</span> <i class="bi bi-check2"></i>');
+    // OTP Input Boxes Auto-Tab & Backspace Logic
+    $('.otp-digit-box').on('input keyup', function (e) {
+        var $this = $(this);
+        var val = $this.val();
+        var index = parseInt($this.attr('data-index'));
+
+        $('.otp-digit-box').removeClass('is-invalid');
+        $('#otpInvalidAlert').addClass('d-none');
+
+        if (val.length === 1 && index < 4 && e.key !== 'Backspace') {
+            $('.otp-digit-box[data-index="' + (index + 1) + '"]').focus();
+        }
+
+        if (e.key === 'Backspace' && val.length === 0 && index > 1) {
+            $('.otp-digit-box[data-index="' + (index - 1) + '"]').focus();
+        }
+    });
+
+    // Handle Paste into OTP Input
+    $('.otp-digit-box').on('paste', function (e) {
+        e.preventDefault();
+        var pasteData = (e.originalEvent.clipboardData || window.clipboardData).getData('text').trim();
+        if (/^\d{4}$/.test(pasteData)) {
+            var digits = pasteData.split('');
+            $('.otp-digit-box').each(function (idx) {
+                $(this).val(digits[idx]).removeClass('is-invalid');
+            });
+            $('.otp-digit-box[data-index="4"]').focus();
+        }
+    });
+
+    // Step 2: Submit OTP Form & Verification Handler
+    $('#otpForm').on('submit', function (e) {
+        e.preventDefault();
+
+        var enteredOtp = '';
+        $('.otp-digit-box').each(function () {
+            enteredOtp += $(this).val().trim();
+        });
+
+        $('#otpInvalidAlert, #otpValidAlert, #voteSubmittedAlert, #otpResendAlert').addClass('d-none');
+
+        // Check Demo OTP: 1234 is VALID, any other code is INVALID
+        if (enteredOtp === '1234') {
+            // STEP 1: SHOW VALID OTP MESSAGE
+            $('#otpValidAlert').removeClass('d-none').hide().fadeIn(200);
+            $('#btnVerifyOtp').prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Verifying &amp; Recording Vote...');
 
             setTimeout(function () {
-                var modalEl = document.getElementById('voteModal');
-                var modalInstance = bootstrap.Modal.getInstance(modalEl);
-                if (modalInstance) {
-                    modalInstance.hide();
+                // Register mobile number as already voted
+                if (pendingVoteData.mobile) {
+                    votedMobileNumbers.add(pendingVoteData.mobile);
                 }
-                $('#voteForm')[0].reset();
-                $('#voteAlert').addClass('d-none');
-                submitBtn.html('<span>Submit My Vote</span> <i class="bi bi-arrow-right"></i>');
-            }, 1500);
 
-        }, 800);
+                // Increment vote counter if present
+                var currentTotal = parseInt($('#liveTotalCounter').text().replace(/,/g, '')) || 0;
+                if (currentTotal > 0) {
+                    $('#liveTotalCounter').text((currentTotal + 1).toLocaleString());
+                }
+
+                // STEP 2: SHOW VOTE SUBMITTED SUCCESS MESSAGE
+                $('#otpValidAlert').addClass('d-none');
+                $('#voteSubmittedAlert').removeClass('d-none').hide().fadeIn(200);
+                $('#btnVerifyOtp').html('<i class="bi bi-check-circle-fill me-1"></i> Vote Submitted Successfully!');
+
+                setTimeout(function () {
+                    var otpModalEl = document.getElementById('otpModal');
+                    var otpModalInstance = bootstrap.Modal.getInstance(otpModalEl);
+                    if (otpModalInstance) {
+                        otpModalInstance.hide();
+                    }
+                    $('#voteForm')[0].reset();
+                    $('#otpForm')[0].reset();
+                }, 1600);
+
+            }, 900);
+
+        } else {
+            // INVALID OTP MESSAGE
+            $('.otp-digit-box').addClass('is-invalid');
+            $('#otpInvalidAlert').removeClass('d-none').hide().fadeIn(200);
+            setTimeout(function () {
+                $('.otp-digit-box[data-index="1"]').focus().select();
+            }, 300);
+        }
+    });
+
+    // Resend OTP Button Click
+    $('#btnResendOtp').on('click', function () {
+        $('.otp-digit-box').val('').removeClass('is-invalid');
+        $('#otpInvalidAlert, #otpValidAlert, #voteSubmittedAlert').addClass('d-none');
+        $('#otpResendAlert').removeClass('d-none').hide().fadeIn(200).delay(3500).fadeOut(300);
+        $('.otp-digit-box[data-index="1"]').focus();
     });
 
     // ==========================================================================

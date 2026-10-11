@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Filament\Resources\Events\Pages\CreateEvent;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Models\Event;
+use App\Models\Participant;
 use App\Models\Sponsor;
 use App\Models\User;
 use App\Models\Winner;
@@ -100,6 +101,17 @@ class AdminManagementTest extends TestCase
             $response = $this->actingAs($admin)->get($route);
             $response->assertStatus(200);
         }
+    }
+
+    public function test_admin_can_load_participant_edit_page(): void
+    {
+        $admin = User::where('email', 'admin@dib24x7.com')->first();
+        $participant = Participant::first();
+
+        $this->assertNotNull($participant);
+
+        $response = $this->actingAs($admin)->get("/admin/participants/{$participant->id}/edit");
+        $response->assertStatus(200);
     }
 
     public function test_admin_can_create_and_manage_users(): void

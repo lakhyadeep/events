@@ -119,11 +119,19 @@
                         <div class="mb-3">
                             <label class="form-label small fw-bold">Select Committee</label>
                             <select class="form-select" id="pandalSelect" required>
-                                <option value="Thana Chariali Sarbajanin" selected>Thana Chariali Sarbajanin</option>
-                                <option value="Graham Bazar Sarbajanin">Graham Bazar Sarbajanin</option>
-                                <option value="New Market Durga Puja">New Market Durga Puja</option>
-                                <option value="Marwari Patty Sarbajanin">Marwari Patty Sarbajanin</option>
-                                <option value="Railway Colony Puja Samiti">Railway Colony Puja Samiti</option>
+                                @if (isset($participants) && $participants->isNotEmpty())
+                                    @foreach ($participants as $pandal)
+                                        <option value="{{ $pandal->name }}" {{ $loop->first ? 'selected' : '' }}>
+                                            {{ $pandal->display_name ?: $pandal->name }} ({{ $pandal->locality ?: ($pandal->zone ?: 'Dibrugarh') }})
+                                        </option>
+                                    @endforeach
+                                @else
+                                    <option value="Thana Chariali Sarbajanin" selected>Thana Chariali Sarbajanin</option>
+                                    <option value="Graham Bazar Sarbajanin">Graham Bazar Sarbajanin</option>
+                                    <option value="New Market Durga Puja">New Market Durga Puja</option>
+                                    <option value="Marwari Patty Sarbajanin">Marwari Patty Sarbajanin</option>
+                                    <option value="Railway Colony Puja Samiti">Railway Colony Puja Samiti</option>
+                                @endif
                             </select>
                         </div>
 
@@ -131,21 +139,105 @@
                             <label class="form-label small fw-bold">Your Mobile Number (For Verification OTP)</label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light">+91</span>
-                                <input type="tel" class="form-control" placeholder="Enter 10-digit number"
-                                    maxlength="10" required pattern="[0-9]{10}">
+                                <input type="tel" class="form-control" id="voterMobile"
+                                    placeholder="Enter 10-digit number" maxlength="10" required pattern="[0-9]{10}">
                             </div>
                             <div class="form-text">One vote per phone number to ensure fair community polling.</div>
                         </div>
 
-                        <div id="voteAlert" class="alert alert-success d-none py-2 px-3 small">
-                            <i class="bi bi-check-circle-fill me-1"></i> Vote recorded successfully! Thank you for
-                            voting.
+                        <!-- Already Voted Warning Message -->
+                        <div id="alreadyVotedAlert" class="alert alert-danger d-none py-2 px-3 small mt-2">
+                            <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                            <span id="alreadyVotedMsg">This mobile number has already cast a vote in Sharad Samman 2026.
+                                Only 1 vote per mobile number is permitted.</span>
                         </div>
 
                         <div class="d-grid mt-4">
-                            <button type="submit" class="btn btn-vote-pill justify-content-center py-2">
-                                <span>Submit My Vote</span>
-                                <i class="bi bi-arrow-right"></i>
+                            <button type="submit" class="btn btn-vote-pill justify-content-center py-2" id="btnSendOtp">
+                                <span>Proceed to OTP Verification</span>
+                                <i class="bi bi-arrow-right ms-1"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- OTP Verification Modal -->
+    <div class="modal fade" id="otpModal" tabindex="-1" aria-labelledby="otpModalLabel" aria-hidden="true"
+        data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg border-0" style="border-radius: 16px;">
+                <div class="modal-header border-0 pb-0">
+                    <div class="d-flex align-items-center gap-2">
+                        <img src="{{ asset('event-assets/images/logo-dibru.png') }}" alt="Dibrugarh 24x7 Logo" class="img-fluid"
+                            style="max-height: 34px;">
+                        <span class="badge bg-warning text-dark rounded-pill fw-bold">
+                            <i class="bi bi-shield-lock-fill me-1"></i> Verification
+                        </span>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                        id="otpCloseBtn"></button>
+                </div>
+
+                <div class="modal-body pt-3 text-center px-4">
+                    <div class="mb-3 d-inline-flex align-items-center justify-content-center rounded-circle bg-danger-subtle text-danger"
+                        style="width: 56px; height: 56px; font-size: 1.5rem;">
+                        <i class="bi bi-phone-vibrate-fill"></i>
+                    </div>
+                    <h4 class="fw-bold mb-1" id="otpModalLabel">Enter Verification Code</h4>
+                    <p class="text-muted small mb-3">
+                        We have sent a 4-digit OTP to <strong id="displayMobileNum" class="text-dark">+91 XXXXX
+                            XXXXX</strong>
+                    </p>
+
+                    <form id="otpForm">
+                        <!-- 4 Digit OTP Input Boxes -->
+                        <div class="d-flex justify-content-center gap-2 my-3" id="otpInputContainer">
+                            <input type="text" class="form-control text-center fs-4 fw-bold otp-digit-box" maxlength="1"
+                                pattern="[0-9]" inputmode="numeric" required autocomplete="off" data-index="1">
+                            <input type="text" class="form-control text-center fs-4 fw-bold otp-digit-box" maxlength="1"
+                                pattern="[0-9]" inputmode="numeric" required autocomplete="off" data-index="2">
+                            <input type="text" class="form-control text-center fs-4 fw-bold otp-digit-box" maxlength="1"
+                                pattern="[0-9]" inputmode="numeric" required autocomplete="off" data-index="3">
+                            <input type="text" class="form-control text-center fs-4 fw-bold otp-digit-box" maxlength="1"
+                                pattern="[0-9]" inputmode="numeric" required autocomplete="off" data-index="4">
+                        </div>
+
+                        <!-- Invalid OTP Alert Message -->
+                        <div id="otpInvalidAlert" class="alert alert-danger d-none py-2 px-3 small text-start mb-3">
+                            <i class="bi bi-x-circle-fill me-1"></i> <span id="otpInvalidMsg">Invalid OTP entered!
+                                Please enter the correct 4-digit code (Demo: 1234).</span>
+                        </div>
+
+                        <!-- Valid OTP Alert Message -->
+                        <div id="otpValidAlert" class="alert alert-success d-none py-2 px-3 small text-start mb-3">
+                            <i class="bi bi-check-circle-fill me-1"></i> <span id="otpValidMsg">OTP verified
+                                successfully! Recording your vote...</span>
+                        </div>
+
+                        <!-- Vote Submitted Success Alert Message -->
+                        <div id="voteSubmittedAlert" class="alert alert-success d-none py-2 px-3 small text-start mb-3">
+                            <i class="bi bi-patch-check-fill me-1"></i> <span id="voteSubmittedMsg">Vote submitted
+                                successfully! Thank you for participating in Sharad Samman 2026.</span>
+                        </div>
+
+                        <!-- Resend OTP Alert Toast Message -->
+                        <div id="otpResendAlert" class="alert alert-warning d-none py-2 px-3 small text-start mb-3">
+                            <i class="bi bi-send-check-fill me-1"></i> A new 4-digit OTP has been sent to your mobile
+                            number! (Demo: 1234)
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-vote-pill justify-content-center py-2"
+                                id="btnVerifyOtp">
+                                <span>Verify OTP &amp; Cast Vote</span>
+                                <i class="bi bi-check-lg ms-1"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-link text-muted text-decoration-none mt-1"
+                                id="btnResendOtp">
+                                Didn't receive OTP? <span class="text-danger fw-semibold">Resend OTP</span>
                             </button>
                         </div>
                     </form>

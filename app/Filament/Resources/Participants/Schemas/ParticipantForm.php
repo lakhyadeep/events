@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\Participants\Schemas;
 
 use App\Enums\RegistrationStatus;
+use App\Models\Locality;
+use App\Models\Zone;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -152,20 +154,20 @@ class ParticipantForm
                         ->schema([
                             Select::make('zone_id')
                                 ->label('Geographic Zone')
-                                ->relationship('zone', 'name')
+                                ->options(fn () => Zone::query()->pluck('name', 'id'))
                                 ->searchable()
                                 ->preload()
                                 ->live()
+                                ->afterStateUpdated(fn ($set) => $set('locality_id', null))
                                 ->required(),
                             Select::make('locality_id')
                                 ->label('Locality / Neighborhood')
-                                ->relationship(
-                                    name: 'locality',
-                                    titleAttribute: 'name',
-                                    modifyQueryUsing: fn ($query, $get) => $query->when(
+                                ->options(fn ($get) => Locality::query()
+                                    ->when(
                                         $get('zone_id'),
-                                        fn ($q, $zoneId) => $q->where('zone_id', $zoneId)
+                                        fn ($query, $zoneId) => $query->where('zone_id', $zoneId)
                                     )
+                                    ->pluck('name', 'id')
                                 )
                                 ->searchable()
                                 ->preload(),

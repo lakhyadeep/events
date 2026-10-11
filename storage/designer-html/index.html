@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -50,7 +50,12 @@
                         <li class="nav-item">
                             <a class="nav-link" data-target="pujas" href="#pujas">Pujas</a>
                         </li>
-
+                        <li class="nav-item">
+                            <a class="nav-link" href="allpujas.html">All Pujas</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-target="awards-announced" href="#awards-announced">Winners</a>
+                        </li>
                         <li class="nav-item">
                             <a class="nav-link" data-target="gallery" href="#gallery">Gallery</a>
                         </li>
@@ -253,7 +258,7 @@
                 </div>
         </section>
 
-        <!-- Vote for the Best â Sharad Samman 2026 Section -->
+        <!-- Vote for the Best — Sharad Samman 2026 Section -->
         <section class="pujas-voting-section" id="pujas">
             <!-- Embedded Awards to be Presented with slightly darker background -->
             <div class="awards-embedded-box mb-5 " id="categories">
@@ -338,7 +343,7 @@
                                                     </svg>
                                                 </div>
                                                 <div class="award-position-title">Winner</div>
-                                                <div class="award-tba-status">TBA</div>
+
                                             </div>
                                         </div>
 
@@ -377,7 +382,7 @@
                                                     </svg>
                                                 </div>
                                                 <div class="award-position-title">Runner Up</div>
-                                                <div class="award-tba-status">TBA</div>
+
                                             </div>
                                         </div>
 
@@ -416,7 +421,7 @@
                                                     </svg>
                                                 </div>
                                                 <div class="award-position-title">Second Runner Up</div>
-                                                <div class="award-tba-status">TBA</div>
+
                                             </div>
                                         </div>
 
@@ -486,7 +491,7 @@
                                                     </svg>
                                                 </div>
                                                 <div class="award-position-title">Winner</div>
-                                                <div class="award-tba-status">TBA</div>
+
                                             </div>
                                         </div>
 
@@ -515,7 +520,7 @@
                                                     </svg>
                                                 </div>
                                                 <div class="award-position-title">Runner Up</div>
-                                                <div class="award-tba-status">TBA</div>
+
                                             </div>
                                         </div>
 
@@ -544,7 +549,7 @@
                                                     </svg>
                                                 </div>
                                                 <div class="award-position-title">Second Runner Up</div>
-                                                <div class="award-tba-status">TBA</div>
+
                                             </div>
                                         </div>
 
@@ -618,7 +623,7 @@
                                                     </svg>
                                                 </div>
                                                 <div class="award-position-title">Winner</div>
-                                                <div class="award-tba-status">TBA</div>
+
                                             </div>
                                         </div>
 
@@ -647,7 +652,7 @@
                                                     </svg>
                                                 </div>
                                                 <div class="award-position-title">Runner Up</div>
-                                                <div class="award-tba-status">TBA</div>
+
                                             </div>
                                         </div>
 
@@ -676,7 +681,7 @@
                                                     </svg>
                                                 </div>
                                                 <div class="award-position-title">Second Runner Up</div>
-                                                <div class="award-tba-status">TBA</div>
+
                                             </div>
                                         </div>
 
@@ -693,22 +698,18 @@
                     <span class="pujas-badge-tag mb-2">
                         <i class="bi bi-trophy-fill text-warning me-1"></i> SHARAD SAMMAN VOTING HUB 2026
                     </span>
-                    <h2 class="fw-bold mb-2 pujas-header-title">Vote for the Best â Sharad Samman 2026</h2>
+                    <h2 class="fw-bold mb-2 pujas-header-title">Vote for the Best — Sharad Samman 2026</h2>
                     <p class="pujas-header-subtitle mb-3">Explore the shortlisted entries and cast your vote in each
                         category</p>
-                    <div class="d-flex flex-wrap justify-content-center gap-2 mt-1">
-                        <a href="#cat-best-puja"
-                            class="btn btn-sm btn-danger rounded-pill px-3 py-2 fw-semibold shadow-sm pujas-nav-btn">
-                            <i class="bi bi-trophy-fill me-1 text-warning"></i> 1. Best Puja
+                    <div class="pujas-nav-tabs-wrapper mt-2">
+                        <a href="#cat-best-puja" class="pujas-nav-btn nav-btn-puja">
+                            <i class="bi bi-trophy-fill text-warning me-1"></i> 1. Best Puja
                         </a>
-                        <a href="#cat-best-pratima"
-                            class="btn btn-sm btn-outline-light rounded-pill px-3 py-2 fw-semibold pujas-nav-btn">
-                            <i class="bi bi-flower1 me-1 text-info"></i> 2. Best Pratima
+                        <a href="#cat-best-pratima" class="pujas-nav-btn nav-btn-pratima">
+                            <i class="bi bi-flower1 me-1" style="color: #0bf5ed;"></i> 2. Best Pratima
                         </a>
-                        <a href="#cat-best-lighting"
-                            class="btn btn-sm btn-outline-warning text-warning rounded-pill px-3 py-2 fw-semibold pujas-nav-btn"
-                            style="border-color: #f59e0b;">
-                            <i class="bi bi-lightbulb-fill me-1 text-warning"></i> 3. Best Lighting
+                        <a href="#cat-best-lighting" class="pujas-nav-btn nav-btn-lighting">
+                            <i class="bi bi-lightbulb-fill text-warning me-1"></i> 3. Best Lighting
                         </a>
                     </div>
                 </div>
@@ -764,19 +765,21 @@
                 <!-- End of Embedded Awards Box -->
                 <!-- CATEGORY 1: BEST PUJA -->
                 <div class="category-section-block cat-puja-theme">
-                    <div class="category-title-wrapper" id="cat-best-puja">
+                    <div class="category-title-wrapper cat-header-puja" id="cat-best-puja">
                         <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
                             <div class="d-flex align-items-center gap-3">
                                 <div class="category-icon-box">
                                     <i class="bi bi-trophy-fill"></i>
                                 </div>
                                 <div>
+                                    <span class="category-eyebrow text-danger"><i class="bi bi-award-fill me-1"></i>
+                                        CATEGORY 01 • FLAGSHIP</span>
                                     <h3 class="category-title-text">Best Puja</h3>
-                                    <div class="category-subtitle-text">Nominated Pandals â¢ Sharad Samman 2026</div>
+                                    <div class="category-subtitle-text">Nominated Pandals • Sharad Samman 2026</div>
                                 </div>
                             </div>
-                            <span class="category-badge-pill">
-                                <i class="bi bi-fire text-danger me-1"></i> Flagship Category
+                            <span class="category-badge-pill pill-puja">
+                                <i class="bi bi-fire me-1"></i> Flagship Award
                             </span>
                         </div>
                     </div>
@@ -784,7 +787,7 @@
                     <div class="row g-4">
                         <!-- Card 1 -->
                         <div class="col-md-4">
-                            <div class="vote-card h-100 p-3">
+                            <div class="vote-card h-100 p-2 p-md-3">
                                 <div class="position-relative mb-3">
                                     <img src="https://images.unsplash.com/photo-1728921957375-877340feaf6a?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0"
                                         alt="Thana Chariali Puja" class="img-fluid rounded-3 w-100"
@@ -810,7 +813,7 @@
 
                         <!-- Card 2 -->
                         <div class="col-md-4">
-                            <div class="vote-card h-100 p-3">
+                            <div class="vote-card h-100 p-2 p-md-3">
                                 <div class="position-relative mb-3">
                                     <img src="https://images.unsplash.com/photo-1728493118702-febd0b9a0fab?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0"
                                         alt="Graham Bazar Puja" class="img-fluid rounded-3 w-100"
@@ -836,7 +839,7 @@
 
                         <!-- Card 3 -->
                         <div class="col-md-4">
-                            <div class="vote-card h-100 p-3">
+                            <div class="vote-card h-100 p-2 p-md-3">
                                 <div class="position-relative mb-3">
                                     <img src="https://images.unsplash.com/photo-1728921957375-877340feaf6a?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0"
                                         alt="New Market Puja" class="img-fluid rounded-3 w-100"
@@ -861,7 +864,7 @@
                         </div>
                         <!-- Card 4 -->
                         <div class="col-md-4">
-                            <div class="vote-card h-100 p-3">
+                            <div class="vote-card h-100 p-2 p-md-3">
                                 <div class="position-relative mb-3">
                                     <img src="https://images.unsplash.com/photo-1728921957375-877340feaf6a?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0"
                                         alt="Thana Chariali Puja" class="img-fluid rounded-3 w-100"
@@ -887,7 +890,7 @@
 
                         <!-- Card 5 -->
                         <div class="col-md-4">
-                            <div class="vote-card h-100 p-3">
+                            <div class="vote-card h-100 p-2 p-md-3">
                                 <div class="position-relative mb-3">
                                     <img src="https://images.unsplash.com/photo-1728493118702-febd0b9a0fab?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0"
                                         alt="Graham Bazar Puja" class="img-fluid rounded-3 w-100"
@@ -913,7 +916,7 @@
 
                         <!-- Card 6 -->
                         <div class="col-md-4">
-                            <div class="vote-card h-100 p-3">
+                            <div class="vote-card h-100 p-2 p-md-3">
                                 <div class="position-relative mb-3">
                                     <img src="https://images.unsplash.com/photo-1728921957375-877340feaf6a?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0"
                                         alt="New Market Puja" class="img-fluid rounded-3 w-100"
@@ -939,24 +942,30 @@
                     </div>
                 </div>
 
+                <!-- CATEGORY SEGMENT DIVIDER -->
+                <div class="category-segment-divider" aria-hidden="true">
+                    <span class="category-segment-divider-icon"><i class="bi bi-star-fill"></i></span>
+                </div>
+
                 <!-- CATEGORY 2: BEST PRATIMA -->
                 <div class="category-section-block cat-pratima-theme">
-                    <div class="category-title-wrapper" id="cat-best-pratima">
+                    <div class="category-title-wrapper cat-header-pratima" id="cat-best-pratima">
                         <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
                             <div class="d-flex align-items-center gap-3">
                                 <div class="category-icon-box"
-                                    style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
+                                    style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
                                     <i class="bi bi-flower1 text-warning"></i>
                                 </div>
                                 <div>
+                                    <span class="category-eyebrow text-primary"><i class="bi bi-palette-fill me-1"></i>
+                                        CATEGORY 02 • IDOL ARTISTRY</span>
                                     <h3 class="category-title-text">Best Pratima</h3>
                                     <div class="category-subtitle-text">Exquisite Clay Idol Artistry & Traditional
                                         Craftsmanship</div>
                                 </div>
                             </div>
-                            <span class="category-badge-pill"
-                                style="background: rgba(30, 41, 59, 0.08); color: #1e293b; border-color: rgba(30, 41, 59, 0.2);">
-                                <i class="bi bi-palette-fill text-primary me-1"></i> Traditional Art
+                            <span class="category-badge-pill pill-pratima">
+                                <i class="bi bi-palette-fill me-1"></i> Traditional Art
                             </span>
                         </div>
                     </div>
@@ -964,7 +973,7 @@
                     <div class="row g-4">
                         <!-- Pratima Card 1 -->
                         <div class="col-md-4">
-                            <div class="vote-card h-100 p-3">
+                            <div class="vote-card h-100 p-2 p-md-3">
                                 <div class="position-relative mb-3">
                                     <img src="https://images.unsplash.com/photo-1728921957375-877340feaf6a?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0"
                                         alt="Jalan Nagar Pratima" class="img-fluid rounded-3 w-100"
@@ -990,7 +999,7 @@
 
                         <!-- Pratima Card 2 -->
                         <div class="col-md-4">
-                            <div class="vote-card h-100 p-3">
+                            <div class="vote-card h-100 p-2 p-md-3">
                                 <div class="position-relative mb-3">
                                     <img src="https://images.unsplash.com/photo-1756399220348-7964d338cb19?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                                         alt="Kadmani Pratima" class="img-fluid rounded-3 w-100"
@@ -1015,7 +1024,7 @@
 
                         <!-- Pratima Card 3 -->
                         <div class="col-md-4">
-                            <div class="vote-card h-100 p-3">
+                            <div class="vote-card h-100 p-2 p-md-3">
                                 <div class="position-relative mb-3">
                                     <img src="https://images.unsplash.com/photo-1728493118702-febd0b9a0fab?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0"
                                         alt="Graham Bazar Pratima" class="img-fluid rounded-3 w-100"
@@ -1040,7 +1049,7 @@
                         </div>
                         <!-- Pratima Card 4 -->
                         <div class="col-md-4">
-                            <div class="vote-card h-100 p-3">
+                            <div class="vote-card h-100 p-2 p-md-3">
                                 <div class="position-relative mb-3">
                                     <img src="https://images.unsplash.com/photo-1728921957375-877340feaf6a?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0"
                                         alt="Jalan Nagar Pratima" class="img-fluid rounded-3 w-100"
@@ -1066,7 +1075,7 @@
 
                         <!-- Pratima Card 5 -->
                         <div class="col-md-4">
-                            <div class="vote-card h-100 p-3">
+                            <div class="vote-card h-100 p-2 p-md-3">
                                 <div class="position-relative mb-3">
                                     <img src="https://images.unsplash.com/photo-1756399220348-7964d338cb19?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                                         alt="Kadmani Pratima" class="img-fluid rounded-3 w-100"
@@ -1091,7 +1100,7 @@
 
                         <!-- Pratima Card 6 -->
                         <div class="col-md-4">
-                            <div class="vote-card h-100 p-3">
+                            <div class="vote-card h-100 p-2 p-md-3">
                                 <div class="position-relative mb-3">
                                     <img src="https://images.unsplash.com/photo-1728493118702-febd0b9a0fab?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0"
                                         alt="Graham Bazar Pratima" class="img-fluid rounded-3 w-100"
@@ -1117,9 +1126,14 @@
                     </div>
                 </div>
 
+                <!-- CATEGORY SEGMENT DIVIDER -->
+                <div class="category-segment-divider" aria-hidden="true">
+                    <span class="category-segment-divider-icon"><i class="bi bi-star-fill"></i></span>
+                </div>
+
                 <!-- CATEGORY 3: BEST LIGHTING -->
                 <div class="category-section-block cat-lighting-theme">
-                    <div class="category-title-wrapper" id="cat-best-lighting">
+                    <div class="category-title-wrapper cat-header-lighting" id="cat-best-lighting">
                         <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
                             <div class="d-flex align-items-center gap-3">
                                 <div class="category-icon-box"
@@ -1127,14 +1141,16 @@
                                     <i class="bi bi-lightbulb-fill text-white"></i>
                                 </div>
                                 <div>
+                                    <span class="category-eyebrow text-warning"><i
+                                            class="bi bi-brightness-high-fill me-1"></i> CATEGORY 03 •
+                                        ILLUMINATION</span>
                                     <h3 class="category-title-text">Best Lighting</h3>
                                     <div class="category-subtitle-text">Grand Illuminations & Light Gate Displays
                                     </div>
                                 </div>
                             </div>
-                            <span class="category-badge-pill"
-                                style="background: rgba(217, 119, 6, 0.1); color: #b45309; border-color: rgba(217, 119, 6, 0.25);">
-                                <i class="bi bi-brightness-high-fill text-warning me-1"></i> Illumination Award
+                            <span class="category-badge-pill pill-lighting">
+                                <i class="bi bi-brightness-high-fill me-1"></i> Illumination Award
                             </span>
                         </div>
                     </div>
@@ -1142,7 +1158,7 @@
                     <div class="row g-4">
                         <!-- Pratima Card 1 -->
                         <div class="col-md-4">
-                            <div class="vote-card h-100 p-3">
+                            <div class="vote-card h-100 p-2 p-md-3">
                                 <div class="position-relative mb-3">
                                     <img src="https://images.unsplash.com/photo-1728921957375-877340feaf6a?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0"
                                         alt="Jalan Nagar Pratima" class="img-fluid rounded-3 w-100"
@@ -1168,7 +1184,7 @@
 
                         <!-- Pratima Card 2 -->
                         <div class="col-md-4">
-                            <div class="vote-card h-100 p-3">
+                            <div class="vote-card h-100 p-2 p-md-3">
                                 <div class="position-relative mb-3">
                                     <img src="https://images.unsplash.com/photo-1756399220348-7964d338cb19?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                                         alt="Kadmani Pratima" class="img-fluid rounded-3 w-100"
@@ -1193,7 +1209,7 @@
 
                         <!-- Pratima Card 3 -->
                         <div class="col-md-4">
-                            <div class="vote-card h-100 p-3">
+                            <div class="vote-card h-100 p-2 p-md-3">
                                 <div class="position-relative mb-3">
                                     <img src="https://images.unsplash.com/photo-1728493118702-febd0b9a0fab?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0"
                                         alt="Graham Bazar Pratima" class="img-fluid rounded-3 w-100"
@@ -1218,7 +1234,7 @@
                         </div>
                         <!-- Pratima Card 4 -->
                         <div class="col-md-4">
-                            <div class="vote-card h-100 p-3">
+                            <div class="vote-card h-100 p-2 p-md-3">
                                 <div class="position-relative mb-3">
                                     <img src="https://images.unsplash.com/photo-1728921957375-877340feaf6a?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0"
                                         alt="Jalan Nagar Pratima" class="img-fluid rounded-3 w-100"
@@ -1244,7 +1260,7 @@
 
                         <!-- Pratima Card 5 -->
                         <div class="col-md-4">
-                            <div class="vote-card h-100 p-3">
+                            <div class="vote-card h-100 p-2 p-md-3">
                                 <div class="position-relative mb-3">
                                     <img src="https://images.unsplash.com/photo-1756399220348-7964d338cb19?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                                         alt="Kadmani Pratima" class="img-fluid rounded-3 w-100"
@@ -1269,7 +1285,7 @@
 
                         <!-- Pratima Card 6 -->
                         <div class="col-md-4">
-                            <div class="vote-card h-100 p-3">
+                            <div class="vote-card h-100 p-2 p-md-3">
                                 <div class="position-relative mb-3">
                                     <img src="https://images.unsplash.com/photo-1728493118702-febd0b9a0fab?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0"
                                         alt="Graham Bazar Pratima" class="img-fluid rounded-3 w-100"
@@ -1289,6 +1305,372 @@
                                         data-pandal="Graham Bazar Cultural Pratima">
                                         <i class="bi bi-hand-thumbs-up me-1"></i> Vote
                                     </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Explore All Pujas CTA Banner -->
+                <div class="mt-5 p-4 rounded-4 shadow-sm text-center text-md-start" style="background: linear-gradient(135deg, #fdf5ea 0%, #fae8d0 100%); border: 2px dashed #d4a373;">
+                    <div class="row align-items-center g-3">
+                        <div class="col-md-8">
+                            <span class="badge bg-danger text-white rounded-pill px-3 py-1 mb-2 fw-semibold">
+                                <i class="bi bi-grid-3x3-gap-fill me-1"></i> Full Directory
+                            </span>
+                            <h4 class="fw-bold mb-1" style="color: #8c0c16;">Explore All 36+ Dibrugarh Durga Pujas</h4>
+                            <p class="text-muted small mb-0">Search all pandals with real-time auto-suggestions, lazy loading directory, and live community voting.</p>
+                        </div>
+                        <div class="col-md-4 text-center text-md-end">
+                            <a href="allpujas.html" class="btn btn-vote-pill px-4 py-2 text-decoration-none">
+                                <span>Browse All Pujas</span>
+                                <span class="vote-icon-badge">
+                                    <i class="bi bi-arrow-right"></i>
+                                </span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Official Awards Announced / Winners Showcase Section -->
+        <section class="awards-announced-section py-5" id="awards-announced">
+            <div class="container py-3">
+                <!-- Section Header Box -->
+                <div class="awards-announced-header-box text-center mb-5">
+                    <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold text-uppercase mb-3 shadow-sm">
+                        <i class="bi bi-trophy-fill me-1"></i> OFFICIAL ANNOUNCEMENT • SHARAD SAMMAN 2026
+                    </span>
+                    <h2 class="display-6 fw-bold mb-2 text-white">🏆 Sharad Samman 2026 — Official Award Winners</h2>
+                    <p class="lead text-white-50 mx-auto mb-4" style="max-width: 780px; font-size: 1.05rem;">
+                        Public voting and official jury assessments have concluded! Celebrating the crowned champions of Dibrugarh's finest pandals, idols, and lightings.
+                    </p>
+
+                    <!-- Key Stats Bar -->
+                    <div class="d-flex flex-wrap justify-content-center gap-3 pt-2 border-top border-warning border-opacity-25">
+                        <div class="px-3 py-1 rounded-pill bg-white bg-opacity-10 text-white small">
+                            <i class="bi bi-check-circle-fill text-warning me-1"></i> <strong>48,920+</strong> Verified Votes Cast
+                        </div>
+                        <div class="px-3 py-1 rounded-pill bg-white bg-opacity-10 text-white small">
+                            <i class="bi bi-award-fill text-warning me-1"></i> <strong>3 Flagship</strong> Award Categories
+                        </div>
+                        <div class="px-3 py-1 rounded-pill bg-white bg-opacity-10 text-white small">
+                            <i class="bi bi-shield-check text-warning me-1"></i> <strong>Jury Certified</strong> Results
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CATEGORY 1: BEST PUJA WINNERS -->
+                <div class="mb-5">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4 pb-2 border-bottom border-danger border-opacity-25">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-danger text-white rounded-pill px-3 py-2 fs-6">
+                                <i class="bi bi-trophy-fill me-1"></i> CATEGORY 01
+                            </span>
+                            <h3 class="fw-bold mb-0 text-dark">Best Puja — Announced Winners</h3>
+                        </div>
+                        <span class="text-muted small"><i class="bi bi-star-fill text-warning me-1"></i> Grand Flagship Title</span>
+                    </div>
+
+                    <div class="row g-4 justify-content-center">
+                        <!-- 1st Place Gold Winner -->
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="winner-podium-card winner-gold h-100">
+                                <span class="winner-rank-badge badge-gold">
+                                    <i class="bi bi-crown-fill me-1"></i> 1st Place • Winner
+                                </span>
+                                <div class="winner-img-wrap">
+                                    <img src="https://images.unsplash.com/photo-1728921957375-877340feaf6a?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0" alt="New Market Durga Puja">
+                                    <div class="winner-img-overlay d-flex justify-content-between align-items-end">
+                                        <span class="winner-vote-pill text-warning">
+                                            <i class="bi bi-fire me-1"></i> 5,537 Votes
+                                        </span>
+                                        <span class="badge bg-warning text-dark fw-bold">GOLD MEDAL</span>
+                                    </div>
+                                </div>
+                                <div class="p-3 text-center">
+                                    <div class="mb-2">
+                                        <div class="winner-trophy-ring ring-gold mx-auto">
+                                            <i class="bi bi-trophy-fill"></i>
+                                        </div>
+                                    </div>
+                                    <h4 class="fw-bold mb-1 text-dark">New Market Durga Puja</h4>
+                                    <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill text-danger me-1"></i> New Market Road, Dibrugarh</p>
+                                    <div class="p-2 rounded bg-warning bg-opacity-10 text-dark small fw-medium">
+                                        <i class="bi bi-award-fill text-warning me-1"></i> Winner of Best Puja 2026 for Exceptional Architecture & Theme Excellence.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2nd Place Silver Runner-up -->
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="winner-podium-card winner-silver h-100">
+                                <span class="winner-rank-badge badge-silver">
+                                    <i class="bi bi-award-fill me-1"></i> 2nd Place • Runner-Up
+                                </span>
+                                <div class="winner-img-wrap">
+                                    <img src="https://images.unsplash.com/photo-1728493118702-febd0b9a0fab?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0" alt="Thana Chariali Sarbajanin">
+                                    <div class="winner-img-overlay d-flex justify-content-between align-items-end">
+                                        <span class="winner-vote-pill text-light">
+                                            <i class="bi bi-hand-thumbs-up me-1"></i> 4,812 Votes
+                                        </span>
+                                        <span class="badge bg-secondary text-white fw-bold">SILVER MEDAL</span>
+                                    </div>
+                                </div>
+                                <div class="p-3 text-center">
+                                    <div class="mb-2">
+                                        <div class="winner-trophy-ring ring-silver mx-auto">
+                                            <i class="bi bi-award"></i>
+                                        </div>
+                                    </div>
+                                    <h4 class="fw-bold mb-1 text-dark">Thana Chariali Sarbajanin</h4>
+                                    <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill text-danger me-1"></i> Thana Chariali, Dibrugarh</p>
+                                    <div class="p-2 rounded bg-light text-muted small fw-medium">
+                                        <i class="bi bi-check-circle-fill text-secondary me-1"></i> Runner-Up for Outstanding Heritage Concept & Crowd Safety.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3rd Place Bronze Runner-up -->
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="winner-podium-card winner-bronze h-100">
+                                <span class="winner-rank-badge badge-bronze">
+                                    <i class="bi bi-shield-fill me-1"></i> 3rd Place • 2nd Runner-Up
+                                </span>
+                                <div class="winner-img-wrap">
+                                    <img src="https://images.unsplash.com/photo-1728921957375-877340feaf6a?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0" alt="Graham Bazar Sarbajanin">
+                                    <div class="winner-img-overlay d-flex justify-content-between align-items-end">
+                                        <span class="winner-vote-pill text-light">
+                                            <i class="bi bi-hand-thumbs-up me-1"></i> 3,940 Votes
+                                        </span>
+                                        <span class="badge bg-danger bg-opacity-75 text-white fw-bold">BRONZE MEDAL</span>
+                                    </div>
+                                </div>
+                                <div class="p-3 text-center">
+                                    <div class="mb-2">
+                                        <div class="winner-trophy-ring ring-bronze mx-auto">
+                                            <i class="bi bi-star"></i>
+                                        </div>
+                                    </div>
+                                    <h4 class="fw-bold mb-1 text-dark">Graham Bazar Sarbajanin</h4>
+                                    <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill text-danger me-1"></i> Graham Bazar, Dibrugarh</p>
+                                    <div class="p-2 rounded bg-light text-muted small fw-medium">
+                                        <i class="bi bi-check-circle-fill text-danger me-1"></i> 2nd Runner-Up for Traditional Ambiance & Community Harmony.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CATEGORY 2: BEST PRATIMA WINNERS -->
+                <div class="mb-5">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4 pb-2 border-bottom border-primary border-opacity-25">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-dark text-white rounded-pill px-3 py-2 fs-6">
+                                <i class="bi bi-flower1 text-warning me-1"></i> CATEGORY 02
+                            </span>
+                            <h3 class="fw-bold mb-0 text-dark">Best Pratima — Idol Artistry Winners</h3>
+                        </div>
+                        <span class="text-muted small"><i class="bi bi-palette-fill me-1 text-primary"></i> Clay Idol Craftsmanship</span>
+                    </div>
+
+                    <div class="row g-4 justify-content-center">
+                        <!-- 1st Place Gold Winner -->
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="winner-podium-card winner-gold h-100">
+                                <span class="winner-rank-badge badge-gold">
+                                    <i class="bi bi-crown-fill me-1"></i> 1st Place • Winner
+                                </span>
+                                <div class="winner-img-wrap">
+                                    <img src="https://images.unsplash.com/photo-1756399220348-7964d338cb19?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0" alt="Kadmani Sarbajanin Pratima">
+                                    <div class="winner-img-overlay d-flex justify-content-between align-items-end">
+                                        <span class="winner-vote-pill text-warning">
+                                            <i class="bi bi-fire me-1"></i> 4,115 Votes
+                                        </span>
+                                        <span class="badge bg-warning text-dark fw-bold">GOLD MEDAL</span>
+                                    </div>
+                                </div>
+                                <div class="p-3 text-center">
+                                    <div class="mb-2">
+                                        <div class="winner-trophy-ring ring-gold mx-auto">
+                                            <i class="bi bi-flower1"></i>
+                                        </div>
+                                    </div>
+                                    <h4 class="fw-bold mb-1 text-dark">Kadmani Sarbajanin Pratima</h4>
+                                    <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill text-danger me-1"></i> Kadmani, Dibrugarh</p>
+                                    <div class="p-2 rounded bg-warning bg-opacity-10 text-dark small fw-medium">
+                                        <i class="bi bi-award-fill text-warning me-1"></i> Crowned Best Idol for Divine Expressions & Master Clay Sculpting.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2nd Place Silver Runner-up -->
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="winner-podium-card winner-silver h-100">
+                                <span class="winner-rank-badge badge-silver">
+                                    <i class="bi bi-award-fill me-1"></i> 2nd Place • Runner-Up
+                                </span>
+                                <div class="winner-img-wrap">
+                                    <img src="https://images.unsplash.com/photo-1728921957375-877340feaf6a?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0" alt="Jalan Nagar Sarbajanin Pratima">
+                                    <div class="winner-img-overlay d-flex justify-content-between align-items-end">
+                                        <span class="winner-vote-pill text-light">
+                                            <i class="bi bi-hand-thumbs-up me-1"></i> 3,420 Votes
+                                        </span>
+                                        <span class="badge bg-secondary text-white fw-bold">SILVER MEDAL</span>
+                                    </div>
+                                </div>
+                                <div class="p-3 text-center">
+                                    <div class="mb-2">
+                                        <div class="winner-trophy-ring ring-silver mx-auto">
+                                            <i class="bi bi-palette"></i>
+                                        </div>
+                                    </div>
+                                    <h4 class="fw-bold mb-1 text-dark">Jalan Nagar Sarbajanin Pratima</h4>
+                                    <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill text-danger me-1"></i> Jalan Nagar, Dibrugarh</p>
+                                    <div class="p-2 rounded bg-light text-muted small fw-medium">
+                                        <i class="bi bi-check-circle-fill text-secondary me-1"></i> Runner-Up for Traditional Ornamentation & Aesthetic Finishes.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3rd Place Bronze Runner-up -->
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="winner-podium-card winner-bronze h-100">
+                                <span class="winner-rank-badge badge-bronze">
+                                    <i class="bi bi-shield-fill me-1"></i> 3rd Place • 2nd Runner-Up
+                                </span>
+                                <div class="winner-img-wrap">
+                                    <img src="https://images.unsplash.com/photo-1728493118702-febd0b9a0fab?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0" alt="Graham Bazar Cultural Pratima">
+                                    <div class="winner-img-overlay d-flex justify-content-between align-items-end">
+                                        <span class="winner-vote-pill text-light">
+                                            <i class="bi bi-hand-thumbs-up me-1"></i> 2,980 Votes
+                                        </span>
+                                        <span class="badge bg-danger bg-opacity-75 text-white fw-bold">BRONZE MEDAL</span>
+                                    </div>
+                                </div>
+                                <div class="p-3 text-center">
+                                    <div class="mb-2">
+                                        <div class="winner-trophy-ring ring-bronze mx-auto">
+                                            <i class="bi bi-brush"></i>
+                                        </div>
+                                    </div>
+                                    <h4 class="fw-bold mb-1 text-dark">Graham Bazar Cultural Pratima</h4>
+                                    <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill text-danger me-1"></i> Graham Bazar, Dibrugarh</p>
+                                    <div class="p-2 rounded bg-light text-muted small fw-medium">
+                                        <i class="bi bi-check-circle-fill text-danger me-1"></i> 2nd Runner-Up for Eco-Friendly Natural Clay Dyes.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CATEGORY 3: BEST LIGHTING WINNERS -->
+                <div>
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4 pb-2 border-bottom border-warning border-opacity-50">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-warning text-dark rounded-pill px-3 py-2 fs-6">
+                                <i class="bi bi-lightbulb-fill me-1"></i> CATEGORY 03
+                            </span>
+                            <h3 class="fw-bold mb-0 text-dark">Best Lighting — Illumination Winners</h3>
+                        </div>
+                        <span class="text-muted small"><i class="bi bi-brightness-high-fill text-warning me-1"></i> Grand Illumination Gates</span>
+                    </div>
+
+                    <div class="row g-4 justify-content-center">
+                        <!-- 1st Place Gold Winner -->
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="winner-podium-card winner-gold h-100">
+                                <span class="winner-rank-badge badge-gold">
+                                    <i class="bi bi-crown-fill me-1"></i> 1st Place • Winner
+                                </span>
+                                <div class="winner-img-wrap">
+                                    <img src="https://images.unsplash.com/photo-1728921957375-877340feaf6a?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0" alt="Thana Chariali Illumination">
+                                    <div class="winner-img-overlay d-flex justify-content-between align-items-end">
+                                        <span class="winner-vote-pill text-warning">
+                                            <i class="bi bi-fire me-1"></i> 5,120 Votes
+                                        </span>
+                                        <span class="badge bg-warning text-dark fw-bold">GOLD MEDAL</span>
+                                    </div>
+                                </div>
+                                <div class="p-3 text-center">
+                                    <div class="mb-2">
+                                        <div class="winner-trophy-ring ring-gold mx-auto">
+                                            <i class="bi bi-lightbulb-fill"></i>
+                                        </div>
+                                    </div>
+                                    <h4 class="fw-bold mb-1 text-dark">Thana Chariali Sarbajanin</h4>
+                                    <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill text-danger me-1"></i> Thana Chariali, Dibrugarh</p>
+                                    <div class="p-2 rounded bg-warning bg-opacity-10 text-dark small fw-medium">
+                                        <i class="bi bi-award-fill text-warning me-1"></i> Awarded Gold for 3D Dynamic LED Light Gates & Chandelier Displays.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2nd Place Silver Runner-up -->
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="winner-podium-card winner-silver h-100">
+                                <span class="winner-rank-badge badge-silver">
+                                    <i class="bi bi-award-fill me-1"></i> 2nd Place • Runner-Up
+                                </span>
+                                <div class="winner-img-wrap">
+                                    <img src="https://images.unsplash.com/photo-1728493118702-febd0b9a0fab?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0" alt="New Market Illumination">
+                                    <div class="winner-img-overlay d-flex justify-content-between align-items-end">
+                                        <span class="winner-vote-pill text-light">
+                                            <i class="bi bi-hand-thumbs-up me-1"></i> 4,680 Votes
+                                        </span>
+                                        <span class="badge bg-secondary text-white fw-bold">SILVER MEDAL</span>
+                                    </div>
+                                </div>
+                                <div class="p-3 text-center">
+                                    <div class="mb-2">
+                                        <div class="winner-trophy-ring ring-silver mx-auto">
+                                            <i class="bi bi-brightness-high"></i>
+                                        </div>
+                                    </div>
+                                    <h4 class="fw-bold mb-1 text-dark">New Market Durga Puja</h4>
+                                    <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill text-danger me-1"></i> New Market Road, Dibrugarh</p>
+                                    <div class="p-2 rounded bg-light text-muted small fw-medium">
+                                        <i class="bi bi-check-circle-fill text-secondary me-1"></i> Runner-Up for Synchronized Street Illumination.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3rd Place Bronze Runner-up -->
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="winner-podium-card winner-bronze h-100">
+                                <span class="winner-rank-badge badge-bronze">
+                                    <i class="bi bi-shield-fill me-1"></i> 3rd Place • 2nd Runner-Up
+                                </span>
+                                <div class="winner-img-wrap">
+                                    <img src="https://images.unsplash.com/photo-1756399220348-7964d338cb19?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0" alt="Kadmani Illumination">
+                                    <div class="winner-img-overlay d-flex justify-content-between align-items-end">
+                                        <span class="winner-vote-pill text-light">
+                                            <i class="bi bi-hand-thumbs-up me-1"></i> 3,850 Votes
+                                        </span>
+                                        <span class="badge bg-danger bg-opacity-75 text-white fw-bold">BRONZE MEDAL</span>
+                                    </div>
+                                </div>
+                                <div class="p-3 text-center">
+                                    <div class="mb-2">
+                                        <div class="winner-trophy-ring ring-bronze mx-auto">
+                                            <i class="bi bi-sun"></i>
+                                        </div>
+                                    </div>
+                                    <h4 class="fw-bold mb-1 text-dark">Kadmani Sarbajanin Pratima</h4>
+                                    <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill text-danger me-1"></i> Kadmani, Dibrugarh</p>
+                                    <div class="p-2 rounded bg-light text-muted small fw-medium">
+                                        <i class="bi bi-check-circle-fill text-danger me-1"></i> 2nd Runner-Up for Eco-Solar Powered Illumination Arches.
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1354,14 +1736,6 @@
 
                 <!-- Carousel Stage -->
                 <div class="slider-stage">
-
-                    <!-- Left Circular Navigation Button -->
-                    <button class="nav-arrow-btn nav-arrow-prev" id="prevReelBtn" aria-label="Previous reels">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="15 18 9 12 15 6"></polyline>
-                        </svg>
-                    </button>
 
                     <!-- Carousel Viewport -->
                     <div class="reels-viewport" id="reelsViewport">
@@ -1490,13 +1864,21 @@
                         </div>
                     </div>
 
-                    <!-- Right Circular Navigation Button -->
-                    <button class="nav-arrow-btn nav-arrow-next" id="nextReelBtn" aria-label="Next reels">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="9 18 15 12 9 6"></polyline>
-                        </svg>
-                    </button>
+                    <!-- Navigation Controls Below Viewport -->
+                    <div class="reels-nav-controls">
+                        <button class="nav-arrow-btn nav-arrow-prev" id="prevReelBtn" aria-label="Previous reels">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="15 18 9 12 15 6"></polyline>
+                            </svg>
+                        </button>
+                        <button class="nav-arrow-btn nav-arrow-next" id="nextReelBtn" aria-label="Next reels">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </button>
+                    </div>
 
                 </div>
 
@@ -1740,7 +2122,8 @@
                         <li><a href="#home" class="nav-link-item active" data-page="Home">Home</a></li>
                         <li class="nav-sep">|</li>
                         <li><a href="#pujas" class="nav-link-item" data-page="Pujas">Pujas</a></li>
-
+                        <li class="nav-sep">|</li>
+                        <li><a href="allpujas.html" class="nav-link-item">All Pujas</a></li>
                         <li class="nav-sep">|</li>
                         <li><a href="#gallery" class="nav-link-item" data-page="Gallery">Gallery</a></li>
                         <li class="nav-sep">|</li>
@@ -1822,7 +2205,7 @@
                     <div class="shorts-header">
                         <div class="shorts-badge">
                             <i class="bi bi-broadcast text-danger"></i>
-                            <span id="shortsLocationLabel">Dibrugarh 24Ã7 Shorts</span>
+                            <span id="shortsLocationLabel">Dibrugarh 24×7 Shorts</span>
                         </div>
                         <button type="button" class="shorts-close-btn" data-bs-dismiss="modal" aria-label="Close">
                             <i class="bi bi-x-lg"></i>
@@ -1831,21 +2214,9 @@
 
                     <!-- Right Vertical Actions (Reels / Shorts Style) -->
                     <div class="shorts-actions">
-                        <!-- Like Action -->
-                        <button class="action-pill-btn" id="shortsLikeBtn" title="Like this Short">
-                            <div class="action-circle-icon text-danger">
-                                <i class="bi bi-heart-fill"></i>
-                            </div>
-                            <span id="shortsLikeCount">14.2K</span>
-                        </button>
 
-                        <!-- Mute / Unmute Action -->
-                        <button class="action-pill-btn" id="shortsAudioBtn" title="Toggle Sound">
-                            <div class="action-circle-icon text-warning">
-                                <i class="bi bi-volume-mute-fill" id="audioIcon"></i>
-                            </div>
-                            <span id="audioLabel">Muted</span>
-                        </button>
+
+
 
                         <!-- Share Action -->
                         <button class="action-pill-btn" id="shortsShareBtn" title="Share Reel">
@@ -1928,10 +2299,17 @@
                             <label class="form-label small fw-bold">Your Mobile Number (For Verification OTP)</label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light">+91</span>
-                                <input type="tel" class="form-control" placeholder="Enter 10-digit number"
-                                    maxlength="10" required pattern="[0-9]{10}">
+                                <input type="tel" class="form-control" id="voterMobile"
+                                    placeholder="Enter 10-digit number" maxlength="10" required pattern="[0-9]{10}">
                             </div>
                             <div class="form-text">One vote per phone number to ensure fair community polling.</div>
+                        </div>
+
+                        <!-- Already Voted Warning Message -->
+                        <div id="alreadyVotedAlert" class="alert alert-danger d-none py-2 px-3 small mt-2">
+                            <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                            <span id="alreadyVotedMsg">This mobile number has already cast a vote in Sharad Samman 2026.
+                                Only 1 vote per mobile number is permitted.</span>
                         </div>
 
                         <div id="voteAlert" class="alert alert-success d-none py-2 px-3 small">
@@ -1940,9 +2318,92 @@
                         </div>
 
                         <div class="d-grid mt-4">
-                            <button type="submit" class="btn btn-vote-pill justify-content-center py-2">
-                                <span>Submit My Vote</span>
-                                <i class="bi bi-arrow-right"></i>
+                            <button type="submit" class="btn btn-vote-pill justify-content-center py-2" id="btnSendOtp">
+                                <span>Proceed to OTP Verification</span>
+                                <i class="bi bi-arrow-right ms-1"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- OTP Verification Modal -->
+    <div class="modal fade" id="otpModal" tabindex="-1" aria-labelledby="otpModalLabel" aria-hidden="true"
+        data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg border-0" style="border-radius: 16px;">
+                <div class="modal-header border-0 pb-0">
+                    <div class="d-flex align-items-center gap-2">
+                        <img src="images/logo-dibru.png" alt="Dibrugarh 24x7 Logo" class="img-fluid"
+                            style="max-height: 34px;">
+                        <span class="badge bg-warning text-dark rounded-pill fw-bold"><i
+                                class="bi bi-shield-lock-fill me-1"></i> Verification</span>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                        id="otpCloseBtn"></button>
+                </div>
+
+                <div class="modal-body pt-3 text-center px-4">
+                    <div class="mb-3 d-inline-flex align-items-center justify-content-center rounded-circle bg-danger-subtle text-danger"
+                        style="width: 56px; height: 56px; font-size: 1.5rem;">
+                        <i class="bi bi-phone-vibrate-fill"></i>
+                    </div>
+                    <h4 class="fw-bold mb-1" id="otpModalLabel">Enter Verification Code</h4>
+                    <p class="text-muted small mb-3">
+                        We have sent a 4-digit OTP to <strong id="displayMobileNum" class="text-dark">+91 XXXXX
+                            XXXXX</strong>
+                    </p>
+
+
+
+                    <form id="otpForm">
+                        <!-- 4 Digit OTP Input Boxes -->
+                        <div class="d-flex justify-content-center gap-2 my-3" id="otpInputContainer">
+                            <input type="text" class="form-control text-center fs-4 fw-bold otp-digit-box" maxlength="1"
+                                pattern="[0-9]" inputmode="numeric" required autocomplete="off" data-index="1">
+                            <input type="text" class="form-control text-center fs-4 fw-bold otp-digit-box" maxlength="1"
+                                pattern="[0-9]" inputmode="numeric" required autocomplete="off" data-index="2">
+                            <input type="text" class="form-control text-center fs-4 fw-bold otp-digit-box" maxlength="1"
+                                pattern="[0-9]" inputmode="numeric" required autocomplete="off" data-index="3">
+                            <input type="text" class="form-control text-center fs-4 fw-bold otp-digit-box" maxlength="1"
+                                pattern="[0-9]" inputmode="numeric" required autocomplete="off" data-index="4">
+                        </div>
+
+                        <!-- Invalid OTP Alert Message -->
+                        <div id="otpInvalidAlert" class="alert alert-danger d-none py-2 px-3 small text-start mb-3">
+                            <i class="bi bi-x-circle-fill me-1"></i> <span id="otpInvalidMsg">Invalid OTP entered!
+                                Please enter the correct 4-digit code (Demo: 1234).</span>
+                        </div>
+
+                        <!-- Valid OTP Alert Message -->
+                        <div id="otpValidAlert" class="alert alert-success d-none py-2 px-3 small text-start mb-3">
+                            <i class="bi bi-check-circle-fill me-1"></i> <span id="otpValidMsg">OTP verified
+                                successfully! Recording your vote...</span>
+                        </div>
+
+                        <!-- Vote Submitted Success Alert Message -->
+                        <div id="voteSubmittedAlert" class="alert alert-success d-none py-2 px-3 small text-start mb-3">
+                            <i class="bi bi-patch-check-fill me-1"></i> <span id="voteSubmittedMsg">Vote submitted
+                                successfully! Thank you for participating in Sharad Samman 2026.</span>
+                        </div>
+
+                        <!-- Resend OTP Alert Toast Message -->
+                        <div id="otpResendAlert" class="alert alert-warning d-none py-2 px-3 small text-start mb-3">
+                            <i class="bi bi-send-check-fill me-1"></i> A new 4-digit OTP has been sent to your mobile
+                            number! (Demo: 1234)
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-vote-pill justify-content-center py-2"
+                                id="btnVerifyOtp">
+                                <span>Verify OTP &amp; Cast Vote</span>
+                                <i class="bi bi-check-lg ms-1"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-link text-muted text-decoration-none mt-1"
+                                id="btnResendOtp">
+                                Didn't receive OTP? <span class="text-danger fw-semibold">Resend OTP</span>
                             </button>
                         </div>
                     </form>
@@ -1956,7 +2417,6 @@
     <!-- jQuery 3.7.1 -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="js/script.js"></script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"7c9232d8d94c4b0fb3ddfd4417f87ea1","r":1,"spa":2}' crossorigin="anonymous"></script>
 </body>
 
-<script>'undefined'=== typeof _trfq || (window._trfq = []);'undefined'=== typeof _trfd && (window._trfd=[]),_trfd.push({'tccl.baseHost':'secureserver.net'},{'ap':'cpsh-oh'},{'server':'p3plzcpnl509034'},{'dcenter':'p3'},{'cp_id':'10273369'},{'cp_cl':'8'}) // Monitoring performance to make your website faster. If you want to opt-out, please contact web hosting support.</script><script src='https://img1.wsimg.com/traffic-assets/js/tccl.min.js'></script></html>
+</html>

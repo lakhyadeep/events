@@ -193,4 +193,39 @@ class EventMicrositeTest extends TestCase
         $this->assertStringContainsString('/storage/banners/desktop/sample.jpg', $banner->desktop_image_url);
         $this->assertStringContainsString('/storage/banners/mobile/sample.jpg', $banner->mobile_image_url);
     }
+
+    public function test_all_pujas_directory_renders_successfully(): void
+    {
+        $response = $this->get('/all-pujas');
+
+        $response->assertStatus(200);
+        $response->assertSee('Dibrugarh Durga Pujas');
+        $response->assertSee('Search and vote for your favourite puja committee');
+        $response->assertSee('pujaSearchInput');
+        $response->assertSee('filter-chips-wrap');
+        $response->assertSee('All Pujas');
+        $response->assertSee('allpujas.js');
+        $response->assertSee('window.dynamicPujasData');
+        $response->assertSee('Thana Chariali Sarbajanin');
+        $response->assertSee('puja-card-');
+    }
+
+    public function test_slug_based_all_pujas_route_works(): void
+    {
+        $response = $this->get('/events/sharod-samman-2026/all-pujas');
+
+        $response->assertStatus(200);
+        $response->assertSee('Dibrugarh Durga Pujas');
+    }
+
+    public function test_home_page_includes_explore_all_pujas_cta_and_otp_modal(): void
+    {
+        $response = $this->get('/');
+
+        $response->assertStatus(200);
+        $response->assertSee('Explore All 36+ Dibrugarh Durga Pujas');
+        $response->assertSee('otpModal');
+        $response->assertSee('voterMobile');
+        $response->assertSee('alreadyVotedAlert');
+    }
 }

@@ -66,10 +66,10 @@ class Participant extends Model
     {
         static::saving(function (Participant $participant) {
             // Keep legacy zone & locality text columns in sync if relation IDs are set
-            if ($participant->zone_id && empty($participant->zone)) {
+            if ($participant->zone_id && ($participant->isDirty('zone_id') || empty($participant->zone))) {
                 $participant->zone = Zone::find($participant->zone_id)?->name ?? $participant->zone;
             }
-            if ($participant->locality_id && empty($participant->locality)) {
+            if ($participant->locality_id && ($participant->isDirty('locality_id') || empty($participant->locality))) {
                 $participant->locality = Locality::find($participant->locality_id)?->name ?? $participant->locality;
             }
         });

@@ -25,6 +25,11 @@
             @include('frontend.partials.voting')
         </section>
 
+            @include('frontend.partials.awards-announced')
+
+
+
+
         <!-- Glimpses of Puja 2026 (Vertical 9:16 Video Shorts Carousel) -->
         @include('frontend.partials.gallery')
 
