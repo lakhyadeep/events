@@ -90,13 +90,54 @@ jobs:
         run: |
           SSH_CMD="ssh -p $SSH_PORT -i ~/.ssh/id_deploy -o StrictHostKeyChecking=no"
 
-          echo "===> Putting application into maintenance mode and pulling develop..."
-          $SSH_CMD "$SSH_USER@$SSH_HOST" "export TERM=dumb; cd $DEPLOY_PATH && if [ -f artisan ]; then php artisan down --render='errors::503' || true; fi && git fetch origin develop && git reset --hard origin/develop && composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev"
+          echo "===> Initializing codebase or pulling latest develop..."
+          $SSH_CMD "$SSH_USER@$SSH_HOST" "export TERM=dumb; mkdir -p $DEPLOY_PATH && cd $DEPLOY_PATH && {
+            if [ -d .git ]; then
+              if [ -f artisan ]; then php artisan down --render='errors::503' || true; fi
+              git fetch origin develop
+              git reset --hard origin/develop
+            else
+              echo 'No git repository detected. Cloning fresh develop branch...'
+              git clone -b develop https://github.com/lakhyadeep/events.git .
+            fi
+
+            if [ ! -f .env ]; then
+              echo 'Setting up initial .env file...'
+              if [ -f .env.production.example ]; then
+                cp .env.production.example .env
+              else
+                cp .env.example .env
+              fi
+            fi
+
+            if [ ! -f .htaccess ] && [ -f .htaccess.root-example ]; then
+              cp .htaccess.root-example .htaccess
+            fi
+
+            composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+
+            if ! grep -q '^APP_KEY=base64:' .env; then
+              php artisan key:generate --force || true
+            fi
+          }"
 
           echo "===> Syncing compiled Vite assets via rsync..."
           rsync -avz --delete -e "$SSH_CMD" public/build/ "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/public/build/"
 
           echo "===> Running migrations, permissions, and optimization caches..."
-          $SSH_CMD "$SSH_USER@$SSH_HOST" "export TERM=dumb; cd $DEPLOY_PATH && chmod -R 775 storage bootstrap/cache || true && php artisan storage:link || true && php artisan migrate --force && php artisan optimize:clear && php artisan optimize && php artisan view:cache && php artisan event:cache && php artisan queue:restart || true && php artisan up"
+          $SSH_CMD "$SSH_USER@$SSH_HOST" "export TERM=dumb; cd $DEPLOY_PATH && {
+            mkdir -p storage/framework/{sessions,views,cache} storage/logs bootstrap/cache
+            touch database/database.sqlite 2>/dev/null || true
+            chmod -R 775 storage bootstrap/cache 2>/dev/null || true
+            php artisan storage:link || true
+            php artisan migrate --force
+            php artisan optimize:clear
+            php artisan optimize
+            php artisan view:cache
+            php artisan event:cache
+            php artisan queue:restart || true
+            php artisan up
+          }"
+
 
 
