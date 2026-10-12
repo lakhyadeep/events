@@ -110,7 +110,7 @@ jobs:
               fi
             fi
 
-            if [ ! -f .htaccess ] && [ -f .htaccess.root-example ]; then
+            if [ -f .htaccess.root-example ]; then
               cp .htaccess.root-example .htaccess
             fi
 

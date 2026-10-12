@@ -17,4 +17,16 @@ require __DIR__.'/../vendor/autoload.php';
 /** @var Application $app */
 $app = require_once __DIR__.'/../bootstrap/app.php';
 
+// Normalize SCRIPT_NAME and PHP_SELF when public/ is rewritten by root .htaccess in a subdirectory
+if (
+    isset($_SERVER['SCRIPT_NAME'])
+    && str_contains($_SERVER['SCRIPT_NAME'], '/public/index.php')
+    && ! str_contains($_SERVER['REQUEST_URI'] ?? '', '/public/')
+) {
+    $_SERVER['SCRIPT_NAME'] = str_replace('/public/index.php', '/index.php', $_SERVER['SCRIPT_NAME']);
+    if (isset($_SERVER['PHP_SELF'])) {
+        $_SERVER['PHP_SELF'] = str_replace('/public/index.php', '/index.php', $_SERVER['PHP_SELF']);
+    }
+}
+
 $app->handleRequest(Request::capture());
