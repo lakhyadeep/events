@@ -7,7 +7,7 @@ return [
     | Default SMS / OTP Driver
     |--------------------------------------------------------------------------
     |
-    | Supported: "log", "twilio", "msg91", "fast2sms", "custom_http"
+    | Supported: "log"
     |
     */
     'default' => env('OTP_SMS_DRIVER', 'log'),
@@ -34,35 +34,10 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Provider Configurations (Fallback if not configured in database)
+    | Provider Configurations
     |--------------------------------------------------------------------------
     */
     'drivers' => [
-        'twilio' => [
-            'sid' => env('TWILIO_SID', ''),
-            'token' => env('TWILIO_AUTH_TOKEN', ''),
-            'from' => env('TWILIO_FROM_NUMBER', ''),
-        ],
-
-        'msg91' => [
-            'auth_key' => env('MSG91_AUTH_KEY', ''),
-            'sender_id' => env('MSG91_SENDER_ID', ''),
-            'template_id' => env('MSG91_TEMPLATE_ID', ''),
-        ],
-
-        'fast2sms' => [
-            'api_key' => env('FAST2SMS_API_KEY', ''),
-            'route' => env('FAST2SMS_ROUTE', 'otp'), // "otp" or "dlt"
-            'sender_id' => env('FAST2SMS_SENDER_ID', ''),
-            'entity_id' => env('FAST2SMS_ENTITY_ID', ''),
-        ],
-
-        'custom_http' => [
-            'url' => env('CUSTOM_SMS_URL', ''),
-            'method' => env('CUSTOM_SMS_METHOD', 'POST'), // POST or GET
-            'headers' => env('CUSTOM_SMS_HEADERS', '{}'),
-            'payload' => env('CUSTOM_SMS_PAYLOAD', '{"phone":"{phone}","message":"{message}","otp":"{otp}"}'),
-            'success_keyword' => env('CUSTOM_SMS_SUCCESS_KEYWORD', ''),
-        ],
+        'log' => [],
     ],
 ];

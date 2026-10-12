@@ -41,16 +41,12 @@ class OtpManagementTest extends TestCase
 
         Livewire::test(ManageOtpSettings::class)
             ->fillForm([
-                'active_driver' => 'twilio',
+                'active_driver' => 'log',
                 'otp_length' => 4,
                 'expiry_minutes' => 10,
                 'resend_cooldown_seconds' => 90,
                 'max_attempts' => 3,
-                'twilio_settings' => [
-                    'sid' => 'AC_CONFIG_TEST',
-                    'token' => 'SECRET_TOKEN_XYZ',
-                    'from' => '+18885551234',
-                ],
+                'message_template' => 'Your code is :otp. Valid for :minutes min.',
             ])
             ->call('save')
             ->assertHasNoFormErrors();
@@ -58,14 +54,12 @@ class OtpManagementTest extends TestCase
         OtpSetting::clearCache();
         $updated = OtpSetting::current();
 
-        $this->assertSame('twilio', $updated->active_driver);
+        $this->assertSame('log', $updated->active_driver);
         $this->assertSame(4, $updated->otp_length);
         $this->assertSame(10, $updated->expiry_minutes);
         $this->assertSame(90, $updated->resend_cooldown_seconds);
         $this->assertSame(3, $updated->max_attempts);
-        $this->assertSame('AC_CONFIG_TEST', $updated->twilio_settings['sid']);
-        $this->assertSame('SECRET_TOKEN_XYZ', $updated->twilio_settings['token']);
-        $this->assertSame('+18885551234', $updated->twilio_settings['from']);
+        $this->assertSame('Your code is :otp. Valid for :minutes min.', $updated->message_template);
     }
 
     public function test_admin_can_trigger_send_test_otp_action(): void
