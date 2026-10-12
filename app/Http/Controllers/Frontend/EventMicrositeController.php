@@ -57,6 +57,7 @@ class EventMicrositeController extends Controller
         // Approved participants with zones for showcase
         $participants = $event->participants()
             ->approved()
+            ->withCount('votes')
             ->with(['zone', 'locality'])
             ->orderByDesc('is_shortlisted')
             ->get();
@@ -95,6 +96,7 @@ class EventMicrositeController extends Controller
 
         $participants = $event->participants()
             ->approved()
+            ->withCount('votes')
             ->with(['zone', 'locality'])
             ->orderByDesc('is_shortlisted')
             ->get();

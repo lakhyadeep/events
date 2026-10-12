@@ -278,7 +278,7 @@ class EventMicrositeTest extends TestCase
         $response->assertSee('data-target="awards-announced"', false);
         $response->assertSee('data-target="gallery"', false);
         $response->assertSee('data-target="events"', false);
-        $response->assertSee('id="btnVoteModal"', false);
+        $response->assertSee('Voting Closed', false);
     }
 
     public function test_all_pujas_shows_empty_state_without_fake_fallback_data(): void

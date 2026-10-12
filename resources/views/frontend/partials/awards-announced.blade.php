@@ -60,7 +60,7 @@
                                         <i class="bi bi-crown-fill me-1"></i> 1st Place • Winner
                                     </span>
                                     <div class="winner-img-wrap">
-                                        <img src="{{ $goldWinner->participant?->primary_image_url ?: ($goldWinner->participant?->image_1_url ?: 'https://images.unsplash.com/photo-1728921957375-877340feaf6a?q=80&w=2070&auto=format&fit=crop') }}"
+                                        <img src="{{ $goldWinner->participant?->primary_image_url ?: ($goldWinner->participant?->image_1_url ?: asset('event-assets/images/hero.png')) }}"
                                             alt="{{ $goldWinner->participant?->display_name ?: $goldWinner->participant?->name }}">
                                         <div class="winner-img-overlay d-flex justify-content-between align-items-end">
                                             <span class="winner-vote-pill text-warning">
@@ -97,7 +97,7 @@
                                         <i class="bi bi-award-fill me-1"></i> 2nd Place • Runner-Up
                                     </span>
                                     <div class="winner-img-wrap">
-                                        <img src="{{ $silverWinner->participant?->image_1_url ?: ($silverWinner->participant?->primary_image_url ?: 'https://images.unsplash.com/photo-1728493118702-febd0b9a0fab?q=80&w=1170&auto=format&fit=crop') }}"
+                                        <img src="{{ $silverWinner->participant?->image_1_url ?: ($silverWinner->participant?->primary_image_url ?: asset('event-assets/images/hero.png')) }}"
                                             alt="{{ $silverWinner->participant?->display_name ?: $silverWinner->participant?->name }}">
                                         <div class="winner-img-overlay d-flex justify-content-between align-items-end">
                                             <span class="winner-vote-pill text-light">
@@ -134,7 +134,7 @@
                                         <i class="bi bi-shield-fill me-1"></i> 3rd Place • 2nd Runner-Up
                                     </span>
                                     <div class="winner-img-wrap">
-                                        <img src="{{ $bronzeWinner->participant?->image_2_url ?: ($bronzeWinner->participant?->primary_image_url ?: 'https://images.unsplash.com/photo-1756399220348-7964d338cb19?q=80&w=1074&auto=format&fit=crop') }}"
+                                        <img src="{{ $bronzeWinner->participant?->image_2_url ?: ($bronzeWinner->participant?->primary_image_url ?: asset('event-assets/images/hero.png')) }}"
                                             alt="{{ $bronzeWinner->participant?->display_name ?: $bronzeWinner->participant?->name }}">
                                         <div class="winner-img-overlay d-flex justify-content-between align-items-end">
                                             <span class="winner-vote-pill text-light">

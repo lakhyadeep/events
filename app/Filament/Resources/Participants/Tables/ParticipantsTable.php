@@ -39,6 +39,12 @@ class ParticipantsTable
                     ->label('Zone')
                     ->badge()
                     ->sortable(),
+                TextColumn::make('votes_count')
+                    ->counts('votes')
+                    ->label('Votes')
+                    ->badge()
+                    ->color('danger')
+                    ->sortable(),
                 TextColumn::make('registration_status')
                     ->label('Status')
                     ->badge()

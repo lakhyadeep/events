@@ -1,3 +1,16 @@
+@props([
+    'event' => null,
+    'metaTitle' => null,
+    'metaDescription' => null,
+    'ogImage' => null,
+    'useAllPujasScript' => false,
+])
+@php
+    $currentEvent = $event ?? ($attributes->get('event') ?? null);
+    if (! $currentEvent && class_exists(\App\Models\Event::class)) {
+        $currentEvent = \App\Models\Event::where('status', 'active')->latest('year')->first() ?? \App\Models\Event::latest('year')->first();
+    }
+@endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth">
 <head>
@@ -36,6 +49,11 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- jQuery 3.7.1 -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+        window.isVotingOpen = {{ ($currentEvent && $currentEvent->isVotingOpen()) ? 'true' : 'false' }};
+        window.votingClosedMessage = {!! json_encode($currentEvent ? $currentEvent->getVotingClosedMessage() : 'Voting is currently closed for this event.') !!};
+        window.votingCountdownTarget = {!! json_encode($currentEvent && $currentEvent->countdown_datetime ? $currentEvent->countdown_datetime->toIso8601String() : null) !!};
+    </script>
     @if (!empty($useAllPujasScript))
         <!-- All Pujas JavaScript Logic -->
         <script src="{{ asset('event-assets/js/allpujas.js') }}"></script>

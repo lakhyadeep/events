@@ -45,15 +45,28 @@
                         </li>
                     </ul>
 
-                    <!-- Right Action Button: Vote Now -->
+                    <!-- Right Action Button: Vote Now / Voting Closed -->
+                    @php
+                        $isVotingOpen = isset($event) && $event->isVotingOpen();
+                    @endphp
                     <div class="d-flex align-items-center mt-3 mt-lg-0">
-                        <button class="btn btn-vote-pill w-100 w-lg-auto" id="btnVoteModal" type="button"
-                            data-bs-toggle="modal" data-bs-target="#voteModal">
-                            <span>Vote Now</span>
-                            <span class="vote-icon-badge">
-                                <i class="bi bi-hand-index-thumb-fill"></i>
-                            </span>
-                        </button>
+                        @if ($isVotingOpen)
+                            <button class="btn btn-vote-pill w-100 w-lg-auto" id="btnVoteModal" type="button"
+                                data-bs-toggle="modal" data-bs-target="#voteModal">
+                                <span>Vote Now</span>
+                                <span class="vote-icon-badge">
+                                    <i class="bi bi-hand-index-thumb-fill"></i>
+                                </span>
+                            </button>
+                        @else
+                            <button class="btn btn-secondary rounded-pill w-100 w-lg-auto opacity-75" id="btnVoteModalClosed" type="button"
+                                data-bs-toggle="modal" data-bs-target="#voteModal">
+                                <span>Voting Closed</span>
+                                <span class="badge bg-dark rounded-pill ms-2">
+                                    <i class="bi bi-lock-fill"></i>
+                                </span>
+                            </button>
+                        @endif
                     </div>
                 </div>
 
