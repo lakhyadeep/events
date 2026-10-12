@@ -54,9 +54,11 @@ jobs:
       - name: Run Tests
         run: php artisan test --compact
 
-  build-assets:
-    name: Build Frontend Assets
+  deploy:
+    name: Deploy to UAT Server
     runs-on: ubuntu-latest
+    needs: [test]
+    if: always() && (needs.test.result == 'success' || needs.test.result == 'skipped')
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -67,29 +69,10 @@ jobs:
           node-version: 22
           cache: 'npm'
 
-      - name: Install NPM Dependencies & Build
+      - name: Install Dependencies & Build Frontend Assets
         run: |
           npm ci
           npm run build
-
-      - name: Upload Vite Build Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: vite-build
-          path: public/build
-          retention-days: 1
-
-  deploy:
-    name: Deploy to UAT Server
-    runs-on: ubuntu-latest
-    needs: [test, build-assets]
-    if: always() && (needs.test.result == 'success' || needs.test.result == 'skipped') && needs.build-assets.result == 'success'
-    steps:
-      - name: Download Vite Build Artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: vite-build
-          path: public/build
 
       - name: Configure SSH Key
         run: |
@@ -115,4 +98,5 @@ jobs:
 
           echo "===> Running migrations, permissions, and optimization caches..."
           $SSH_CMD "$SSH_USER@$SSH_HOST" "export TERM=dumb; cd $DEPLOY_PATH && chmod -R 775 storage bootstrap/cache || true && php artisan storage:link || true && php artisan migrate --force && php artisan optimize:clear && php artisan optimize && php artisan view:cache && php artisan event:cache && php artisan queue:restart || true && php artisan up"
+
 
