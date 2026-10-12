@@ -39,7 +39,7 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <!-- Custom Festive Stylesheet -->
-    <link rel="stylesheet" href="{{ asset('event-assets/css/style.css') }}">
+    <link rel="stylesheet" href="{{ asset('event-assets/css/style.css') }}?v={{ file_exists(public_path('event-assets/css/style.css')) ? filemtime(public_path('event-assets/css/style.css')) : '1.0' }}">
 </head>
 <body>
 
@@ -57,10 +57,10 @@
     </script>
     @if (!empty($useAllPujasScript))
         <!-- All Pujas JavaScript Logic -->
-        <script src="{{ asset('event-assets/js/allpujas.js') }}"></script>
+        <script src="{{ asset('event-assets/js/allpujas.js') }}?v={{ file_exists(public_path('event-assets/js/allpujas.js')) ? filemtime(public_path('event-assets/js/allpujas.js')) : '1.0' }}"></script>
     @else
         <!-- Festive Microsite Script -->
-        <script src="{{ asset('event-assets/js/script.js') }}"></script>
+        <script src="{{ asset('event-assets/js/script.js') }}?v={{ file_exists(public_path('event-assets/js/script.js')) ? filemtime(public_path('event-assets/js/script.js')) : '1.0' }}"></script>
     @endif
 
     {{ $scripts ?? '' }}
