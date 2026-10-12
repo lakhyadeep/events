@@ -73,7 +73,7 @@ $(document).ready(function () {
         $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Checking &amp; Sending OTP...');
 
         $.ajax({
-            url: '/api/v1/otp/send',
+            url: (window.apiBaseUrl || '/api/v1') + '/otp/send',
             type: 'POST',
             contentType: 'application/json',
             headers: {
@@ -175,7 +175,7 @@ $(document).ready(function () {
         $verifyBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Verifying &amp; Recording Vote...');
 
         $.ajax({
-            url: '/api/v1/votes/cast',
+            url: (window.apiBaseUrl || '/api/v1') + '/votes/cast',
             type: 'POST',
             contentType: 'application/json',
             headers: {
@@ -244,7 +244,7 @@ $(document).ready(function () {
         $('#otpInvalidAlert, #otpValidAlert, #voteSubmittedAlert').addClass('d-none');
 
         $.ajax({
-            url: '/api/v1/otp/send',
+            url: (window.apiBaseUrl || '/api/v1') + '/otp/send',
             type: 'POST',
             contentType: 'application/json',
             headers: {
