@@ -62,7 +62,7 @@
                     @if ($event->videoShorts && $event->videoShorts->isNotEmpty())
                         @foreach ($event->videoShorts as $index => $short)
                             <div class="reel-card" data-index="{{ $index }}" data-pandal="{{ $short->name }}"
-                                data-likes="{{ (14 + $index * 5) . '.2K' }}" data-theme="{{ $short->caption ?: $short->name }}"
+                                data-theme="{{ $short->caption ?: $short->name }}"
                                 data-splash="{{ $short->thumbnail_image_url ?: asset('event-assets/images/hero.png') }}"
                                 data-video="{{ $short->video_url }}">
                                 <video class="reel-bg"

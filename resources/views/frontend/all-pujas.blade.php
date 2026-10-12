@@ -1,4 +1,5 @@
 <x-layouts.microsite
+    :event="$event"
     :meta-title="($event->meta_title ?: 'All Pujas Directory — ' . ($event->display_name ?? 'Dibrugarh Durgo Utsav 2026'))"
     :meta-description="$event->meta_description ?: 'Explore the complete directory of registered Sarbajanin Durga Pujas across Dibrugarh with interactive search, auto-suggestions, and live voting.'"
     :og-image="$event->og_image ?? null"
@@ -13,6 +14,8 @@
         <!-- Dynamic Dataset Bridge for JavaScript Filtering & Lazy Loading -->
         <script>
             window.dynamicPujasData = @json($pujasData);
+            window.isVotingOpen = {{ isset($event) && $event->isVotingOpen() ? 'true' : 'false' }};
+            window.currentEventId = {{ $event->id ?? 'null' }};
         </script>
 
         <!-- Hero Section with Search & Auto-Suggestion -->
@@ -22,6 +25,13 @@
                 <!-- Title & Tagline -->
                 <h1 class="allpujas-title mb-1">Dibrugarh Durga Pujas</h1>
                 <p class="allpujas-subtitle mb-3">Search and vote for your favourite puja committee</p>
+
+                @if (isset($event) && ! $event->isVotingOpen())
+                    <div class="alert alert-warning border-0 shadow-sm rounded-pill px-4 py-2 d-inline-flex align-items-center gap-2 mb-4 mx-auto" style="max-width: 500px;">
+                        <i class="bi bi-lock-fill text-warning"></i>
+                        <span class="small fw-semibold text-dark">{{ $event->getVotingClosedMessage() }}</span>
+                    </div>
+                @endif
 
                 @if ($totalPujasCount > 0)
                     <!-- Search Field with Auto Suggestion -->
@@ -144,10 +154,19 @@
                                         <small class="text-muted d-block" style="font-size: 0.72rem;">Current Count</small>
                                         <span class="fw-bold fs-6 text-danger" id="count-puja-{{ $puja['id'] }}">{{ number_format($puja['votes']) }} votes</span>
                                     </div>
-                                    <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn"
-                                        data-pandal="{{ $puja['name'] }}" data-puja-id="{{ $puja['id'] }}">
-                                        <i class="bi bi-hand-thumbs-up me-1"></i> Vote
-                                    </button>
+                                    @php
+                                        $isVotingOpen = isset($event) && $event->isVotingOpen();
+                                    @endphp
+                                    @if ($isVotingOpen)
+                                        <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn"
+                                            data-pandal="{{ $puja['name'] }}" data-puja-id="{{ $puja['id'] }}" data-participant-id="{{ $puja['id'] }}">
+                                            <i class="bi bi-hand-thumbs-up me-1"></i> Vote
+                                        </button>
+                                    @else
+                                        <button class="btn btn-sm btn-secondary rounded-pill px-3 opacity-75" disabled title="{{ isset($event) ? $event->getVotingClosedMessage() : 'Voting Closed' }}">
+                                            <i class="bi bi-lock-fill me-1"></i> Closed
+                                        </button>
+                                    @endif
                                 </div>
                             </div>
                         </div>

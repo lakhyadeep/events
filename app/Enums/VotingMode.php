@@ -18,7 +18,7 @@ enum VotingMode: string
     public function description(): string
     {
         return match ($this) {
-            self::Participant => 'A mobile number can only vote for one participant across the entire event ballot.',
+            self::Participant => 'A mobile number can only vote for one participant across the entire event.',
             self::ParticipantAndAward => 'A mobile number can vote for a chosen participant under each active award category configured on the event.',
         };
     }

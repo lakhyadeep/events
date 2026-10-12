@@ -103,50 +103,95 @@ class Event extends Model
     }
 
     /**
+     * Check if public voting is currently open for this event based on toggle and countdown deadline.
+     */
+    public function isVotingOpen(): bool
+    {
+        if (! $this->is_voting_active) {
+            return false;
+        }
+
+        if ($this->countdown_datetime && now()->greaterThanOrEqualTo($this->countdown_datetime)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Get the descriptive closure message when voting is concluded or inactive.
+     */
+    public function getVotingClosedMessage(): string
+    {
+        if (filled($this->closure_message)) {
+            return $this->closure_message;
+        }
+
+        if ($this->countdown_datetime && now()->greaterThanOrEqualTo($this->countdown_datetime)) {
+            return 'Voting has officially concluded for this event.';
+        }
+
+        return 'Voting is currently closed for this event.';
+    }
+
+    /**
      * Check if a given mobile number is eligible to cast a vote under current event rules.
      *
      * @return array{allowed: bool, message: string}
      */
-    public function canMobileVote(string $mobile, ?int $awardId = null): array
+    public function canMobileVote(string $mobile, ?int $participantId = null, ?int $awardId = null): array
     {
+        if (! $this->isVotingOpen()) {
+            return [
+                'allowed' => false,
+                'message' => $this->getVotingClosedMessage(),
+            ];
+        }
+
         $clean = preg_replace('/[^0-9]/', '', $mobile) ?? '';
         if (strlen($clean) !== 10) {
             return ['allowed' => false, 'message' => 'Please provide a valid 10-digit mobile number.'];
         }
 
-        if ($this->voting_mode === VotingMode::ParticipantAndAward) {
-            if (! $awardId) {
-                return ['allowed' => false, 'message' => 'Please select an award category for this vote.'];
-            }
-
-            $alreadyVoted = $this->votes()
+        // Option 1: When an award category is selected (Participant + Award)
+        // A mobile number can cast one vote in each award category.
+        if ($awardId) {
+            $alreadyVotedInAward = $this->votes()
                 ->where('mobile_number', $clean)
                 ->where('award_id', $awardId)
                 ->exists();
 
-            if ($alreadyVoted) {
+            if ($alreadyVotedInAward) {
                 $award = $this->awards()->find($awardId);
                 $awardName = $award?->display_name ?: ($award?->name ?: 'this category');
 
                 return [
                     'allowed' => false,
-                    'message' => "Mobile number +91 {$clean} has already cast a vote for \"{$awardName}\". Only 1 vote per award category is permitted.",
+                    'message' => "Mobile number +91 {$clean} has already cast a vote for \"{$awardName}\". You can cast one vote in each award category.",
                 ];
             }
 
             return ['allowed' => true, 'message' => 'Eligible to vote.'];
         }
 
-        // Default 'participant' mode: 1 vote per mobile number across the entire event
-        $alreadyVoted = $this->votes()
-            ->where('mobile_number', $clean)
-            ->exists();
+        // Option 2: General candidate voting (without award category)
+        // A mobile number can vote for multiple different participants, but only once per candidate.
+        if ($participantId) {
+            $alreadyVoted = $this->votes()
+                ->where('mobile_number', $clean)
+                ->where('participant_id', $participantId)
+                ->whereNull('award_id')
+                ->exists();
 
-        if ($alreadyVoted) {
-            return [
-                'allowed' => false,
-                'message' => "Mobile number +91 {$clean} has already cast a vote in {$this->display_name}. Only 1 vote per phone number is permitted.",
-            ];
+            if ($alreadyVoted) {
+                $participant = $this->participants()->find($participantId);
+                $participantName = $participant?->display_name ?: ($participant?->name ?: 'this candidate');
+
+                return [
+                    'allowed' => false,
+                    'message' => "Mobile number +91 {$clean} has already cast a vote for \"{$participantName}\". You can vote for other participants, but only once per candidate.",
+                ];
+            }
         }
 
         return ['allowed' => true, 'message' => 'Eligible to vote.'];

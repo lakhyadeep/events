@@ -1,4 +1,5 @@
 <x-layouts.microsite
+    :event="$event"
     :meta-title="$event->meta_title ?: 'Dibrugarh 24x7 - Festive Awards & Navigation'"
     :meta-description="$event->meta_description ?: 'Dibrugarh Durgo Utsav 2026'"
     :og-image="$event->og_image"

@@ -23,6 +23,7 @@ class OtpController extends Controller
             'phone' => ['required', 'string', 'min:7', 'max:20'],
             'purpose' => ['nullable', 'string', 'max:50'],
             'event_id' => ['nullable', 'integer', 'exists:events,id'],
+            'participant_id' => ['nullable', 'integer', 'exists:participants,id'],
             'award_id' => ['nullable', 'integer', 'exists:awards,id'],
         ]);
 
@@ -32,15 +33,16 @@ class OtpController extends Controller
         if ($purpose === 'voting' && ! empty($validated['event_id'])) {
             $event = Event::find($validated['event_id']);
             if ($event) {
-                if (! $event->is_voting_active) {
+                if (! $event->isVotingOpen()) {
                     return response()->json([
                         'success' => false,
-                        'message' => 'Voting is currently closed for this event.',
+                        'message' => $event->getVotingClosedMessage(),
                     ], 422);
                 }
 
+                $participantId = ! empty($validated['participant_id']) ? (int) $validated['participant_id'] : null;
                 $awardId = ! empty($validated['award_id']) ? (int) $validated['award_id'] : null;
-                $check = $event->canMobileVote($validated['phone'], $awardId);
+                $check = $event->canMobileVote($validated['phone'], $participantId, $awardId);
                 if (! $check['allowed']) {
                     return response()->json([
                         'success' => false,

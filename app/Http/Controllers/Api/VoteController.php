@@ -9,6 +9,7 @@ use App\Models\Vote;
 use App\Services\Otp\OtpService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class VoteController extends Controller
 {
@@ -23,6 +24,7 @@ class VoteController extends Controller
     {
         $validated = $request->validate([
             'event_id' => ['required', 'integer', 'exists:events,id'],
+            'participant_id' => ['nullable', 'integer', 'exists:participants,id'],
             'phone' => ['required', 'string', 'min:10', 'max:20'],
             'award_id' => ['nullable', 'integer', 'exists:awards,id'],
         ]);
@@ -30,16 +32,17 @@ class VoteController extends Controller
         /** @var Event $event */
         $event = Event::findOrFail($validated['event_id']);
 
-        if (! $event->is_voting_active) {
+        if (! $event->isVotingOpen()) {
             return response()->json([
                 'success' => false,
                 'allowed' => false,
-                'message' => 'Voting is currently closed for this event.',
+                'message' => $event->getVotingClosedMessage(),
             ], 422);
         }
 
+        $participantId = ! empty($validated['participant_id']) ? (int) $validated['participant_id'] : null;
         $awardId = ! empty($validated['award_id']) ? (int) $validated['award_id'] : null;
-        $check = $event->canMobileVote($validated['phone'], $awardId);
+        $check = $event->canMobileVote($validated['phone'], $participantId, $awardId);
 
         if (! $check['allowed']) {
             return response()->json([
@@ -72,10 +75,10 @@ class VoteController extends Controller
         /** @var Event $event */
         $event = Event::findOrFail($validated['event_id']);
 
-        if (! $event->is_voting_active) {
+        if (! $event->isVotingOpen()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Voting has officially concluded for this event.',
+                'message' => $event->getVotingClosedMessage(),
             ], 422);
         }
 
@@ -85,7 +88,7 @@ class VoteController extends Controller
         $awardId = ! empty($validated['award_id']) ? (int) $validated['award_id'] : null;
 
         // 1. Double check voting eligibility rules
-        $check = $event->canMobileVote($validated['phone'], $awardId);
+        $check = $event->canMobileVote($validated['phone'], $participant->id, $awardId);
         if (! $check['allowed']) {
             return response()->json([
                 'success' => false,
@@ -106,20 +109,34 @@ class VoteController extends Controller
             ], 422);
         }
 
-        // 3. Record official Ballot Vote
+        // 3. Record official Vote atomically
         $cleanPhone = preg_replace('/[^0-9]/', '', $validated['phone']) ?? '';
         if (strlen($cleanPhone) > 10) {
             $cleanPhone = substr($cleanPhone, -10);
         }
 
-        $vote = Vote::create([
-            'event_id' => $event->id,
-            'participant_id' => $participant->id,
-            'award_id' => $awardId,
-            'mobile_number' => $cleanPhone,
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-        ]);
+        try {
+            $vote = DB::transaction(function () use ($event, $participant, $awardId, $cleanPhone, $request) {
+                $recheck = $event->canMobileVote($cleanPhone, $participant->id, $awardId);
+                if (! $recheck['allowed']) {
+                    throw new \RuntimeException($recheck['message']);
+                }
+
+                return Vote::create([
+                    'event_id' => $event->id,
+                    'participant_id' => $participant->id,
+                    'award_id' => $awardId,
+                    'mobile_number' => $cleanPhone,
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                ]);
+            });
+        } catch (\RuntimeException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
 
         $recipientName = $participant->display_name ?: $participant->name;
 
@@ -129,7 +146,7 @@ class VoteController extends Controller
             'data' => [
                 'vote_id' => $vote->id,
                 'participant_name' => $recipientName,
-                'voting_mode' => $event->voting_mode->value,
+                'award_id' => $awardId,
             ],
         ], 200);
     }

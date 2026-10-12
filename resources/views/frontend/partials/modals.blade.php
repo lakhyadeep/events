@@ -39,7 +39,7 @@
                             <div class="action-circle-icon text-danger">
                                 <i class="bi bi-heart-fill"></i>
                             </div>
-                            <span id="shortsLikeCount">14.2K</span>
+                            <span id="shortsLikeCount" class="d-none"></span>
                         </button>
 
                         <!-- Mute / Unmute Action -->
@@ -105,7 +105,7 @@
                     <div class="d-flex align-items-center gap-2">
                         <img src="{{ asset('event-assets/images/logo-dibru.png') }}" alt="Dibrugarh 24x7 Logo" class="img-fluid"
                             style="max-height: 36px;">
-                        <span class="badge bg-danger rounded-pill">Official Ballot</span>
+                        <span class="badge bg-danger rounded-pill">Official Vote</span>
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -114,38 +114,28 @@
                     <h4 class="fw-bold mb-1" id="voteModalLabel">Cast Your Vote</h4>
                     <p class="text-muted small mb-4">Choose your favorite Pandal committee for the {{ $event->year ?? 2026 }} People's Choice Award.</p>
 
+                    @php
+                        $isVotingOpen = isset($event) && $event->isVotingOpen();
+                    @endphp
+
+                    @if (! $isVotingOpen)
+                        <div class="alert alert-warning py-3 px-3 d-flex align-items-center gap-2 mb-3 rounded-3" id="votingClosedModalAlert">
+                            <i class="bi bi-lock-fill fs-4 text-warning"></i>
+                            <div>
+                                <div class="fw-bold text-dark">Voting is Closed</div>
+                                <div class="small text-muted">{{ isset($event) ? $event->getVotingClosedMessage() : 'Voting is currently closed for this event.' }}</div>
+                            </div>
+                        </div>
+                    @endif
+
                     <form id="voteForm">
                         <input type="hidden" id="voteEventId" value="{{ $event->id ?? '' }}">
-                        <input type="hidden" id="voteVotingMode" value="{{ (isset($event) && $event->voting_mode) ? $event->voting_mode->value : 'participant' }}">
 
-                        @php
-                            $isAwardMode = isset($event) && $event->voting_mode === \App\Enums\VotingMode::ParticipantAndAward;
-                            $activeAwards = (isset($event) && $event->awards) ? $event->awards->where('is_active', true) : collect();
-                        @endphp
-
-                        @if ($isAwardMode)
-                            <div class="mb-3" id="awardCategoryGroup">
-                                <label class="form-label small fw-bold">Select Award Category</label>
-                                <select class="form-select" id="awardSelect" required>
-                                    @if ($activeAwards->isNotEmpty())
-                                        @foreach ($activeAwards as $award)
-                                            <option value="{{ $award->id }}" {{ $loop->first ? 'selected' : '' }}>
-                                                {{ $award->display_name ?: $award->name }}
-                                            </option>
-                                        @endforeach
-                                    @else
-                                        <option value="" disabled selected>No active award categories</option>
-                                    @endif
-                                </select>
-                                <div class="form-text">Choose the award category you wish to vote under.</div>
-                            </div>
-                        @else
-                            <input type="hidden" id="awardSelect" value="">
-                        @endif
+                        <input type="hidden" id="awardSelect" value="">
 
                         <div class="mb-3">
                             <label class="form-label small fw-bold">Select Committee</label>
-                            <select class="form-select" id="pandalSelect" required>
+                            <select class="form-select" id="pandalSelect" required {{ ! $isVotingOpen ? 'disabled' : '' }}>
                                 @if (isset($participants) && $participants->isNotEmpty())
                                     @foreach ($participants as $pandal)
                                         <option value="{{ $pandal->id }}" data-name="{{ $pandal->name }}" {{ $loop->first ? 'selected' : '' }}>
@@ -163,17 +153,11 @@
                             <div class="input-group">
                                 <span class="input-group-text bg-light">+91</span>
                                 <input type="tel" class="form-control" id="voterMobile"
-                                    placeholder="Enter 10-digit number" maxlength="10" required pattern="[0-9]{10}">
+                                    placeholder="Enter 10-digit number" maxlength="10" required pattern="[0-9]{10}" {{ ! $isVotingOpen ? 'disabled' : '' }}>
                             </div>
-                            @if ($isAwardMode)
-                                <div class="form-text">
-                                    <i class="bi bi-shield-check text-success me-1"></i>One vote per phone number <strong>for each award category</strong>.
-                                </div>
-                            @else
-                                <div class="form-text">
-                                    <i class="bi bi-shield-check text-success me-1"></i>One vote per phone number for this entire event.
-                                </div>
-                            @endif
+                            <div class="form-text">
+                                <i class="bi bi-shield-check text-success me-1"></i>One vote per phone number for each candidate or award category.
+                            </div>
                         </div>
 
                         <!-- Already Voted Warning Message -->
@@ -183,9 +167,9 @@
                         </div>
 
                         <div class="d-grid mt-4">
-                            <button type="submit" class="btn btn-vote-pill justify-content-center py-2" id="btnSendOtp">
-                                <span>Proceed to OTP Verification</span>
-                                <i class="bi bi-arrow-right ms-1"></i>
+                            <button type="submit" class="btn btn-vote-pill justify-content-center py-2" id="btnSendOtp" {{ ! $isVotingOpen ? 'disabled' : '' }}>
+                                <span>{{ $isVotingOpen ? 'Proceed to OTP Verification' : 'Voting Closed' }}</span>
+                                <i class="bi bi-{{ $isVotingOpen ? 'arrow-right' : 'lock-fill' }} ms-1"></i>
                             </button>
                         </div>
                     </form>

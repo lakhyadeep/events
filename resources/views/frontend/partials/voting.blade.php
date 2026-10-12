@@ -4,6 +4,7 @@
     $pujaAward = $eventAwards->first(fn($a) => str_contains(strtolower($a->name), 'puja') && !str_contains(strtolower($a->name), 'people')) ?? $eventAwards->first();
     $pratimaAward = $eventAwards->first(fn($a) => str_contains(strtolower($a->name), 'pratima') || str_contains(strtolower($a->name), 'idol')) ?? $eventAwards->skip(1)->first();
     $lightingAward = $eventAwards->first(fn($a) => str_contains(strtolower($a->name), 'light') || str_contains(strtolower($a->name), 'illumination')) ?? $eventAwards->skip(2)->first();
+    $isVotingOpen = isset($event) && $event->isVotingOpen();
 @endphp
 
 @if ($contestants->isNotEmpty())
@@ -29,6 +30,51 @@
                 <i class="bi bi-lightbulb-fill me-1 text-warning"></i> 3. Best Lighting
             </a>
         </div>
+
+        @if ($isVotingOpen && !empty($event->countdown_datetime))
+            <div class="voting-countdown-wrapper mt-3 p-3 rounded-4 shadow-sm text-center" 
+                 id="votingCountdownContainer"
+                 style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #fff; max-width: 520px; width: 100%; border: 1px solid rgba(255,255,255,0.12);">
+                <div class="small text-uppercase tracking-wider text-warning fw-semibold mb-2">
+                    <i class="bi bi-clock-history me-1"></i> Voting Deadline
+                </div>
+                <div class="d-flex justify-content-center align-items-center gap-3" 
+                     id="votingCountdownClock" 
+                     data-deadline="{{ $event->countdown_datetime->toIso8601String() }}">
+                    <div class="countdown-unit text-center">
+                        <span class="fs-4 fw-bold text-white d-block" id="countDays">00</span>
+                        <span class="text-white-50 text-uppercase" style="font-size: 0.65rem;">Days</span>
+                    </div>
+                    <span class="fs-4 text-warning fw-bold">:</span>
+                    <div class="countdown-unit text-center">
+                        <span class="fs-4 fw-bold text-white d-block" id="countHours">00</span>
+                        <span class="text-white-50 text-uppercase" style="font-size: 0.65rem;">Hours</span>
+                    </div>
+                    <span class="fs-4 text-warning fw-bold">:</span>
+                    <div class="countdown-unit text-center">
+                        <span class="fs-4 fw-bold text-white d-block" id="countMinutes">00</span>
+                        <span class="text-white-50 text-uppercase" style="font-size: 0.65rem;">Mins</span>
+                    </div>
+                    <span class="fs-4 text-warning fw-bold">:</span>
+                    <div class="countdown-unit text-center">
+                        <span class="fs-4 fw-bold text-danger d-block" id="countSeconds">00</span>
+                        <span class="text-white-50 text-uppercase" style="font-size: 0.65rem;">Secs</span>
+                    </div>
+                </div>
+                <div class="small text-white-50 mt-2" style="font-size: 0.75rem;">
+                    Voting closes on {{ $event->countdown_datetime->format('d M, Y h:i A') }}
+                </div>
+            </div>
+        @elseif (! $isVotingOpen)
+            <div class="voting-closed-banner mt-3 p-3 rounded-4 shadow-sm text-center"
+                 style="background: #fef2f2; border: 1px solid #fecaca; max-width: 520px; width: 100%;">
+                <div class="d-flex align-items-center justify-content-center gap-2 text-danger fw-bold fs-6 mb-1">
+                    <i class="bi bi-lock-fill"></i>
+                    <span>Voting is Closed</span>
+                </div>
+                <p class="mb-0 text-muted small">{{ isset($event) ? $event->getVotingClosedMessage() : 'Voting is currently closed for this event.' }}</p>
+            </div>
+        @endif
     </div>
 
     <!-- Award Details Modal -->
@@ -64,10 +110,16 @@
                 <div class="modal-footer justify-content-center bg-light border-0 py-3">
                     <button type="button" class="btn btn-secondary px-4 rounded-pill"
                         data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn text-white px-4 rounded-pill"
-                        style="background-color: #a5131d;" id="modalVoteActionBtn">
-                        <i class="bi bi-hand-thumbs-up-fill me-1"></i> Cast Your Vote
-                    </button>
+                    @if ($isVotingOpen)
+                        <button type="button" class="btn text-white px-4 rounded-pill"
+                            style="background-color: #a5131d;" id="modalVoteActionBtn">
+                            <i class="bi bi-hand-thumbs-up-fill me-1"></i> Cast Your Vote
+                        </button>
+                    @else
+                        <button type="button" class="btn btn-secondary px-4 rounded-pill opacity-75" disabled>
+                            <i class="bi bi-lock-fill me-1"></i> Voting Closed
+                        </button>
+                    @endif
                 </div>
             </div>
         </div>
@@ -98,7 +150,7 @@
                 <div class="col-md-4">
                     <div class="vote-card h-100 p-3">
                         <div class="position-relative mb-3">
-                            <img src="{{ $p->primary_image_url ?: ($p->image_1_url ?: 'https://images.unsplash.com/photo-1728921957375-877340feaf6a?q=80&w=2070&auto=format&fit=crop') }}"
+                            <img src="{{ $p->primary_image_url ?: ($p->image_1_url ?: asset('event-assets/images/hero.png')) }}"
                                 alt="{{ $p->display_name ?: $p->name }}" class="img-fluid rounded-3 w-100"
                                 style="height: 200px; object-fit: cover;">
                         </div>
@@ -114,15 +166,24 @@
                         @endif
                         <div class="d-flex justify-content-between align-items-center pt-2 border-top mt-auto">
                             <div>
-                                <small class="text-muted d-block">Zone</small>
+                                <small class="text-muted d-block" style="font-size: 0.72rem;">Zone &bull; Live Votes</small>
                                 <span class="fw-bold fs-6 text-danger">{{ $p->zone ?: 'Central' }}</span>
+                                <span class="badge bg-danger-subtle text-danger rounded-pill ms-1 live-vote-count-{{ $p->id }}">
+                                    <i class="bi bi-hand-thumbs-up-fill me-1"></i>{{ number_format($p->votes_count ?? 0) }}
+                                </span>
                             </div>
-                            <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn"
-                                data-pandal="{{ $p->name }}"
-                                data-participant-id="{{ $p->id }}"
-                                data-award-id="{{ $pujaAward?->id ?? '' }}">
-                                <i class="bi bi-hand-thumbs-up me-1"></i> Vote
-                            </button>
+                            @if ($isVotingOpen)
+                                <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn"
+                                    data-pandal="{{ $p->name }}"
+                                    data-participant-id="{{ $p->id }}"
+                                    data-award-id="{{ $pujaAward?->id ?? '' }}">
+                                    <i class="bi bi-hand-thumbs-up me-1"></i> Vote
+                                </button>
+                            @else
+                                <button class="btn btn-sm btn-secondary rounded-pill px-3 opacity-75" disabled title="{{ isset($event) ? $event->getVotingClosedMessage() : 'Voting Closed' }}">
+                                    <i class="bi bi-lock-fill me-1"></i> Closed
+                                </button>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -156,7 +217,7 @@
                 <div class="col-md-4">
                     <div class="vote-card h-100 p-3">
                         <div class="position-relative mb-3">
-                            <img src="{{ $p->image_1_url ?: ($p->primary_image_url ?: 'https://images.unsplash.com/photo-1756399220348-7964d338cb19?q=80&w=1074&auto=format&fit=crop') }}"
+                            <img src="{{ $p->image_1_url ?: ($p->primary_image_url ?: asset('event-assets/images/hero.png')) }}"
                                 alt="{{ $p->display_name ?: $p->name }}" class="img-fluid rounded-3 w-100"
                                 style="height: 200px; object-fit: cover;">
                         </div>
@@ -172,15 +233,24 @@
                         @endif
                         <div class="d-flex justify-content-between align-items-center pt-2 border-top mt-auto">
                             <div>
-                                <small class="text-muted d-block">Zone</small>
+                                <small class="text-muted d-block" style="font-size: 0.72rem;">Zone &bull; Live Votes</small>
                                 <span class="fw-bold fs-6 text-dark">{{ $p->zone ?: 'Central' }}</span>
+                                <span class="badge bg-secondary-subtle text-dark rounded-pill ms-1 live-vote-count-{{ $p->id }}">
+                                    <i class="bi bi-hand-thumbs-up-fill me-1 text-danger"></i>{{ number_format($p->votes_count ?? 0) }}
+                                </span>
                             </div>
-                            <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn"
-                                data-pandal="{{ $p->name }}"
-                                data-participant-id="{{ $p->id }}"
-                                data-award-id="{{ $pratimaAward?->id ?? '' }}">
-                                <i class="bi bi-hand-thumbs-up me-1"></i> Vote
-                            </button>
+                            @if ($isVotingOpen)
+                                <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn"
+                                    data-pandal="{{ $p->name }}"
+                                    data-participant-id="{{ $p->id }}"
+                                    data-award-id="{{ $pratimaAward?->id ?? '' }}">
+                                    <i class="bi bi-hand-thumbs-up me-1"></i> Vote
+                                </button>
+                            @else
+                                <button class="btn btn-sm btn-secondary rounded-pill px-3 opacity-75" disabled title="{{ isset($event) ? $event->getVotingClosedMessage() : 'Voting Closed' }}">
+                                    <i class="bi bi-lock-fill me-1"></i> Closed
+                                </button>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -214,7 +284,7 @@
                 <div class="col-md-4">
                     <div class="vote-card h-100 p-3">
                         <div class="position-relative mb-3">
-                            <img src="{{ $p->image_2_url ?: ($p->primary_image_url ?: 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=800&q=80') }}"
+                            <img src="{{ $p->image_2_url ?: ($p->primary_image_url ?: asset('event-assets/images/hero.png')) }}"
                                 alt="{{ $p->display_name ?: $p->name }}" class="img-fluid rounded-3 w-100"
                                 style="height: 200px; object-fit: cover;">
                         </div>
@@ -230,15 +300,24 @@
                         @endif
                         <div class="d-flex justify-content-between align-items-center pt-2 border-top mt-auto">
                             <div>
-                                <small class="text-muted d-block">Zone</small>
+                                <small class="text-muted d-block" style="font-size: 0.72rem;">Zone &bull; Live Votes</small>
                                 <span class="fw-bold fs-6 text-warning">{{ $p->zone ?: 'Central' }}</span>
+                                <span class="badge bg-warning-subtle text-dark rounded-pill ms-1 live-vote-count-{{ $p->id }}">
+                                    <i class="bi bi-hand-thumbs-up-fill me-1 text-danger"></i>{{ number_format($p->votes_count ?? 0) }}
+                                </span>
                             </div>
-                            <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn"
-                                data-pandal="{{ $p->name }}"
-                                data-participant-id="{{ $p->id }}"
-                                data-award-id="{{ $lightingAward?->id ?? '' }}">
-                                <i class="bi bi-hand-thumbs-up me-1"></i> Vote
-                            </button>
+                            @if ($isVotingOpen)
+                                <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn"
+                                    data-pandal="{{ $p->name }}"
+                                    data-participant-id="{{ $p->id }}"
+                                    data-award-id="{{ $lightingAward?->id ?? '' }}">
+                                    <i class="bi bi-hand-thumbs-up me-1"></i> Vote
+                                </button>
+                            @else
+                                <button class="btn btn-sm btn-secondary rounded-pill px-3 opacity-75" disabled title="{{ isset($event) ? $event->getVotingClosedMessage() : 'Voting Closed' }}">
+                                    <i class="bi bi-lock-fill me-1"></i> Closed
+                                </button>
+                            @endif
                         </div>
                     </div>
                 </div>

@@ -16,7 +16,7 @@ Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
     Route::post('/otp/send', [OtpController::class, 'send'])->middleware('throttle:10,1');
     Route::post('/otp/verify', [OtpController::class, 'verify'])->middleware('throttle:15,1');
 
-    // Ballot Voting Endpoints with Rate Limiting
+    // Voting Endpoints with Rate Limiting
     Route::post('/votes/check', [VoteController::class, 'checkEligibility'])->middleware('throttle:30,1');
     Route::post('/votes/cast', [VoteController::class, 'cast'])->middleware('throttle:15,1');
 

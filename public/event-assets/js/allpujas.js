@@ -3,485 +3,12 @@
 // Search with Auto-Suggestion, Live Filters & Lazy Loading
 // ==========================================================================
 
-const defaultPujasData = [
-    {
-        id: 1,
-        name: "Thana Chariali Sarbajanin",
-        location: "Thana Chariali, Central Dibrugarh",
-        zone: "Central Dibrugarh",
-        category: "Best Puja",
-        categoryPill: "Flagship Award",
-        categoryClass: "tag-best-puja",
-        votes: 4812,
-        established: "Est. 1948",
-        theme: "Royal Vedic Mandir with Intricate Brass Relief",
-        image: "https://images.unsplash.com/photo-1728921957375-877340feaf6a?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-        id: 2,
-        name: "Graham Bazar Sarbajanin",
-        location: "Graham Bazar, Dibrugarh",
-        zone: "Graham Bazar & Station",
-        category: "Best Puja",
-        categoryPill: "Heritage & Splendor",
-        categoryClass: "tag-best-puja",
-        votes: 3940,
-        established: "Est. 1952",
-        theme: "Artisanal Terracotta & Clay Heritage Architecture",
-        image: "https://images.unsplash.com/photo-1728493118702-febd0b9a0fab?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-        id: 3,
-        name: "New Market Durga Puja",
-        location: "New Market Road, Dibrugarh",
-        zone: "Central Dibrugarh",
-        category: "Best Puja",
-        categoryPill: "1st Place Winner",
-        categoryClass: "tag-best-puja",
-        votes: 5537,
-        established: "Est. 1961",
-        theme: "Golden Palace Recreated with Traditional Assamese Motifs",
-        image: "https://images.unsplash.com/photo-1728921957375-877340feaf6a?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-        id: 4,
-        name: "Jalan Nagar Sarbajanin Pratima",
-        location: "Jalan Nagar, Dibrugarh",
-        zone: "Jalan Nagar & Outer",
-        category: "Best Pratima",
-        categoryPill: "Traditional Art",
-        categoryClass: "tag-best-pratima",
-        votes: 3420,
-        established: "Est. 1970",
-        theme: "Sculpted Sabeki Ekchala Durga Idol in Pristine White Sholar Saaj",
-        image: "https://images.unsplash.com/photo-1728921957375-877340feaf6a?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-        id: 5,
-        name: "Kadmani Sarbajanin Pratima",
-        location: "Kadmani, Dibrugarh",
-        zone: "Central Dibrugarh",
-        category: "Best Pratima",
-        categoryPill: "Traditional Art",
-        categoryClass: "tag-best-pratima",
-        votes: 4115,
-        established: "Est. 1965",
-        theme: "Lifelike Clay Eyes & Mahishasurmardini Dynamic Stance",
-        image: "https://images.unsplash.com/photo-1756399220348-7964d338cb19?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-        id: 6,
-        name: "Graham Bazar Cultural Pratima",
-        location: "Graham Bazar, Dibrugarh",
-        zone: "Graham Bazar & Station",
-        category: "Best Pratima",
-        categoryPill: "Traditional Art",
-        categoryClass: "tag-best-pratima",
-        votes: 2980,
-        established: "Est. 1974",
-        theme: "Natural Eco-friendly Clay Colors with Classical Draping",
-        image: "https://images.unsplash.com/photo-1728493118702-febd0b9a0fab?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-        id: 7,
-        name: "Marwari Patty Sarbajanin",
-        location: "Marwari Patty, Dibrugarh",
-        zone: "Central Dibrugarh",
-        category: "Best Lighting",
-        categoryPill: "Grand Illumination",
-        categoryClass: "tag-best-lighting",
-        votes: 4620,
-        established: "Est. 1955",
-        theme: "3D Dynamic LED Chandannagar Moving Light Gates",
-        image: "https://images.unsplash.com/photo-1572979203492-7144e05bbf2f?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-        id: 8,
-        name: "Railway Colony Puja Samiti",
-        location: "Railway Colony, Dibrugarh",
-        zone: "Graham Bazar & Station",
-        category: "Best Lighting",
-        categoryPill: "Grand Illumination",
-        categoryClass: "tag-best-lighting",
-        votes: 3880,
-        established: "Est. 1958",
-        theme: "Spectacular Synchronized Light Symphony & Canopy",
-        image: "https://images.unsplash.com/photo-1598387993441-a364f854c3e1?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-        id: 9,
-        name: "Shantipara Sarbajanin Durga Puja",
-        location: "Shantipara 2nd Lane, Dibrugarh",
-        zone: "Central Dibrugarh",
-        category: "Best Puja",
-        categoryPill: "Flagship Award",
-        categoryClass: "tag-best-puja",
-        votes: 4310,
-        established: "Est. 1968",
-        theme: "Swarna Mandir Golden Splendor with Dazzling Illumination",
-        image: "https://images.unsplash.com/photo-1604085572504-a392ddf0d86a?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-        id: 10,
-        name: "Amolapatty Sarbajanin Durga Puja",
-        location: "Amolapatty, Dibrugarh",
-        zone: "Heritage Old City",
-        category: "Heritage Puja",
-        categoryPill: "Heritage Centenary",
-        categoryClass: "tag-heritage",
-        votes: 3750,
-        established: "Est. 1935",
-        theme: "Centenary Heritage Puja with Traditional Dhak & Aarti Rites",
-        image: "https://images.unsplash.com/photo-1634823136209-6aa056c0e259?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-        id: 11,
-        name: "Naliapool Sarbajanin Durga Puja",
-        location: "Naliapool, Dibrugarh",
-        zone: "Graham Bazar & Station",
-        category: "Best Lighting",
-        categoryPill: "Illumination Special",
-        categoryClass: "tag-best-lighting",
-        votes: 3625,
-        established: "Est. 1972",
-        theme: "Illuminated Over-bridge Archway and Color Changing Waterfalls",
-        image: "https://images.unsplash.com/photo-1605649487212-47bdab064df7?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-        id: 12,
-        name: "Boiragimoth Sarbajanin Durga Puja",
-        location: "Boiragimoth, Dibrugarh",
-        zone: "Heritage Old City",
-        category: "Eco-Friendly",
-        categoryPill: "Eco-Friendly",
-        categoryClass: "tag-eco",
-        votes: 3210,
-        established: "Est. 1976",
-        theme: "100% Biodegradable Bamboo, Jute, and Paddy Husk Architecture",
-        image: "https://images.unsplash.com/photo-1567157577867-05ccb1388e66?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-        id: 13,
-        name: "Paltan Bazar Sarbajanin Durga Puja",
-        location: "Paltan Bazar, Dibrugarh",
-        zone: "Central Dibrugarh",
-        category: "Best Puja",
-        categoryPill: "Popular Choice",
-        categoryClass: "tag-best-puja",
-        votes: 3490,
-        established: "Est. 1963",
-        theme: "Rajasthan Fort Replicas with Handcrafted Mirror Art",
-        image: "https://images.unsplash.com/photo-1728921957375-877340feaf6a?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-        id: 14,
-        name: "Chiring Chapori Sarbajanin Puja",
-        location: "Chiring Chapori, Dibrugarh",
-        zone: "Central Dibrugarh",
-        category: "Best Pratima",
-        categoryPill: "Clay Artistry",
-        categoryClass: "tag-best-pratima",
-        votes: 3120,
-        established: "Est. 1969",
-        theme: "Antique Rajbari Style Traditional Bishnupur Clay Idol",
-        image: "https://images.unsplash.com/photo-1756399220348-7964d338cb19?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-        id: 15,
-        name: "Chowkidinghee Sarbajanin Durga Puja",
-        location: "Chowkidinghee Chariali, Dibrugarh",
-        zone: "Central Dibrugarh",
-        category: "Best Puja",
-        categoryPill: "Grand Flagship",
-        categoryClass: "tag-best-puja",
-        votes: 4980,
-        established: "Est. 1954",
-        theme: "Magnificent Lotus Temple Replica with Glowing Floral Petals",
-        image: "https://images.unsplash.com/photo-1728493118702-febd0b9a0fab?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-        id: 16,
-        name: "Dibrugarh Bengali Association Puja",
-        location: "R.K.B. Road, Dibrugarh",
-        zone: "Heritage Old City",
-        category: "Heritage Puja",
-        categoryPill: "Centenary Tradition",
-        categoryClass: "tag-heritage",
-        votes: 4230,
-        established: "Est. 1928",
-        theme: "Nearly Century-Old Traditional Daker Saaj & Vedic Chants",
-        image: "https://images.unsplash.com/photo-1634823136209-6aa056c0e259?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-        id: 17,
-        name: "Kalibari Durga Puja Samiti",
-        location: "Old Kalibari, Dibrugarh",
-        zone: "Heritage Old City",
-        category: "Heritage Puja",
-        categoryPill: "Devotional Heritage",
-        categoryClass: "tag-heritage",
-        votes: 3890,
-        established: "Est. 1939",
-        theme: "Divine Sanctum with Sandhi Puja Grand 108 Lotus Offering",
-        image: "https://images.unsplash.com/photo-1601659771146-24e5efbf7708?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-        id: 18,
-        name: "Police Reserve Durga Puja",
-        location: "Police Reserve Lines, Dibrugarh",
-        zone: "South Dibrugarh",
-        category: "Best Lighting",
-        categoryPill: "Illumination",
-        categoryClass: "tag-best-lighting",
-        votes: 3510,
-        established: "Est. 1959",
-        theme: "Grand Laser Light Display & Patriotic Theme Illuminations",
-        image: "https://images.unsplash.com/photo-1572979203492-7144e05bbf2f?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-        id: 19,
-        name: "Khalihamari Sarbajanin Durga Puja",
-        location: "Khalihamari, Dibrugarh",
-        zone: "Central Dibrugarh",
-        category: "Best Puja",
-        categoryPill: "Artistic Pandal",
-        categoryClass: "tag-best-puja",
-        votes: 3670,
-        established: "Est. 1971",
-        theme: "South Indian Gopuram Temple Carved in Eco-Friendly Wood",
-        image: "https://images.unsplash.com/photo-1604085572504-a392ddf0d86a?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-        id: 20,
-        name: "Milan Nagar Sarbajanin Durga Puja",
-        location: "Milan Nagar J-Zone, Dibrugarh",
-        zone: "Jalan Nagar & Outer",
-        category: "Best Pratima",
-        categoryPill: "Creative Art",
-        categoryClass: "tag-best-pratima",
-        votes: 3340,
-        established: "Est. 1982",
-        theme: "Contemporary Fusion Maa Durga Sculpted with Tribal Motifs",
-        image: "https://images.unsplash.com/photo-1756399220348-7964d338cb19?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-        id: 21,
-        name: "Mancotta Road Sarbajanin Puja",
-        location: "Mancotta Road, Dibrugarh",
-        zone: "South Dibrugarh",
-        category: "Best Lighting",
-        categoryPill: "Illumination Gateway",
-        categoryClass: "tag-best-lighting",
-        votes: 3790,
-        established: "Est. 1977",
-        theme: "1 Km High-Intensity LED Light Tunnel along Mancotta Avenue",
-        image: "https://images.unsplash.com/photo-1605649487212-47bdab064df7?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-        id: 22,
-        name: "Santipara Jubak Sangha Puja",
-        location: "Santipara Main Road, Dibrugarh",
-        zone: "Central Dibrugarh",
-        category: "Best Puja",
-        categoryPill: "Youth & Culture",
-        categoryClass: "tag-best-puja",
-        votes: 4120,
-        established: "Est. 1980",
-        theme: "Himalayan Buddhist Monastery Replica with Prayer Wheels",
-        image: "https://images.unsplash.com/photo-1728921957375-877340feaf6a?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-        id: 23,
-        name: "Jhapara Durga Puja Samiti",
-        location: "Jhapara, Dibrugarh",
-        zone: "Heritage Old City",
-        category: "Heritage Puja",
-        categoryPill: "Folk Traditions",
-        categoryClass: "tag-heritage",
-        votes: 2840,
-        established: "Est. 1966",
-        theme: "Assamese Bihu-Durga Harmony Folk Decor with Bell-Metal Bells",
-        image: "https://images.unsplash.com/photo-1601659771146-24e5efbf7708?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-        id: 24,
-        name: "AT Road Sarbajanin Durga Puja",
-        location: "AT Road Commercial Hub, Dibrugarh",
-        zone: "Central Dibrugarh",
-        category: "Best Lighting",
-        categoryPill: "Grand Illumination",
-        categoryClass: "tag-best-lighting",
-        votes: 4450,
-        established: "Est. 1957",
-        theme: "Animated Chandannagar Light Tales of Mahishasurmardini",
-        image: "https://images.unsplash.com/photo-1598387993441-a364f854c3e1?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-        id: 25,
-        name: "Kumaranichiga Sarbajanin Puja",
-        location: "Kumaranichiga, Dibrugarh",
-        zone: "South Dibrugarh",
-        category: "Best Pratima",
-        categoryPill: "Traditional Art",
-        categoryClass: "tag-best-pratima",
-        votes: 3080,
-        established: "Est. 1985",
-        theme: "Graceful Abhaya Mudra Idol in Traditional Golden Silk Sari",
-        image: "https://images.unsplash.com/photo-1728921957375-877340feaf6a?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-        id: 26,
-        name: "Maijan Tea Estate Sarbajanin Puja",
-        location: "Maijan TE, Dibrugarh",
-        zone: "West / Riverside",
-        category: "Heritage Puja",
-        categoryPill: "Tea Garden Heritage",
-        categoryClass: "tag-heritage",
-        votes: 3190,
-        established: "Est. 1950",
-        theme: "Picturesque Tea Garden Heritage with Vibrant Dholak Beats",
-        image: "https://images.unsplash.com/photo-1634823136209-6aa056c0e259?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-        id: 27,
-        name: "Lepetkata Durga Puja Samiti",
-        location: "Lepetkata, Dibrugarh",
-        zone: "South Dibrugarh",
-        category: "Eco-Friendly",
-        categoryPill: "Eco-Friendly",
-        categoryClass: "tag-eco",
-        votes: 2920,
-        established: "Est. 1988",
-        theme: "Recycled Cane, Bamboo Basketry & Hand-painted Earthen Pots",
-        image: "https://images.unsplash.com/photo-1567157577867-05ccb1388e66?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-        id: 28,
-        name: "Seujpur Sarbajanin Durga Puja",
-        location: "Seujpur, Dibrugarh",
-        zone: "Central Dibrugarh",
-        category: "Best Puja",
-        categoryPill: "Artistic Pandal",
-        categoryClass: "tag-best-puja",
-        votes: 3820,
-        established: "Est. 1975",
-        theme: "Green Biosphere Dome with Living Bonsai Plants & Terrariums",
-        image: "https://images.unsplash.com/photo-1728493118702-febd0b9a0fab?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-        id: 29,
-        name: "Dibru-Sukapha Sarbajanin Puja",
-        location: "Nirmal Nagar, Dibrugarh",
-        zone: "Jalan Nagar & Outer",
-        category: "Best Pratima",
-        categoryPill: "Sculptural Marvel",
-        categoryClass: "tag-best-pratima",
-        votes: 3260,
-        established: "Est. 1983",
-        theme: "Ahom Architecture Fusion Durga Idol with Brass Ornaments",
-        image: "https://images.unsplash.com/photo-1756399220348-7964d338cb19?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-        id: 30,
-        name: "Borbari Durga Puja Samiti",
-        location: "Borbari, Dibrugarh",
-        zone: "Graham Bazar & Station",
-        category: "Best Lighting",
-        categoryPill: "Illumination",
-        categoryClass: "tag-best-lighting",
-        votes: 3140,
-        established: "Est. 1979",
-        theme: "Kaleidoscopic Fiber-optic Constellation Dome",
-        image: "https://images.unsplash.com/photo-1572979203492-7144e05bbf2f?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-        id: 31,
-        name: "Tinkunia Sarbajanin Durga Puja",
-        location: "Tinkunia, Dibrugarh",
-        zone: "Central Dibrugarh",
-        category: "Best Puja",
-        categoryPill: "Grand Gateway",
-        categoryClass: "tag-best-puja",
-        votes: 3910,
-        established: "Est. 1964",
-        theme: "Victorian Clock Tower & Glass Facade Gateway",
-        image: "https://images.unsplash.com/photo-1728921957375-877340feaf6a?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-        id: 32,
-        name: "HS Road Sarbajanin Durga Puja",
-        location: "H.S. Road, Dibrugarh",
-        zone: "Central Dibrugarh",
-        category: "Best Lighting",
-        categoryPill: "Illumination Carnival",
-        categoryClass: "tag-best-lighting",
-        votes: 4210,
-        established: "Est. 1960",
-        theme: "Musical Fountain with Synchronized Illumination Show",
-        image: "https://images.unsplash.com/photo-1605649487212-47bdab064df7?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-        id: 33,
-        name: "Gabharu Pather Sarbajanin Puja",
-        location: "Gabharu Pather, Dibrugarh",
-        zone: "South Dibrugarh",
-        category: "Eco-Friendly",
-        categoryPill: "Eco-Friendly",
-        categoryClass: "tag-eco",
-        votes: 2780,
-        established: "Est. 1991",
-        theme: "Handloom Weavers Village Theme with Sualkuchi Silk Fabrics",
-        image: "https://images.unsplash.com/photo-1567157577867-05ccb1388e66?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-        id: 34,
-        name: "Convoy Road Sarbajanin Puja",
-        location: "Convoy Road, Dibrugarh",
-        zone: "Central Dibrugarh",
-        category: "Best Pratima",
-        categoryPill: "Traditional Art",
-        categoryClass: "tag-best-pratima",
-        votes: 3380,
-        established: "Est. 1981",
-        theme: "Serene Mahisasuramardini with 10 Weapon Details in Fine Silver",
-        image: "https://images.unsplash.com/photo-1756399220348-7964d338cb19?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-        id: 35,
-        name: "Mohanaghat Sarbajanin Puja",
-        location: "Mohanaghat Brahmaputra Bank, Dibrugarh",
-        zone: "West / Riverside",
-        category: "Heritage Puja",
-        categoryPill: "Riverside Heritage",
-        categoryClass: "tag-heritage",
-        votes: 3560,
-        established: "Est. 1953",
-        theme: "Brahmaputra Wave Pavilion with Evening Ganga-Style Aarti",
-        image: "https://images.unsplash.com/photo-1601659771146-24e5efbf7708?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-        id: 36,
-        name: "Rehabari Sarbajanin Durga Puja",
-        location: "Rehabari, Dibrugarh",
-        zone: "Graham Bazar & Station",
-        category: "Best Puja",
-        categoryPill: "Cultural Splendor",
-        categoryClass: "tag-best-puja",
-        votes: 3690,
-        established: "Est. 1973",
-        theme: "Terracotta Relief Panels Celebrating Assam's Riverine Culture",
-        image: "https://images.unsplash.com/photo-1728493118702-febd0b9a0fab?q=80&w=800&auto=format&fit=crop"
-    }
-];
+// Dynamic Dataset populated from database via Blade template
+const allPujasData = (window.dynamicPujasData && Array.isArray(window.dynamicPujasData)) ? window.dynamicPujasData : [];
 
 // Configuration for Lazy Loading & Pagination
 const INITIAL_BATCH = 12;
 const BATCH_SIZE = 6;
-
-// Dynamic Dataset Resolution
-const allPujasData = (typeof window !== 'undefined' && Array.isArray(window.dynamicPujasData))
-    ? window.dynamicPujasData
-    : (typeof window !== 'undefined' && window.dynamicPujasData === undefined ? defaultPujasData : []);
 
 let currentZone = "all";
 let currentSearchQuery = "";
@@ -492,14 +19,10 @@ let isLoadingMore = false;
 let activeSuggestIndex = -1;
 let currentSuggestions = [];
 
-// Track voted numbers and active vote target
-let votedMobileNumbers = new Set(['9876543210', '9999999999']);
-let pendingVoteData = { mobile: '', pandal: '', pujaId: null };
+// Track active vote target
+let pendingVoteData = { mobile: '', pandal: '', pujaId: null, awardId: null, eventId: null };
 
 $(document).ready(function () {
-
-    // 0. Update chip counts dynamically based on allPujasData
-    updateChipCounts();
 
     // 1. Populate Modal Ballot Select with all registered Pujas
     populateBallotOptions();
@@ -535,24 +58,14 @@ function populateBallotOptions() {
     if (!$pandalSelect.length) return;
 
     $pandalSelect.empty();
+    if (allPujasData.length === 0) {
+        $pandalSelect.append('<option value="" disabled selected>No committees available for voting</option>');
+        return;
+    }
     allPujasData.forEach((puja, index) => {
         const isSelected = index === 0 ? 'selected' : '';
-        $pandalSelect.append(`<option value="${puja.id}" data-name="${escapeHtml(puja.name)}" ${isSelected}>${escapeHtml(puja.name)} (${escapeHtml(puja.location)})</option>`);
-    });
-}
-
-function updateChipCounts() {
-    $('.filter-chip-btn').each(function () {
-        const zone = $(this).attr('data-zone');
-        let count = 0;
-        if (zone === 'all') {
-            count = allPujasData.length;
-        } else if (zone === 'Outer & Riverside') {
-            count = allPujasData.filter(p => p.zone === 'Jalan Nagar & Outer' || p.zone === 'West / Riverside' || p.zone === 'Outer & Riverside').length;
-        } else {
-            count = allPujasData.filter(p => p.zone === zone).length;
-        }
-        $(this).find('.chip-count').text(count);
+        const loc = puja.location || puja.zone || 'Dibrugarh';
+        $pandalSelect.append(`<option value="${puja.id}" data-name="${escapeHtml(puja.name)}" ${isSelected}>${escapeHtml(puja.name)} (${escapeHtml(loc)})</option>`);
     });
 }
 
@@ -642,7 +155,7 @@ function renderNextBatch(countToLoad) {
                              class="img-fluid rounded-3 w-100"
                              style="height: 200px; object-fit: cover;"
                              loading="lazy"
-                             onerror="this.onerror=null;this.src='images/hero.png';">
+                             onerror="this.onerror=null;this.src='/event-assets/images/hero.png';">
                     </div>
                     
                     <div class="d-flex justify-content-between align-items-baseline mb-1">
@@ -662,10 +175,14 @@ function renderNextBatch(countToLoad) {
                             <small class="text-muted d-block" style="font-size: 0.72rem;">Current Count</small>
                             <span class="fw-bold fs-6 text-danger" id="count-puja-${puja.id}">${puja.votes.toLocaleString()} votes</span>
                         </div>
+                        ${(typeof window.isVotingOpen === "undefined" || window.isVotingOpen) ? `
                         <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn"
-                            data-pandal="${escapeHtml(puja.name)}" data-puja-id="${puja.id}">
+                            data-pandal="${escapeHtml(puja.name)}" data-puja-id="${puja.id}" data-participant-id="${puja.id}">
                             <i class="bi bi-hand-thumbs-up me-1"></i> Vote
-                        </button>
+                        </button>` : `
+                        <button class="btn btn-sm btn-secondary rounded-pill px-3 opacity-75" disabled title="Voting Closed">
+                            <i class="bi bi-lock-fill me-1"></i> Closed
+                        </button>`}
                     </div>
                 </div>
             </div>
@@ -951,192 +468,122 @@ function triggerLazyBatch() {
 // 7. VOTING & OTP VERIFICATION FLOW
 // ==========================================================================
 function setupVotingHandlers() {
-    let pendingVoteData = { mobile: '', pandal: '', pujaId: null, purpose: 'voting' };
-    let resendTimerInterval = null;
-
-    function getCsrfToken() {
-        return $('meta[name="csrf-token"]').attr('content') || '';
-    }
-
-    function getExpectedOtpLength() {
-        const len = parseInt($('#otpInputContainer').attr('data-otp-length'), 10);
-        return (len >= 4 && len <= 8) ? len : 6;
-    }
-
-    function getVotedNumbers() {
-        try {
-            const stored = localStorage.getItem('dibru_voted_mobiles');
-            return stored ? JSON.parse(stored) : [];
-        } catch (e) {
-            return [];
-        }
-    }
-
-    function markMobileVoted(mobile) {
-        try {
-            const list = getVotedNumbers();
-            if (list.indexOf(mobile) === -1) {
-                list.push(mobile);
-                localStorage.setItem('dibru_voted_mobiles', JSON.stringify(list));
-            }
-        } catch (e) {}
-    }
-
-    function isMobileVoted(mobile) {
-        return getVotedNumbers().indexOf(mobile) !== -1;
-    }
-
-    function startResendCountdown(seconds) {
-        if (resendTimerInterval) {
-            clearInterval(resendTimerInterval);
-        }
-
-        let remaining = seconds || 60;
-        const $btn = $('#btnResendOtp');
-        const $text = $('#resendBtnText');
-
-        $btn.prop('disabled', true).addClass('pe-none opacity-50');
-        $text.text('Resend in ' + remaining + 's');
-
-        resendTimerInterval = setInterval(function () {
-            remaining--;
-            if (remaining <= 0) {
-                clearInterval(resendTimerInterval);
-                resendTimerInterval = null;
-                $btn.prop('disabled', false).removeClass('pe-none opacity-50');
-                $text.text('Resend OTP');
-            } else {
-                $text.text('Resend in ' + remaining + 's');
-            }
-        }, 1000);
-    }
 
     // Trigger Vote Modal from any Card (event delegation)
     $(document).on('click', '.vote-trigger-btn', function () {
-        const pandalName = $(this).attr('data-pandal') || '';
-        const pujaId = $(this).attr('data-puja-id') || $(this).attr('data-participant-id') || '';
+        const pandalName = $(this).attr('data-pandal');
+        const pujaId = $(this).attr('data-participant-id') || $(this).attr('data-puja-id');
         const awardId = $(this).attr('data-award-id') || '';
 
-        pendingVoteData.pandalName = pandalName;
-        pendingVoteData.participantId = pujaId;
+        pendingVoteData.pandal = pandalName;
+        pendingVoteData.pujaId = pujaId;
         pendingVoteData.awardId = awardId;
 
         if (pujaId) {
             $('#pandalSelect').val(pujaId);
         } else if (pandalName) {
-            const opt = $('#pandalSelect option[data-name="' + pandalName + '"]');
-            if (opt.length) {
-                opt.prop('selected', true);
+            const $opt = $(`#pandalSelect option[data-name="${pandalName}"]`);
+            if ($opt.length) {
+                $('#pandalSelect').val($opt.val());
             }
         }
 
-        if (awardId && $('#awardSelect').length) {
+        if (awardId) {
             $('#awardSelect').val(awardId);
         }
 
         $('#alreadyVotedAlert').addClass('d-none');
 
-        const voteModalEl = document.getElementById('voteModal');
-        if (voteModalEl) {
-            const voteModal = new bootstrap.Modal(voteModalEl);
-            voteModal.show();
-        }
+        const voteModal = new bootstrap.Modal(document.getElementById('voteModal'));
+        voteModal.show();
     });
 
-    // Step 1: Submit Mobile Number to request OTP via API (with server-side pre-flight check)
+    // Step 1: Submit Mobile Number to trigger real OTP or show Already Voted alert
     $('#voteForm').on('submit', function (e) {
         e.preventDefault();
         $('#alreadyVotedAlert').addClass('d-none');
 
         const mobile = $('#voterMobile').val().trim();
         const participantId = $('#pandalSelect').val();
-        const pandalName = $('#pandalSelect option:selected').text().trim();
-        const eventId = $('#voteEventId').val() || '';
-        const awardId = ($('#awardSelect').length ? $('#awardSelect').val() : '') || null;
-        const votingMode = $('#voteVotingMode').val() || 'participant';
+        const awardId = $('#awardSelect').val() || null;
+        const eventId = $('#voteEventId').val() || (window.currentEventId || null);
 
         if (mobile.length !== 10 || !/^\d{10}$/.test(mobile)) {
             alert('Please enter a valid 10-digit mobile number.');
             return;
         }
 
+        if (!participantId) {
+            alert('Please select a committee to vote for.');
+            return;
+        }
+
         pendingVoteData.mobile = mobile;
-        pendingVoteData.participantId = participantId;
-        pendingVoteData.pandalName = pandalName;
+        pendingVoteData.pujaId = participantId;
         pendingVoteData.awardId = awardId;
         pendingVoteData.eventId = eventId;
-        pendingVoteData.votingMode = votingMode;
 
-        const $submitBtn = $('#btnSendOtp');
-        const originalBtnHtml = $submitBtn.html();
-        $submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Sending OTP...');
+        const $btn = $('#btnSendOtp');
+        const originalBtnHtml = $btn.html();
+        $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Checking &amp; Sending OTP...');
 
-        // Dispatch OTP via backend API (with server-side eligibility check)
         $.ajax({
             url: '/api/v1/otp/send',
             type: 'POST',
-            dataType: 'json',
             contentType: 'application/json',
             headers: {
-                'X-CSRF-TOKEN': getCsrfToken(),
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
                 'Accept': 'application/json'
             },
             data: JSON.stringify({
                 phone: mobile,
                 purpose: 'voting',
-                event_id: eventId ? parseInt(eventId, 10) : null,
-                award_id: awardId ? parseInt(awardId, 10) : null
+                event_id: eventId ? parseInt(eventId) : null,
+                participant_id: parseInt(participantId),
+                award_id: awardId ? parseInt(awardId) : null
             }),
-            success: function (response) {
-                $submitBtn.prop('disabled', false).html(originalBtnHtml);
+            success: function () {
+                $btn.prop('disabled', false).html(originalBtnHtml);
 
-                // Hide Vote Modal & Show OTP Modal
                 const voteModalEl = document.getElementById('voteModal');
                 const voteModalInstance = bootstrap.Modal.getInstance(voteModalEl);
                 if (voteModalInstance) {
                     voteModalInstance.hide();
                 }
 
-                // Prepare and open OTP Modal
-                $('#displayMobileNum').text('+91 ' + mobile.substring(0, 5) + ' ' + mobile.substring(5));
+                $('#displayMobileNum').text('+91 ' + mobile);
                 $('.otp-digit-box').val('').removeClass('is-invalid');
                 $('#otpInvalidAlert, #otpValidAlert, #voteSubmittedAlert, #otpResendAlert').addClass('d-none');
                 $('#btnVerifyOtp').prop('disabled', false).html('<span>Verify OTP &amp; Cast Vote</span> <i class="bi bi-check-lg ms-1"></i>');
-
-                const cooldownSec = (response.data && response.data.resend_after_seconds) ? response.data.resend_after_seconds : 60;
-                startResendCountdown(cooldownSec);
 
                 setTimeout(function () {
                     const otpModal = new bootstrap.Modal(document.getElementById('otpModal'));
                     otpModal.show();
                     setTimeout(function () {
                         $('.otp-digit-box[data-index="1"]').focus();
-                    }, 350);
+                    }, 300);
                 }, 300);
             },
             error: function (xhr) {
-                $submitBtn.prop('disabled', false).html(originalBtnHtml);
-                let errorMsg = 'Failed to dispatch verification code. Please check your mobile number and try again.';
-                if (xhr.responseJSON && xhr.responseJSON.message) {
-                    errorMsg = xhr.responseJSON.message;
-                }
-                $('#alreadyVotedMsg').text(errorMsg);
+                $btn.prop('disabled', false).html(originalBtnHtml);
+                const errMsg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Unable to proceed with vote. Please try again.';
+                $('#alreadyVotedMsg').html(errMsg);
                 $('#alreadyVotedAlert').removeClass('d-none').hide().fadeIn(300);
             }
         });
     });
 
-    // OTP Input Boxes Auto-Tab & Backspace Logic
-    $(document).on('input keyup', '.otp-digit-box', function (e) {
+    // Dynamic OTP Input Boxes Auto-Tab & Backspace Logic
+    const totalOtpDigits = $('.otp-digit-box').length || 6;
+    $('.otp-digit-box').on('input keyup', function (e) {
         const $this = $(this);
         const val = $this.val();
-        const index = parseInt($this.attr('data-index'), 10);
-        const totalLength = getExpectedOtpLength();
+        const index = parseInt($this.attr('data-index'));
 
         $('.otp-digit-box').removeClass('is-invalid');
         $('#otpInvalidAlert').addClass('d-none');
 
-        if (val.length === 1 && index < totalLength && e.key !== 'Backspace') {
+        if (val.length === 1 && index < totalOtpDigits && e.key !== 'Backspace') {
             $('.otp-digit-box[data-index="' + (index + 1) + '"]').focus();
         }
 
@@ -1145,88 +592,86 @@ function setupVotingHandlers() {
         }
     });
 
-    // Handle Paste into OTP Inputs
-    $(document).on('paste', '.otp-digit-box', function (e) {
+    // Handle Paste into OTP Input
+    $('.otp-digit-box').on('paste', function (e) {
         e.preventDefault();
         const pasteData = (e.originalEvent.clipboardData || window.clipboardData).getData('text').trim();
-        const digitsOnly = pasteData.replace(/[^0-9]/g, '');
-        const expectedLen = getExpectedOtpLength();
-
-        if (digitsOnly.length > 0) {
-            const digits = digitsOnly.split('');
+        const digits = pasteData.replace(/\D/g, '').split('');
+        if (digits.length > 0) {
             $('.otp-digit-box').each(function (idx) {
-                if (idx < digits.length && idx < expectedLen) {
+                if (digits[idx]) {
                     $(this).val(digits[idx]).removeClass('is-invalid');
                 }
             });
-
-            const targetIndex = Math.min(digits.length, expectedLen);
-            $('.otp-digit-box[data-index="' + targetIndex + '"]').focus();
-
-            // Auto-submit if all digits were pasted
-            if (digits.length >= expectedLen) {
-                $('#otpForm').trigger('submit');
-            }
+            const focusIdx = Math.min(digits.length, totalOtpDigits);
+            $('.otp-digit-box[data-index="' + focusIdx + '"]').focus();
         }
     });
 
-    // Step 2: Submit OTP Form & Verification Handler via API
+    // Step 2: Submit OTP Form & Real Verification Handler
     $('#otpForm').on('submit', function (e) {
         e.preventDefault();
 
         let enteredOtp = '';
-        const expectedLen = getExpectedOtpLength();
-
         $('.otp-digit-box').each(function () {
             enteredOtp += $(this).val().trim();
         });
 
         $('#otpInvalidAlert, #otpValidAlert, #voteSubmittedAlert, #otpResendAlert').addClass('d-none');
 
-        if (enteredOtp.length < expectedLen) {
-            $('#otpInvalidMsg').text('Please enter all ' + expectedLen + ' digits of your verification code.');
+        if (enteredOtp.length < 4) {
+            $('.otp-digit-box').addClass('is-invalid');
+            $('#otpInvalidMsg').text('Please enter the complete verification code.');
             $('#otpInvalidAlert').removeClass('d-none').hide().fadeIn(200);
             return;
         }
 
         const $verifyBtn = $('#btnVerifyOtp');
-        $verifyBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Verifying OTP &amp; Casting Vote...');
+        $verifyBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Verifying &amp; Recording Vote...');
 
         $.ajax({
             url: '/api/v1/votes/cast',
             type: 'POST',
-            dataType: 'json',
             contentType: 'application/json',
             headers: {
-                'X-CSRF-TOKEN': getCsrfToken(),
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
                 'Accept': 'application/json'
             },
             data: JSON.stringify({
-                event_id: parseInt(pendingVoteData.eventId, 10),
-                participant_id: parseInt(pendingVoteData.participantId, 10),
-                award_id: pendingVoteData.awardId ? parseInt(pendingVoteData.awardId, 10) : null,
+                event_id: pendingVoteData.eventId ? parseInt(pendingVoteData.eventId) : parseInt($('#voteEventId').val()),
+                participant_id: parseInt(pendingVoteData.pujaId),
+                award_id: pendingVoteData.awardId ? parseInt(pendingVoteData.awardId) : null,
                 phone: pendingVoteData.mobile,
                 otp: enteredOtp
             }),
-            success: function (response) {
+            success: function (res) {
                 $('#otpValidAlert').removeClass('d-none').hide().fadeIn(200);
-                const successMsg = response.message || 'Vote recorded successfully!';
-                $('#voteSubmittedMsg').text(successMsg);
 
                 // Increment vote count in dataset & in DOM
-                const pujaId = pendingVoteData.participantId;
-                if (typeof allPujasData !== 'undefined' && Array.isArray(allPujasData)) {
-                    const matchedPuja = allPujasData.find(p => p.id == pujaId);
-                    if (matchedPuja) {
-                        matchedPuja.votes = (matchedPuja.votes || 0) + 1;
-                        $(`#count-puja-${matchedPuja.id}`).text(matchedPuja.votes.toLocaleString() + ' votes');
-                    }
+                const participantId = pendingVoteData.pujaId;
+                const matchedPuja = allPujasData.find(p => String(p.id) === String(participantId));
+                if (matchedPuja) {
+                    matchedPuja.votes = (matchedPuja.votes || 0) + 1;
+                    $(`#count-puja-${matchedPuja.id}`).text(matchedPuja.votes.toLocaleString() + ' votes');
+                }
+
+                $(`.live-vote-count-${participantId}`).each(function () {
+                    const current = parseInt($(this).text().replace(/[^0-9]/g, '')) || 0;
+                    $(this).html('<i class="bi bi-hand-thumbs-up-fill me-1"></i>' + (current + 1).toLocaleString());
+                });
+
+                const $totalCounter = $('#liveTotalCounter');
+                if ($totalCounter.length) {
+                    const currentTotal = parseInt($totalCounter.text().replace(/,/g, '')) || 0;
+                    $totalCounter.text((currentTotal + 1).toLocaleString());
                 }
 
                 setTimeout(function () {
                     $('#otpValidAlert').addClass('d-none');
+                    const successMsg = (res && res.message) ? res.message : 'Vote submitted successfully!';
+                    $('#voteSubmittedMsg').text(successMsg);
                     $('#voteSubmittedAlert').removeClass('d-none').hide().fadeIn(200);
-                    $('#btnVerifyOtp').html('<i class="bi bi-check-circle-fill me-1"></i> Vote Recorded Successfully!');
+                    $verifyBtn.html('<i class="bi bi-check-circle-fill me-1"></i> Vote Submitted Successfully!');
 
                     setTimeout(function () {
                         const otpModalEl = document.getElementById('otpModal');
@@ -1236,71 +681,56 @@ function setupVotingHandlers() {
                         }
                         $('#voteForm')[0].reset();
                         $('#otpForm')[0].reset();
-                    }, 1800);
-                }, 600);
+                    }, 1600);
+                }, 800);
             },
             error: function (xhr) {
                 $verifyBtn.prop('disabled', false).html('<span>Verify OTP &amp; Cast Vote</span> <i class="bi bi-check-lg ms-1"></i>');
                 $('.otp-digit-box').addClass('is-invalid');
-
-                let errorMsg = 'Invalid verification code or vote submission failed. Please try again.';
-                if (xhr.responseJSON && xhr.responseJSON.message) {
-                    errorMsg = xhr.responseJSON.message;
-                }
-                $('#otpInvalidMsg').text(errorMsg);
+                const errMsg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Invalid OTP code. Please try again.';
+                $('#otpInvalidMsg').text(errMsg);
                 $('#otpInvalidAlert').removeClass('d-none').hide().fadeIn(200);
-
                 setTimeout(function () {
                     $('.otp-digit-box[data-index="1"]').focus().select();
-                }, 200);
+                }, 300);
             }
         });
     });
 
-    // Resend OTP Button Click via API
+    // Resend OTP Button Click
     $('#btnResendOtp').on('click', function () {
-        if ($(this).prop('disabled') || !pendingVoteData.mobile) {
-            return;
-        }
+        if (!pendingVoteData.mobile || !pendingVoteData.pujaId) return;
 
-        const $btn = $(this);
-        const originalText = $('#resendBtnText').text();
-        $('#resendBtnText').html('<span class="spinner-border spinner-border-sm"></span>');
+        const $resendBtn = $(this);
+        $resendBtn.prop('disabled', true);
+        $('#otpInvalidAlert, #otpValidAlert, #voteSubmittedAlert').addClass('d-none');
 
         $.ajax({
             url: '/api/v1/otp/send',
             type: 'POST',
-            dataType: 'json',
             contentType: 'application/json',
             headers: {
-                'X-CSRF-TOKEN': getCsrfToken(),
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
                 'Accept': 'application/json'
             },
             data: JSON.stringify({
                 phone: pendingVoteData.mobile,
                 purpose: 'voting',
-                event_id: pendingVoteData.eventId ? parseInt(pendingVoteData.eventId, 10) : null,
-                award_id: pendingVoteData.awardId ? parseInt(pendingVoteData.awardId, 10) : null
+                event_id: pendingVoteData.eventId ? parseInt(pendingVoteData.eventId) : null,
+                participant_id: parseInt(pendingVoteData.pujaId),
+                award_id: pendingVoteData.awardId ? parseInt(pendingVoteData.awardId) : null
             }),
-            success: function (response) {
+            success: function (res) {
                 $('.otp-digit-box').val('').removeClass('is-invalid');
-                $('#otpInvalidAlert, #otpValidAlert, #voteSubmittedAlert').addClass('d-none');
-
-                const successMsg = response.message || 'A new verification code has been dispatched to your mobile number!';
-                $('#otpResendMsg').text(successMsg);
-                $('#otpResendAlert').removeClass('d-none').hide().fadeIn(200).delay(4000).fadeOut(300);
-
-                const cooldownSec = (response.data && response.data.resend_after_seconds) ? response.data.resend_after_seconds : 60;
-                startResendCountdown(cooldownSec);
+                $('#otpResendMsg').text((res && res.message) ? res.message : 'A new verification code has been dispatched to your mobile number!');
+                $('#otpResendAlert').removeClass('d-none').hide().fadeIn(200).delay(3500).fadeOut(300);
                 $('.otp-digit-box[data-index="1"]').focus();
+                setTimeout(() => $resendBtn.prop('disabled', false), 5000);
             },
             error: function (xhr) {
-                $('#resendBtnText').text(originalText);
-                let errorMsg = 'Unable to resend OTP at this time.';
-                if (xhr.responseJSON && xhr.responseJSON.message) {
-                    errorMsg = xhr.responseJSON.message;
-                }
-                $('#otpInvalidMsg').text(errorMsg);
+                $resendBtn.prop('disabled', false);
+                const errMsg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Unable to resend OTP at this time.';
+                $('#otpInvalidMsg').text(errMsg);
                 $('#otpInvalidAlert').removeClass('d-none').hide().fadeIn(200);
             }
         });

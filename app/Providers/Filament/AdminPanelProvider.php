@@ -6,6 +6,8 @@ use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Auth\RegisterSuperadmin;
 use App\Filament\Widgets\ContestActivityStats;
 use App\Filament\Widgets\EventStatsOverview;
+use App\Filament\Widgets\VotingLeaderboardWidget;
+use App\Filament\Widgets\VotingStatsOverview;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -48,7 +50,9 @@ class AdminPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
                 EventStatsOverview::class,
+                VotingStatsOverview::class,
                 ContestActivityStats::class,
+                VotingLeaderboardWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

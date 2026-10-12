@@ -142,6 +142,7 @@ class AdminManagementTest extends TestCase
             '/admin/zones',
             '/admin/localities',
             '/admin/users',
+            '/admin/votes',
         ];
 
         foreach ($routes as $route) {
