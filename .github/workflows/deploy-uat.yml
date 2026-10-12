@@ -91,68 +91,28 @@ jobs:
           name: vite-build
           path: public/build
 
-      - name: Step 1 - Pull Code & Install Backend Dependencies
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.UAT_SSH_HOST }}
-          username: ${{ secrets.UAT_SSH_USER }}
-          key: ${{ secrets.UAT_SSH_KEY }}
-          port: ${{ secrets.UAT_SSH_PORT || 22 }}
-          script_stop: true
-          script: |
-            cd ${{ secrets.UAT_DEPLOY_PATH }}
+      - name: Configure SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.UAT_SSH_KEY }}" | tr -d '\r' > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          ssh-keyscan -p ${{ secrets.UAT_SSH_PORT || 22 }} -H "${{ secrets.UAT_SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
 
-            # Activate maintenance mode if Laravel artisan exists
-            if [ -f artisan ]; then
-              php artisan down --render="errors::503" || true
-            fi
+      - name: Deploy Code & Sync Compiled Assets
+        env:
+          SSH_HOST: ${{ secrets.UAT_SSH_HOST }}
+          SSH_USER: ${{ secrets.UAT_SSH_USER }}
+          SSH_PORT: ${{ secrets.UAT_SSH_PORT || 22 }}
+          DEPLOY_PATH: ${{ secrets.UAT_DEPLOY_PATH }}
+        run: |
+          SSH_CMD="ssh -p $SSH_PORT -i ~/.ssh/id_deploy -o StrictHostKeyChecking=no"
 
-            # Clean and fetch latest develop branch
-            git fetch origin develop
-            git reset --hard origin/develop
+          echo "===> Putting application into maintenance mode and pulling develop..."
+          $SSH_CMD "$SSH_USER@$SSH_HOST" "export TERM=dumb; cd $DEPLOY_PATH && if [ -f artisan ]; then php artisan down --render='errors::503' || true; fi && git fetch origin develop && git reset --hard origin/develop && composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev"
 
-            # Install production Composer dependencies
-            composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+          echo "===> Syncing compiled Vite assets via rsync..."
+          rsync -avz --delete -e "$SSH_CMD" public/build/ "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/public/build/"
 
-      - name: Step 2 - Upload Compiled Vite Assets
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.UAT_SSH_HOST }}
-          username: ${{ secrets.UAT_SSH_USER }}
-          key: ${{ secrets.UAT_SSH_KEY }}
-          port: ${{ secrets.UAT_SSH_PORT || 22 }}
-          source: "public/build"
-          target: "${{ secrets.UAT_DEPLOY_PATH }}"
-          strip_components: 0
+          echo "===> Running migrations, permissions, and optimization caches..."
+          $SSH_CMD "$SSH_USER@$SSH_HOST" "export TERM=dumb; cd $DEPLOY_PATH && chmod -R 775 storage bootstrap/cache || true && php artisan storage:link || true && php artisan migrate --force && php artisan optimize:clear && php artisan optimize && php artisan view:cache && php artisan event:cache && php artisan queue:restart || true && php artisan up"
 
-      - name: Step 3 - Run Migrations, Cache & Bring Up
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.UAT_SSH_HOST }}
-          username: ${{ secrets.UAT_SSH_USER }}
-          key: ${{ secrets.UAT_SSH_KEY }}
-          port: ${{ secrets.UAT_SSH_PORT || 22 }}
-          script_stop: true
-          script: |
-            cd ${{ secrets.UAT_DEPLOY_PATH }}
-
-            # Ensure proper storage & cache permissions
-            chmod -R 775 storage bootstrap/cache || true
-
-            # Ensure storage symlink exists
-            php artisan storage:link || true
-
-            # Run database migrations
-            php artisan migrate --force
-
-            # Clear old caches and optimize
-            php artisan optimize:clear
-            php artisan optimize
-            php artisan view:cache
-            php artisan event:cache
-
-            # Restart queue workers if supervisor/worker is running
-            php artisan queue:restart || true
-
-            # Bring application out of maintenance mode
-            php artisan up

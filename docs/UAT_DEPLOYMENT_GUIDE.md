@@ -99,10 +99,12 @@ The workflow [.github/workflows/deploy-uat.yml](file:///.github/workflows/deploy
    - Avoids RAM exhaustion or missing Node.js dependencies on the UAT server.
 
 3. **Remote Deployment** (`deploy` job):
+   - Configures SSH key securely and scans host fingerprint.
+   - Sets `export TERM=dumb` to prevent `tput: No value for $TERM` errors in non-interactive shells.
    - Places app into maintenance mode (`php artisan down --render="errors::503"`).
    - Fetches and resets to `origin/develop`.
    - Runs `composer install --no-dev --optimize-autoloader`.
-   - SCP transfers pre-built Vite assets to `public/build`.
+   - Uses `rsync -avz --delete` over SSH to synchronize compiled Vite assets into `public/build` (fast delta transfer without SCP channel issues).
    - Runs `php artisan migrate --force`.
    - Ensures `php artisan storage:link`.
    - Clears and rebuilds configuration, route, view, and event caches (`php artisan optimize`).
@@ -111,7 +113,29 @@ The workflow [.github/workflows/deploy-uat.yml](file:///.github/workflows/deploy
 
 ---
 
-## 5. Triggering a Deployment
+## 5. Troubleshooting: "tput: No value for $TERM and no -T specified"
+
+This error occurs when non-interactive SSH / SCP sessions execute a remote command on servers where `~/.bashrc` or `/etc/bash.bashrc` attempts to style the terminal using `tput` without verifying that the session is an interactive shell.
+
+### How this workflow fixes it:
+1. **Replaced SCP with native `rsync` over OpenSSH**: Avoids pseudo-terminal and raw-channel conflicts found in `appleboy/scp-action`.
+2. **Explicit `export TERM=dumb`**: Injected at the beginning of remote commands, so any script querying `$TERM` receives a valid fallback terminal definition.
+
+### Server-side fix (Optional best practice):
+If you still notice terminal warnings on your server during non-interactive SSH connections, check your user's `~/.bashrc` on the UAT server. At the very top of `~/.bashrc`, ensure this guard exists:
+
+```bash
+# If not running interactively, return immediately
+case $- in
+    *i*) ;;
+      *) return;;
+esac
+```
+
+---
+
+## 6. Triggering a Deployment
 
 - **Automatic**: Push or merge a pull request into the `develop` branch.
 - **Manual**: Go to **Actions** tab on GitHub → Select **Deploy to UAT** → Click **Run workflow** (select `develop` branch and optionally toggle automated tests).
+
