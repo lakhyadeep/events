@@ -1,0 +1,158 @@
+name: Deploy to UAT
+
+on:
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+    inputs:
+      run_tests:
+        description: 'Run automated tests before deploying'
+        required: true
+        type: boolean
+        default: true
+
+concurrency:
+  group: uat-deployment
+  cancel-in-progress: false
+
+jobs:
+  test:
+    name: Run Automated Tests
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || inputs.run_tests == true
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, bcmath, fileinfo
+          coverage: none
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install Composer Dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Install NPM Dependencies & Build Assets
+        run: |
+          npm ci
+          npm run build
+
+      - name: Prepare Environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Run Tests
+        run: php artisan test --compact
+
+  build-assets:
+    name: Build Frontend Assets
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install NPM Dependencies & Build
+        run: |
+          npm ci
+          npm run build
+
+      - name: Upload Vite Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: vite-build
+          path: public/build
+          retention-days: 1
+
+  deploy:
+    name: Deploy to UAT Server
+    runs-on: ubuntu-latest
+    needs: [test, build-assets]
+    if: always() && (needs.test.result == 'success' || needs.test.result == 'skipped') && needs.build-assets.result == 'success'
+    steps:
+      - name: Download Vite Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: vite-build
+          path: public/build
+
+      - name: Step 1 - Pull Code & Install Backend Dependencies
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.UAT_SSH_HOST }}
+          username: ${{ secrets.UAT_SSH_USER }}
+          key: ${{ secrets.UAT_SSH_KEY }}
+          port: ${{ secrets.UAT_SSH_PORT || 22 }}
+          script_stop: true
+          script: |
+            cd ${{ secrets.UAT_DEPLOY_PATH }}
+
+            # Activate maintenance mode if Laravel artisan exists
+            if [ -f artisan ]; then
+              php artisan down --render="errors::503" || true
+            fi
+
+            # Clean and fetch latest develop branch
+            git fetch origin develop
+            git reset --hard origin/develop
+
+            # Install production Composer dependencies
+            composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+
+      - name: Step 2 - Upload Compiled Vite Assets
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.UAT_SSH_HOST }}
+          username: ${{ secrets.UAT_SSH_USER }}
+          key: ${{ secrets.UAT_SSH_KEY }}
+          port: ${{ secrets.UAT_SSH_PORT || 22 }}
+          source: "public/build"
+          target: "${{ secrets.UAT_DEPLOY_PATH }}"
+          strip_components: 0
+
+      - name: Step 3 - Run Migrations, Cache & Bring Up
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.UAT_SSH_HOST }}
+          username: ${{ secrets.UAT_SSH_USER }}
+          key: ${{ secrets.UAT_SSH_KEY }}
+          port: ${{ secrets.UAT_SSH_PORT || 22 }}
+          script_stop: true
+          script: |
+            cd ${{ secrets.UAT_DEPLOY_PATH }}
+
+            # Ensure proper storage & cache permissions
+            chmod -R 775 storage bootstrap/cache || true
+
+            # Ensure storage symlink exists
+            php artisan storage:link || true
+
+            # Run database migrations
+            php artisan migrate --force
+
+            # Clear old caches and optimize
+            php artisan optimize:clear
+            php artisan optimize
+            php artisan view:cache
+            php artisan event:cache
+
+            # Restart queue workers if supervisor/worker is running
+            php artisan queue:restart || true
+
+            # Bring application out of maintenance mode
+            php artisan up
