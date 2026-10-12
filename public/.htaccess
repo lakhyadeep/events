@@ -6,6 +6,7 @@
     DirectoryIndex index.php
 
     RewriteEngine On
+    RewriteBase /event-demo/public/
 
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
