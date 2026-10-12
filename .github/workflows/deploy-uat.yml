@@ -92,14 +92,17 @@ jobs:
 
           echo "===> Initializing codebase or pulling latest develop..."
           $SSH_CMD "$SSH_USER@$SSH_HOST" "export TERM=dumb; mkdir -p $DEPLOY_PATH && cd $DEPLOY_PATH && {
-            if [ -d .git ]; then
-              if [ -f artisan ]; then php artisan down --render='errors::503' || true; fi
-              git fetch origin develop
-              git reset --hard origin/develop
+            if [ ! -d .git ]; then
+              echo 'Initializing fresh git repository in working directory...'
+              git init
+              git remote add origin https://github.com/lakhyadeep/events.git 2>/dev/null || git remote set-url origin https://github.com/lakhyadeep/events.git
             else
-              echo 'No git repository detected. Cloning fresh develop branch...'
-              git clone -b develop https://github.com/lakhyadeep/events.git .
+              if [ -f artisan ]; then php artisan down --render='errors::503' || true; fi
             fi
+
+            git fetch origin develop
+            git checkout -f develop 2>/dev/null || git checkout -b develop origin/develop 2>/dev/null || true
+            git reset --hard origin/develop
 
             if [ ! -f .env ]; then
               echo 'Setting up initial .env file...'
@@ -121,8 +124,11 @@ jobs:
             fi
           }"
 
-          echo "===> Syncing compiled Vite assets via rsync..."
-          rsync -avz --delete -e "$SSH_CMD" public/build/ "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/public/build/"
+          echo "===> Verifying compiled Vite assets and transferring to server..."
+          ls -la public/build
+          $SSH_CMD "$SSH_USER@$SSH_HOST" "mkdir -p $DEPLOY_PATH/public"
+          tar -czf - -C public build | $SSH_CMD "$SSH_USER@$SSH_HOST" "tar -xzf - -C $DEPLOY_PATH/public"
+
 
           echo "===> Running migrations, permissions, and optimization caches..."
           $SSH_CMD "$SSH_USER@$SSH_HOST" "export TERM=dumb; cd $DEPLOY_PATH && {
