@@ -23,6 +23,7 @@ class OtpSetting extends Model
         'msg91_settings',
         'fast2sms_settings',
         'custom_http_settings',
+        'brevo_settings',
     ];
 
     /**
@@ -41,6 +42,7 @@ class OtpSetting extends Model
             'msg91_settings' => 'encrypted:array',
             'fast2sms_settings' => 'encrypted:array',
             'custom_http_settings' => 'encrypted:array',
+            'brevo_settings' => 'encrypted:array',
         ];
     }
 
@@ -114,10 +116,6 @@ class OtpSetting extends Model
                 'message_template' => config('otp.message_template'),
                 'master_otp' => config('otp.master_otp'),
                 'test_phone_numbers' => implode(',', config('otp.test_phone_numbers', [])),
-                'twilio_settings' => config('otp.drivers.twilio', []),
-                'msg91_settings' => config('otp.drivers.msg91', []),
-                'fast2sms_settings' => config('otp.drivers.fast2sms', []),
-                'custom_http_settings' => config('otp.drivers.custom_http', []),
             ]);
         }
 

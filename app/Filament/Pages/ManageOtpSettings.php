@@ -16,7 +16,6 @@ use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\EmbeddedSchema;
 use Filament\Schemas\Components\Form;
 use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use UnitEnum;
 
@@ -56,14 +55,11 @@ class ManageOtpSettings extends Page
                         Select::make('active_driver')
                             ->label('Active SMS / OTP Gateway')
                             ->options([
-                                'log' => 'Log Simulator (Local & Staging)',
-                                'twilio' => 'Twilio SMS (Global)',
-                                'msg91' => 'MSG91 (India DLT Flow)',
-                                'fast2sms' => 'Fast2SMS (India Quick SMS)',
-                                'custom_http' => 'Custom HTTP / Webhook Gateway (Generic Any Provider)',
+                                'log' => 'Log SMS Driver (Local & Staging / Testing)',
                             ])
+                            ->default('log')
+                            ->helperText('Currently operating in Log SMS mode. Production SMS provider will be integrated once verified.')
                             ->required()
-                            ->live()
                             ->columnSpanFull(),
 
                         Select::make('otp_length')
@@ -123,115 +119,6 @@ class ManageOtpSettings extends Page
                             ->label('Designated Test Mobile Numbers')
                             ->placeholder('e.g. 9876543210, 9999999999')
                             ->helperText('Comma-separated list of test mobile numbers that will accept the Master OTP code.'),
-                    ]),
-
-                Section::make('Twilio Gateway Configuration')
-                    ->description('Configure Twilio API credentials for international SMS dispatch.')
-                    ->columns(['default' => 1, 'sm' => 3])
-                    ->visible(fn (Get $get): bool => $get('active_driver') === 'twilio')
-                    ->schema([
-                        TextInput::make('twilio_settings.sid')
-                            ->label('Account SID')
-                            ->placeholder('ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
-                            ->required(fn (Get $get): bool => $get('active_driver') === 'twilio'),
-
-                        TextInput::make('twilio_settings.token')
-                            ->label('Auth Token')
-                            ->password()
-                            ->revealable()
-                            ->required(fn (Get $get): bool => $get('active_driver') === 'twilio'),
-
-                        TextInput::make('twilio_settings.from')
-                            ->label('From Phone Number / Sender ID')
-                            ->placeholder('+1234567890')
-                            ->required(fn (Get $get): bool => $get('active_driver') === 'twilio'),
-                    ]),
-
-                Section::make('MSG91 Gateway Configuration')
-                    ->description('Configure MSG91 API credentials and DLT-approved template IDs for Indian SMS.')
-                    ->columns(['default' => 1, 'sm' => 3])
-                    ->visible(fn (Get $get): bool => $get('active_driver') === 'msg91')
-                    ->schema([
-                        TextInput::make('msg91_settings.auth_key')
-                            ->label('Auth Key')
-                            ->password()
-                            ->revealable()
-                            ->required(fn (Get $get): bool => $get('active_driver') === 'msg91'),
-
-                        TextInput::make('msg91_settings.sender_id')
-                            ->label('Sender ID (6 Chars)')
-                            ->placeholder('DIBEVT')
-                            ->maxLength(6),
-
-                        TextInput::make('msg91_settings.template_id')
-                            ->label('DLT Template / Flow ID')
-                            ->placeholder('64f8xxxxxxxxxxxxxxxx')
-                            ->required(fn (Get $get): bool => $get('active_driver') === 'msg91'),
-                    ]),
-
-                Section::make('Fast2SMS Gateway Configuration')
-                    ->description('Configure Fast2SMS API key and routing for quick Indian SMS.')
-                    ->columns(['default' => 1, 'sm' => 2])
-                    ->visible(fn (Get $get): bool => $get('active_driver') === 'fast2sms')
-                    ->schema([
-                        TextInput::make('fast2sms_settings.api_key')
-                            ->label('API Authorization Key')
-                            ->password()
-                            ->revealable()
-                            ->required(fn (Get $get): bool => $get('active_driver') === 'fast2sms')
-                            ->columnSpanFull(),
-
-                        Select::make('fast2sms_settings.route')
-                            ->label('Route Type')
-                            ->options([
-                                'otp' => 'OTP Route (Quick Instant SMS)',
-                                'dlt' => 'DLT Approved Route',
-                            ])
-                            ->default('otp'),
-
-                        TextInput::make('fast2sms_settings.sender_id')
-                            ->label('Sender ID (DLT only)')
-                            ->placeholder('DIBEVT'),
-
-                        TextInput::make('fast2sms_settings.entity_id')
-                            ->label('Entity / Message ID (DLT only)'),
-                    ]),
-
-                Section::make('Custom HTTP / Webhook Gateway')
-                    ->description('Integrate ANY third-party SMS provider dynamically using HTTP webhooks or custom REST APIs.')
-                    ->columns(1)
-                    ->visible(fn (Get $get): bool => $get('active_driver') === 'custom_http')
-                    ->schema([
-                        TextInput::make('custom_http_settings.url')
-                            ->label('Endpoint URL')
-                            ->placeholder('https://api.smsvendor.com/v1/send?to={phone}&text={url_encoded_message}')
-                            ->helperText('Available tokens: {phone}, {raw_phone}, {otp}, {message}, {url_encoded_message}')
-                            ->required(fn (Get $get): bool => $get('active_driver') === 'custom_http'),
-
-                        Select::make('custom_http_settings.method')
-                            ->label('HTTP Request Method')
-                            ->options([
-                                'POST' => 'HTTP POST',
-                                'GET' => 'HTTP GET',
-                            ])
-                            ->default('POST')
-                            ->required(),
-
-                        Textarea::make('custom_http_settings.headers')
-                            ->label('Custom HTTP Headers (JSON format)')
-                            ->placeholder('{"Authorization": "Bearer YOUR_API_TOKEN", "Content-Type": "application/json"}')
-                            ->rows(2),
-
-                        Textarea::make('custom_http_settings.payload')
-                            ->label('Request Body / Payload Template')
-                            ->placeholder('{"mobile": "{phone}", "code": "{otp}", "message": "{message}"}')
-                            ->helperText('JSON or form payload template with dynamic tokens replaced at send-time.')
-                            ->rows(3),
-
-                        TextInput::make('custom_http_settings.success_keyword')
-                            ->label('Success Keyword / Regex Matcher (Optional)')
-                            ->placeholder('e.g. "status":"success" or "200"')
-                            ->helperText('Optional keyword required in response body to consider dispatch successful. If left blank, any HTTP 2xx status is accepted.'),
                     ]),
             ])
             ->statePath('data');

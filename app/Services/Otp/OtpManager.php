@@ -4,11 +4,7 @@ namespace App\Services\Otp;
 
 use App\Models\OtpSetting;
 use App\Services\Otp\Contracts\SmsGatewayInterface;
-use App\Services\Otp\Drivers\CustomHttpSmsDriver;
-use App\Services\Otp\Drivers\Fast2SmsDriver;
 use App\Services\Otp\Drivers\LogSmsDriver;
-use App\Services\Otp\Drivers\Msg91SmsDriver;
-use App\Services\Otp\Drivers\TwilioSmsDriver;
 use Closure;
 use InvalidArgumentException;
 
@@ -43,17 +39,23 @@ class OtpManager
     }
 
     /**
+     * Safely obtain the active OtpSetting model or null if database is unmigrated/unavailable.
+     */
+    protected function getOtpSetting(): ?OtpSetting
+    {
+        try {
+            return OtpSetting::current();
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    /**
      * Get the default driver name configured in system settings.
      */
     public function getDefaultDriver(): string
     {
-        try {
-            $setting = OtpSetting::current();
-
-            return $setting->active_driver ?: config('otp.default', 'log');
-        } catch (\Throwable) {
-            return config('otp.default', 'log');
-        }
+        return $this->getOtpSetting()?->active_driver ?: config('otp.default', 'log');
     }
 
     /**
@@ -83,55 +85,11 @@ class OtpManager
     }
 
     /**
-     * Create an instance of the Twilio SMS driver.
+     * Create an instance of the Log SMS driver (alias).
      */
-    protected function createTwilioDriver(): TwilioSmsDriver
+    protected function createLogSmsDriver(): LogSmsDriver
     {
-        $settings = OtpSetting::current()->twilio_settings ?? [];
-        if (empty($settings)) {
-            $settings = config('otp.drivers.twilio', []);
-        }
-
-        return new TwilioSmsDriver($settings);
-    }
-
-    /**
-     * Create an instance of the MSG91 SMS driver.
-     */
-    protected function createMsg91Driver(): Msg91SmsDriver
-    {
-        $settings = OtpSetting::current()->msg91_settings ?? [];
-        if (empty($settings)) {
-            $settings = config('otp.drivers.msg91', []);
-        }
-
-        return new Msg91SmsDriver($settings);
-    }
-
-    /**
-     * Create an instance of the Fast2SMS driver.
-     */
-    protected function createFast2smsDriver(): Fast2SmsDriver
-    {
-        $settings = OtpSetting::current()->fast2sms_settings ?? [];
-        if (empty($settings)) {
-            $settings = config('otp.drivers.fast2sms', []);
-        }
-
-        return new Fast2SmsDriver($settings);
-    }
-
-    /**
-     * Create an instance of the Custom HTTP SMS driver.
-     */
-    protected function createCustomHttpDriver(): CustomHttpSmsDriver
-    {
-        $settings = OtpSetting::current()->custom_http_settings ?? [];
-        if (empty($settings)) {
-            $settings = config('otp.drivers.custom_http', []);
-        }
-
-        return new CustomHttpSmsDriver($settings);
+        return new LogSmsDriver;
     }
 
     /**
