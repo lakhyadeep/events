@@ -54,29 +54,33 @@ class ParticipantForm
                         ->schema([
                             FileUpload::make('primary_display_image')
                                 ->label('Primary Showcase Photo (Featured Cover)')
+                                ->disk('public')
                                 ->image()
-                                ->maxSize(5120)
-                                ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                                ->maxSize(10240)
+                                ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/jpg'])
                                 ->directory('participants/primary')
                                 ->columnSpanFull()
                                 ->required(),
                             FileUpload::make('image_1')
                                 ->label('Gallery Photo 1 (Pandal Exterior / Theme)')
+                                ->disk('public')
                                 ->image()
-                                ->maxSize(5120)
-                                ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                                ->maxSize(10240)
+                                ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/jpg'])
                                 ->directory('participants/gallery'),
                             FileUpload::make('image_2')
                                 ->label('Gallery Photo 2 (Idol / Sculpting Detail)')
+                                ->disk('public')
                                 ->image()
-                                ->maxSize(5120)
-                                ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                                ->maxSize(10240)
+                                ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/jpg'])
                                 ->directory('participants/gallery'),
                             FileUpload::make('image_3')
                                 ->label('Gallery Photo 3 (Lighting / Atmosphere)')
+                                ->disk('public')
                                 ->image()
-                                ->maxSize(5120)
-                                ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                                ->maxSize(10240)
+                                ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/jpg'])
                                 ->directory('participants/gallery'),
                         ]),
 
@@ -115,9 +119,10 @@ class ParticipantForm
                                 ->maxLength(191),
                             FileUpload::make('concept_note_image')
                                 ->label('Concept Note / Architectural Blueprint')
+                                ->disk('public')
                                 ->image()
-                                ->maxSize(5120)
-                                ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                                ->maxSize(10240)
+                                ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/jpg'])
                                 ->directory('participants/concept_notes')
                                 ->columnSpanFull(),
                         ]),

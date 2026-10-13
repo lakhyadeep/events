@@ -41,16 +41,16 @@ class BannerForm
                                 ->label('Desktop Hero Banner (1920×600 px)')
                                 ->disk('public')
                                 ->image()
-                                ->maxSize(5120)
-                                ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                                ->maxSize(10240)
+                                ->acceptedFileTypes(['image/jpeg', 'image/jpg', 'image/png', 'image/webp'])
                                 ->directory('banners/desktop')
                                 ->required(),
                             FileUpload::make('image_mobile')
                                 ->label('Mobile Portrait Banner (768×960 px)')
                                 ->disk('public')
                                 ->image()
-                                ->maxSize(5120)
-                                ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                                ->maxSize(10240)
+                                ->acceptedFileTypes(['image/jpeg', 'image/jpg', 'image/png', 'image/webp'])
                                 ->directory('banners/mobile')
                                 ->required(),
                         ]),

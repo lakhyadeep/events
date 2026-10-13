@@ -56,9 +56,10 @@ class SponsorForm
                             FileUpload::make('logo')
                                 ->label('Sponsor Logo (Transparent PNG/SVG/WebP)')
                                 ->helperText('Recommended: horizontal logo format on transparent background')
+                                ->disk('public')
                                 ->image()
-                                ->maxSize(3072)
-                                ->acceptedFileTypes(['image/png', 'image/svg+xml', 'image/webp', 'image/jpeg'])
+                                ->maxSize(10240)
+                                ->acceptedFileTypes(['image/png', 'image/svg+xml', 'image/webp', 'image/jpeg', 'image/jpg'])
                                 ->directory('sponsors/logos')
                                 ->required(),
                         ]),
