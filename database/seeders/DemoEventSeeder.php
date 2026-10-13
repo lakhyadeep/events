@@ -26,8 +26,21 @@ class DemoEventSeeder extends Seeder
     protected function ensureUploadedMedia(string $diskPath, ?string $fallbackLocalPath = null, ?string $fallbackUrl = null): string
     {
         // If file already exists and is not oversized (<= 350KB), keep it
-        if (Storage::disk('public')->exists($diskPath) && Storage::disk('public')->size($diskPath) <= 350000) {
-            return $diskPath;
+        try {
+            if (Storage::disk('public')->exists($diskPath) && Storage::disk('public')->size($diskPath) <= 350000) {
+                return $diskPath;
+            }
+        } catch (\Throwable $e) {
+            // fall through
+        }
+
+        // Remove legacy oversized file if present
+        try {
+            if (Storage::disk('public')->exists($diskPath)) {
+                Storage::disk('public')->delete($diskPath);
+            }
+        } catch (\Throwable $e) {
+            // fall through
         }
 
         $rawContent = null;
@@ -40,7 +53,7 @@ class DemoEventSeeder extends Seeder
         // 2. If a fallback URL is given, try downloading it if no local file was available
         if ((! $rawContent) && $fallbackUrl && (str_starts_with($fallbackUrl, 'http://') || str_starts_with($fallbackUrl, 'https://'))) {
             try {
-                $response = Http::timeout(8)->get($fallbackUrl);
+                $response = Http::timeout(5)->get($fallbackUrl);
                 if ($response->successful() && strlen($response->body()) > 500) {
                     $rawContent = $response->body();
                 }
@@ -49,9 +62,9 @@ class DemoEventSeeder extends Seeder
             }
         }
 
-        // 3. Fallback to bundled hero asset
+        // 3. Fallback to bundled sample pandal asset (guaranteed ~95KB)
         if (! $rawContent) {
-            $defaultLocal = public_path('event-assets/images/hero.png');
+            $defaultLocal = public_path('event-assets/images/sample-pandal.jpg');
             if (file_exists($defaultLocal)) {
                 $rawContent = file_get_contents($defaultLocal);
             }
@@ -149,7 +162,7 @@ class DemoEventSeeder extends Seeder
      */
     public function run(): void
     {
-        // 0. Ensure public storage subdirectories
+        // 0. Ensure public storage subdirectories and purge legacy bloated files (> 350KB)
         Storage::disk('public')->makeDirectory('events/og');
         Storage::disk('public')->makeDirectory('banners/desktop');
         Storage::disk('public')->makeDirectory('banners/mobile');
@@ -157,6 +170,16 @@ class DemoEventSeeder extends Seeder
         Storage::disk('public')->makeDirectory('participants/primary');
         Storage::disk('public')->makeDirectory('participants/gallery');
         Storage::disk('public')->makeDirectory('shorts/thumbnails');
+
+        try {
+            foreach (Storage::disk('public')->allFiles() as $file) {
+                if (Storage::disk('public')->size($file) > 350000) {
+                    Storage::disk('public')->delete($file);
+                }
+            }
+        } catch (\Throwable $e) {
+            // Ignore if directory scan fails
+        }
 
         // 1. Create Flagship Event
         $event = Event::updateOrCreate(
@@ -255,15 +278,15 @@ class DemoEventSeeder extends Seeder
         $bannersData = [
             [
                 'title' => 'The Grand Celebration of Art & Devotion in Dibrugarh',
-                'image_desktop' => $this->ensureUploadedMedia('banners/desktop/01M3XCHZ62T8A8JRQHRFYA5ZT4.jpg', public_path('event-assets/images/hero.png')),
-                'image_mobile' => $this->ensureUploadedMedia('banners/mobile/01M3XCHZ6ECNP9DCHD2VE277Z1.jpg', public_path('event-assets/images/hero.png')),
+                'image_desktop' => $this->ensureUploadedMedia('banners/desktop/01M3XCHZ62T8A8JRQHRFYA5ZT4.jpg', public_path('event-assets/images/hero-banner.jpg')),
+                'image_mobile' => $this->ensureUploadedMedia('banners/mobile/01M3XCHZ6ECNP9DCHD2VE277Z1.jpg', public_path('event-assets/images/hero-mobile.jpg')),
                 'cta_link' => '#participants',
                 'sort_order' => 1,
             ],
             [
                 'title' => 'Cast Your Vote for People\'s Choice Award 2026',
-                'image_desktop' => $this->ensureUploadedMedia('banners/desktop/01M4NE7K48VSWX80WAAK2AZSQT.jpg', public_path('event-assets/images/hero.png')),
-                'image_mobile' => $this->ensureUploadedMedia('banners/mobile/01M4NE7K4MS2WD49JPGA0MX8F4.jpg', public_path('event-assets/images/hero.png')),
+                'image_desktop' => $this->ensureUploadedMedia('banners/desktop/01M4NE7K48VSWX80WAAK2AZSQT.jpg', public_path('event-assets/images/hero-banner.jpg')),
+                'image_mobile' => $this->ensureUploadedMedia('banners/mobile/01M4NE7K4MS2WD49JPGA0MX8F4.jpg', public_path('event-assets/images/hero-mobile.jpg')),
                 'cta_link' => '#vote',
                 'sort_order' => 2,
             ],
@@ -535,13 +558,18 @@ class DemoEventSeeder extends Seeder
             $slug = Str::slug($p['name']);
             $primaryImg = $this->ensureUploadedMedia(
                 'participants/primary/'.$slug.'.jpg',
-                public_path('event-assets/images/hero.png'),
+                public_path('event-assets/images/sample-pandal.jpg'),
                 $p['primary_display_image'] ?? null
             );
             $galleryImg = $this->ensureUploadedMedia(
                 'participants/gallery/'.$slug.'-1.jpg',
-                public_path('event-assets/images/hero.png'),
+                public_path('event-assets/images/sample-pratima.jpg'),
                 $p['image_1'] ?? null
+            );
+            $lightingImg = $this->ensureUploadedMedia(
+                'participants/gallery/'.$slug.'-2.jpg',
+                public_path('event-assets/images/sample-lighting.jpg'),
+                $p['image_2'] ?? null
             );
 
             $createdParticipants[] = Participant::updateOrCreate(
@@ -553,7 +581,7 @@ class DemoEventSeeder extends Seeder
                     'registration_status' => 'approved',
                     'primary_display_image' => $primaryImg,
                     'image_1' => $galleryImg,
-                    'image_2' => $galleryImg,
+                    'image_2' => $lightingImg,
                     'image_3' => $galleryImg,
                 ])
             );
@@ -608,7 +636,7 @@ class DemoEventSeeder extends Seeder
                 'video_url' => 'https://www.youtube.com/shorts/dQw4w9WgXcQ',
                 'video_id' => 'dQw4w9WgXcQ',
                 'caption' => 'Master artisans crafting bamboo and cane wonders at Chowkidinghee.',
-                'thumbnail_image' => $this->ensureUploadedMedia('shorts/thumbnails/short-1.jpg', public_path('event-assets/images/hero.png'), 'https://images.unsplash.com/photo-1567157577867-05ccb1388e66?auto=format&fit=crop&w=400&q=80'),
+                'thumbnail_image' => $this->ensureUploadedMedia('shorts/thumbnails/short-1.jpg', public_path('event-assets/images/hero-mobile.jpg')),
                 'sort_order' => 1,
             ],
             [
@@ -617,7 +645,7 @@ class DemoEventSeeder extends Seeder
                 'video_url' => 'https://www.youtube.com/shorts/jNQXAC9IVRw',
                 'video_id' => 'jNQXAC9IVRw',
                 'caption' => 'Over 100,000 LEDs creating an aquatic wonderland in West Dibrugarh.',
-                'thumbnail_image' => $this->ensureUploadedMedia('shorts/thumbnails/short-2.jpg', public_path('event-assets/images/hero.png'), 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=400&q=80'),
+                'thumbnail_image' => $this->ensureUploadedMedia('shorts/thumbnails/short-2.jpg', public_path('event-assets/images/hero-mobile.jpg')),
                 'sort_order' => 2,
             ],
             [
@@ -626,7 +654,7 @@ class DemoEventSeeder extends Seeder
                 'video_url' => 'https://www.youtube.com/shorts/3JZ_D3ELwOQ',
                 'video_id' => '3JZ_D3ELwOQ',
                 'caption' => 'Exclusive walkthrough of traditional idol craftsmanship and cultural exhibitions.',
-                'thumbnail_image' => $this->ensureUploadedMedia('shorts/thumbnails/short-3.jpg', public_path('event-assets/images/hero.png'), 'https://images.unsplash.com/photo-1516876437184-593fda40c7ce?auto=format&fit=crop&w=400&q=80'),
+                'thumbnail_image' => $this->ensureUploadedMedia('shorts/thumbnails/short-3.jpg', public_path('event-assets/images/hero-mobile.jpg')),
                 'sort_order' => 3,
             ],
         ];
