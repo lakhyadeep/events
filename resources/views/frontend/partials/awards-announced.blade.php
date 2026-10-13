@@ -46,9 +46,6 @@
                             </span>
                             <h3 class="fw-bold mb-0 text-dark">{{ $award?->display_name ?: ($award?->name ?? 'Category ' . $loop->iteration) }} — Announced Winners</h3>
                         </div>
-                        @if ($award?->category)
-                            <span class="text-muted small"><i class="bi bi-star-fill text-warning me-1"></i> {{ $award->category }}</span>
-                        @endif
                     </div>
 
                     <div class="row g-4 justify-content-center">

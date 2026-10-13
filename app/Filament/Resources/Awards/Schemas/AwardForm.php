@@ -35,7 +35,7 @@ class AwardForm
                             TextInput::make('category')
                                 ->label('Category Group')
                                 ->placeholder('e.g. Grand Championship, Art & Sculpture, Lighting')
-                                ->required()
+                                ->nullable()
                                 ->maxLength(191),
                             TextInput::make('prize_money_or_award')
                                 ->label('Prize Package / Trophy')

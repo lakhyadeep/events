@@ -25,7 +25,8 @@ class AwardsTable
                     ->sortable()
                     ->weight('bold'),
                 TextColumn::make('category')
-                    ->label('Category')
+                    ->label('Category Group')
+                    ->placeholder('—')
                     ->badge()
                     ->color('primary')
                     ->searchable(),
@@ -57,7 +58,8 @@ class AwardsTable
                     ->searchable()
                     ->preload(),
                 SelectFilter::make('category')
-                    ->options(fn () => Award::distinct()->pluck('category', 'category')->toArray()),
+                    ->label('Category Group')
+                    ->options(fn () => Award::whereNotNull('category')->where('category', '!=', '')->distinct()->pluck('category', 'category')->toArray()),
                 TernaryFilter::make('is_active')
                     ->label('Active Award'),
                 SelectFilter::make('year')

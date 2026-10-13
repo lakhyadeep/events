@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Filament\Pages\Auth\RegisterSuperadmin;
+use App\Filament\Resources\Awards\Pages\CreateAward;
 use App\Filament\Resources\Events\Pages\CreateEvent;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Models\Event;
@@ -228,5 +229,28 @@ class AdminManagementTest extends TestCase
             ->assertHasNoActionErrors();
 
         $this->assertDatabaseMissing('users', ['id' => $userToDelete->id]);
+    }
+
+    public function test_admin_can_create_award_without_category_group(): void
+    {
+        $admin = User::where('email', 'admin@dib24x7.com')->first();
+        $event = Event::first();
+
+        Livewire::actingAs($admin)
+            ->test(CreateAward::class)
+            ->fillForm([
+                'name' => 'Special Heritage Award',
+                'display_name' => 'Special Heritage Award (ঐতিহ্যবাহী সম্মাননা)',
+                'category' => null,
+                'event_id' => $event->id,
+                'year' => 2026,
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $this->assertDatabaseHas('awards', [
+            'name' => 'Special Heritage Award',
+            'category' => null,
+        ]);
     }
 }
