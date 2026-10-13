@@ -21,28 +21,28 @@ class DemoEventSeeder extends Seeder
 {
     /**
      * Ensure a media file exists on the public storage disk, copying from local fallback or downloading.
+     * Automatically optimizes and compresses the image for lightweight web delivery.
      */
     protected function ensureUploadedMedia(string $diskPath, ?string $fallbackLocalPath = null, ?string $fallbackUrl = null): string
     {
-        if (Storage::disk('public')->exists($diskPath)) {
+        // If file already exists and is not oversized (<= 350KB), keep it
+        if (Storage::disk('public')->exists($diskPath) && Storage::disk('public')->size($diskPath) <= 350000) {
             return $diskPath;
         }
 
-        // 1. If a local file path is given and exists, copy it
+        $rawContent = null;
+
+        // 1. If a local file path is given and exists, read it
         if ($fallbackLocalPath && file_exists($fallbackLocalPath)) {
-            Storage::disk('public')->put($diskPath, file_get_contents($fallbackLocalPath));
-
-            return $diskPath;
+            $rawContent = file_get_contents($fallbackLocalPath);
         }
 
-        // 2. If a fallback URL is given, try downloading it
-        if ($fallbackUrl && (str_starts_with($fallbackUrl, 'http://') || str_starts_with($fallbackUrl, 'https://'))) {
+        // 2. If a fallback URL is given, try downloading it if no local file was available
+        if ((! $rawContent) && $fallbackUrl && (str_starts_with($fallbackUrl, 'http://') || str_starts_with($fallbackUrl, 'https://'))) {
             try {
                 $response = Http::timeout(8)->get($fallbackUrl);
                 if ($response->successful() && strlen($response->body()) > 500) {
-                    Storage::disk('public')->put($diskPath, $response->body());
-
-                    return $diskPath;
+                    $rawContent = $response->body();
                 }
             } catch (\Throwable $e) {
                 // fall through to default asset
@@ -50,12 +50,98 @@ class DemoEventSeeder extends Seeder
         }
 
         // 3. Fallback to bundled hero asset
-        $defaultLocal = public_path('event-assets/images/hero.png');
-        if (file_exists($defaultLocal)) {
-            Storage::disk('public')->put($diskPath, file_get_contents($defaultLocal));
+        if (! $rawContent) {
+            $defaultLocal = public_path('event-assets/images/hero.png');
+            if (file_exists($defaultLocal)) {
+                $rawContent = file_get_contents($defaultLocal);
+            }
+        }
+
+        if ($rawContent) {
+            $optimizedContent = $this->optimizeImageContent($rawContent, $diskPath);
+            Storage::disk('public')->put($diskPath, $optimizedContent);
         }
 
         return $diskPath;
+    }
+
+    /**
+     * Optimize image content to reduce file size and resolution for fast frontend delivery.
+     */
+    protected function optimizeImageContent(string $rawContent, string $diskPath): string
+    {
+        if (! extension_loaded('gd') || strlen($rawContent) < 100) {
+            return $rawContent;
+        }
+
+        $src = @imagecreatefromstring($rawContent);
+        if (! $src) {
+            return $rawContent;
+        }
+
+        $origW = imagesx($src);
+        $origH = imagesy($src);
+
+        if ($origW <= 0 || $origH <= 0) {
+            imagedestroy($src);
+
+            return $rawContent;
+        }
+
+        $isPng = str_ends_with(strtolower($diskPath), '.png');
+        $maxW = 1200;
+        $maxH = 1200;
+
+        if (str_contains($diskPath, 'participants/')) {
+            $maxW = 800;
+            $maxH = 800;
+        } elseif (str_contains($diskPath, 'banners/desktop/')) {
+            $maxW = 1600;
+            $maxH = 700;
+        } elseif (str_contains($diskPath, 'banners/mobile/')) {
+            $maxW = 800;
+            $maxH = 1000;
+        } elseif (str_contains($diskPath, 'shorts/')) {
+            $maxW = 450;
+            $maxH = 800;
+        } elseif (str_contains($diskPath, 'sponsors/')) {
+            $maxW = 400;
+            $maxH = 200;
+        } elseif (str_contains($diskPath, 'events/og/')) {
+            $maxW = 800;
+            $maxH = 800;
+        }
+
+        $ratio = min($maxW / $origW, $maxH / $origH, 1.0);
+        $newW = (int) max(1, round($origW * $ratio));
+        $newH = (int) max(1, round($origH * $ratio));
+
+        $dst = imagecreatetruecolor($newW, $newH);
+
+        if ($isPng) {
+            imagealphablending($dst, false);
+            imagesavealpha($dst, true);
+            $transparent = imagecolorallocatealpha($dst, 0, 0, 0, 127);
+            imagefilledrectangle($dst, 0, 0, $newW, $newH, $transparent);
+            imagecopyresampled($dst, $src, 0, 0, 0, 0, $newW, $newH, $origW, $origH);
+
+            ob_start();
+            imagepng($dst, null, 8);
+            $output = ob_get_clean();
+        } else {
+            $white = imagecolorallocate($dst, 255, 255, 255);
+            imagefilledrectangle($dst, 0, 0, $newW, $newH, $white);
+            imagecopyresampled($dst, $src, 0, 0, 0, 0, $newW, $newH, $origW, $origH);
+
+            ob_start();
+            imagejpeg($dst, null, 80);
+            $output = ob_get_clean();
+        }
+
+        imagedestroy($src);
+        imagedestroy($dst);
+
+        return ($output !== false && strlen($output) > 100) ? $output : $rawContent;
     }
 
     /**
@@ -522,7 +608,7 @@ class DemoEventSeeder extends Seeder
                 'video_url' => 'https://www.youtube.com/shorts/dQw4w9WgXcQ',
                 'video_id' => 'dQw4w9WgXcQ',
                 'caption' => 'Master artisans crafting bamboo and cane wonders at Chowkidinghee.',
-                'thumbnail_image' => $this->ensureUploadedMedia('shorts/thumbnails/short-1.jpg', null, 'https://images.unsplash.com/photo-1567157577867-05ccb1388e66?auto=format&fit=crop&w=400&q=80'),
+                'thumbnail_image' => $this->ensureUploadedMedia('shorts/thumbnails/short-1.jpg', public_path('event-assets/images/hero.png'), 'https://images.unsplash.com/photo-1567157577867-05ccb1388e66?auto=format&fit=crop&w=400&q=80'),
                 'sort_order' => 1,
             ],
             [
@@ -531,7 +617,7 @@ class DemoEventSeeder extends Seeder
                 'video_url' => 'https://www.youtube.com/shorts/jNQXAC9IVRw',
                 'video_id' => 'jNQXAC9IVRw',
                 'caption' => 'Over 100,000 LEDs creating an aquatic wonderland in West Dibrugarh.',
-                'thumbnail_image' => $this->ensureUploadedMedia('shorts/thumbnails/short-2.jpg', null, 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=400&q=80'),
+                'thumbnail_image' => $this->ensureUploadedMedia('shorts/thumbnails/short-2.jpg', public_path('event-assets/images/hero.png'), 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=400&q=80'),
                 'sort_order' => 2,
             ],
             [
@@ -540,7 +626,7 @@ class DemoEventSeeder extends Seeder
                 'video_url' => 'https://www.youtube.com/shorts/3JZ_D3ELwOQ',
                 'video_id' => '3JZ_D3ELwOQ',
                 'caption' => 'Exclusive walkthrough of traditional idol craftsmanship and cultural exhibitions.',
-                'thumbnail_image' => $this->ensureUploadedMedia('shorts/thumbnails/short-3.jpg', null, 'https://images.unsplash.com/photo-1516876437184-593fda40c7ce?auto=format&fit=crop&w=400&q=80'),
+                'thumbnail_image' => $this->ensureUploadedMedia('shorts/thumbnails/short-3.jpg', public_path('event-assets/images/hero.png'), 'https://images.unsplash.com/photo-1516876437184-593fda40c7ce?auto=format&fit=crop&w=400&q=80'),
                 'sort_order' => 3,
             ],
         ];
