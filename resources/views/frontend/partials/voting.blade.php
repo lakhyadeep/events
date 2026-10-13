@@ -15,19 +15,15 @@
         </span>
         <h2 class="fw-bold mb-2 pujas-header-title">Vote for the Best — {{ $event->display_name ?? 'Sharad Samman 2026' }}</h2>
         <p class="pujas-header-subtitle mb-3">Explore the shortlisted entries and cast your vote in each category</p>
-        <div class="d-flex flex-wrap justify-content-center gap-2 mt-1">
-            <a href="#cat-best-puja"
-                class="btn btn-sm btn-danger rounded-pill px-3 py-2 fw-semibold shadow-sm pujas-nav-btn">
-                <i class="bi bi-trophy-fill me-1 text-warning"></i> 1. Best Puja
+        <div class="pujas-nav-tabs-wrapper mt-2">
+            <a href="#cat-best-puja" class="pujas-nav-btn nav-btn-puja">
+                <i class="bi bi-trophy-fill text-warning me-1"></i> 1. Best Puja
             </a>
-            <a href="#cat-best-pratima"
-                class="btn btn-sm btn-outline-light rounded-pill px-3 py-2 fw-semibold pujas-nav-btn">
-                <i class="bi bi-flower1 me-1 text-info"></i> 2. Best Pratima
+            <a href="#cat-best-pratima" class="pujas-nav-btn nav-btn-pratima">
+                <i class="bi bi-flower1 me-1" style="color: #0bf5ed;"></i> 2. Best Pratima
             </a>
-            <a href="#cat-best-lighting"
-                class="btn btn-sm btn-outline-warning text-warning rounded-pill px-3 py-2 fw-semibold pujas-nav-btn"
-                style="border-color: #f59e0b;">
-                <i class="bi bi-lightbulb-fill me-1 text-warning"></i> 3. Best Lighting
+            <a href="#cat-best-lighting" class="pujas-nav-btn nav-btn-lighting">
+                <i class="bi bi-lightbulb-fill text-warning me-1"></i> 3. Best Lighting
             </a>
         </div>
 
@@ -128,19 +124,21 @@
 
     <!-- CATEGORY 1: BEST PUJA -->
     <div class="category-section-block cat-puja-theme">
-        <div class="category-title-wrapper" id="cat-best-puja">
+        <div class="category-title-wrapper cat-header-puja" id="cat-best-puja">
             <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
                 <div class="d-flex align-items-center gap-3">
                     <div class="category-icon-box">
                         <i class="bi bi-trophy-fill"></i>
                     </div>
                     <div>
-                        <h3 class="category-title-text">Best Puja</h3>
+                        <span class="category-eyebrow text-danger"><i class="bi bi-award-fill me-1"></i>
+                            CATEGORY 01 • FLAGSHIP</span>
+                        <h3 class="category-title-text">{{ $pujaAward?->display_name ?: ($pujaAward?->name ?: 'Best Puja') }}</h3>
                         <div class="category-subtitle-text">Nominated Pandals • {{ $event->display_name ?? 'Sharad Samman 2026' }}</div>
                     </div>
                 </div>
-                <span class="category-badge-pill">
-                    <i class="bi bi-fire text-danger me-1"></i> Flagship Category
+                <span class="category-badge-pill pill-puja">
+                    <i class="bi bi-fire me-1"></i> Flagship Award
                 </span>
             </div>
         </div>
@@ -148,7 +146,7 @@
         <div class="row g-4">
             @foreach ($contestants as $p)
                 <div class="col-md-4">
-                    <div class="vote-card h-100 p-3">
+                    <div class="vote-card h-100 p-2 p-md-3">
                         <div class="position-relative mb-3">
                             <img src="{{ $p->primary_image_url ?: ($p->image_1_url ?: asset('event-assets/images/hero.png')) }}"
                                 alt="{{ $p->display_name ?: $p->name }}" class="img-fluid rounded-3 w-100"
@@ -191,23 +189,29 @@
         </div>
     </div>
 
+    <!-- CATEGORY SEGMENT DIVIDER -->
+    <div class="category-segment-divider" aria-hidden="true">
+        <span class="category-segment-divider-icon"><i class="bi bi-star-fill"></i></span>
+    </div>
+
     <!-- CATEGORY 2: BEST PRATIMA -->
     <div class="category-section-block cat-pratima-theme">
-        <div class="category-title-wrapper" id="cat-best-pratima">
+        <div class="category-title-wrapper cat-header-pratima" id="cat-best-pratima">
             <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
                 <div class="d-flex align-items-center gap-3">
                     <div class="category-icon-box"
-                        style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
+                        style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
                         <i class="bi bi-flower1 text-warning"></i>
                     </div>
                     <div>
-                        <h3 class="category-title-text">Best Pratima</h3>
+                        <span class="category-eyebrow text-primary"><i class="bi bi-palette-fill me-1"></i>
+                            CATEGORY 02 • IDOL ARTISTRY</span>
+                        <h3 class="category-title-text">{{ $pratimaAward?->display_name ?: ($pratimaAward?->name ?: 'Best Pratima') }}</h3>
                         <div class="category-subtitle-text">Exquisite Clay Idol Artistry & Traditional Craftsmanship</div>
                     </div>
                 </div>
-                <span class="category-badge-pill"
-                    style="background: rgba(30, 41, 59, 0.08); color: #1e293b; border-color: rgba(30, 41, 59, 0.2);">
-                    <i class="bi bi-palette-fill text-primary me-1"></i> Traditional Art
+                <span class="category-badge-pill pill-pratima">
+                    <i class="bi bi-palette-fill me-1"></i> Traditional Art
                 </span>
             </div>
         </div>
@@ -215,7 +219,7 @@
         <div class="row g-4">
             @foreach ($contestants as $p)
                 <div class="col-md-4">
-                    <div class="vote-card h-100 p-3">
+                    <div class="vote-card h-100 p-2 p-md-3">
                         <div class="position-relative mb-3">
                             <img src="{{ $p->image_1_url ?: ($p->primary_image_url ?: asset('event-assets/images/hero.png')) }}"
                                 alt="{{ $p->display_name ?: $p->name }}" class="img-fluid rounded-3 w-100"
@@ -258,9 +262,14 @@
         </div>
     </div>
 
+    <!-- CATEGORY SEGMENT DIVIDER -->
+    <div class="category-segment-divider" aria-hidden="true">
+        <span class="category-segment-divider-icon"><i class="bi bi-star-fill"></i></span>
+    </div>
+
     <!-- CATEGORY 3: BEST LIGHTING -->
     <div class="category-section-block cat-lighting-theme">
-        <div class="category-title-wrapper" id="cat-best-lighting">
+        <div class="category-title-wrapper cat-header-lighting" id="cat-best-lighting">
             <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
                 <div class="d-flex align-items-center gap-3">
                     <div class="category-icon-box"
@@ -268,13 +277,13 @@
                         <i class="bi bi-lightbulb-fill text-white"></i>
                     </div>
                     <div>
-                        <h3 class="category-title-text">Best Lighting</h3>
+                        <span class="category-eyebrow text-warning"><i class="bi bi-brightness-high-fill me-1"></i> CATEGORY 03 • ILLUMINATION</span>
+                        <h3 class="category-title-text">{{ $lightingAward?->display_name ?: ($lightingAward?->name ?: 'Best Lighting') }}</h3>
                         <div class="category-subtitle-text">Grand Illuminations & Light Gate Displays</div>
                     </div>
                 </div>
-                <span class="category-badge-pill"
-                    style="background: rgba(217, 119, 6, 0.1); color: #b45309; border-color: rgba(217, 119, 6, 0.25);">
-                    <i class="bi bi-brightness-high-fill text-warning me-1"></i> Illumination Award
+                <span class="category-badge-pill pill-lighting">
+                    <i class="bi bi-brightness-high-fill me-1"></i> Illumination Award
                 </span>
             </div>
         </div>
@@ -282,7 +291,7 @@
         <div class="row g-4">
             @foreach ($contestants as $p)
                 <div class="col-md-4">
-                    <div class="vote-card h-100 p-3">
+                    <div class="vote-card h-100 p-2 p-md-3">
                         <div class="position-relative mb-3">
                             <img src="{{ $p->image_2_url ?: ($p->primary_image_url ?: asset('event-assets/images/hero.png')) }}"
                                 alt="{{ $p->display_name ?: $p->name }}" class="img-fluid rounded-3 w-100"

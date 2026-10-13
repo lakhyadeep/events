@@ -48,11 +48,7 @@
                                 </span>
                                 <div>
                                     <h3 class="award-header-title mb-0">{{ $award->display_name ?: $award->name }}</h3>
-                                    @if ($award->category)
-                                        <span class="badge bg-black bg-opacity-25 rounded-pill px-2 py-1" style="font-size: 0.65rem; font-weight: 500;">
-                                            {{ $award->category }}
-                                        </span>
-                                    @endif
+                                    
                                 </div>
                             </div>
 
@@ -77,9 +73,6 @@
                                                 </svg>
                                             </div>
                                             <div class="award-position-title">Winner</div>
-                                            <div class="award-tba-status text-truncate px-1" title="{{ $firstWinner?->participant?->display_name ?: ($firstWinner?->participant?->name ?? 'TBA') }}">
-                                                {{ $firstWinner ? ($firstWinner->participant?->display_name ?: $firstWinner->participant?->name) : 'TBA' }}
-                                            </div>
                                         </div>
                                     </div>
 
@@ -100,9 +93,7 @@
                                                 </svg>
                                             </div>
                                             <div class="award-position-title">Runner Up</div>
-                                            <div class="award-tba-status text-truncate px-1" title="{{ $secondWinner?->participant?->display_name ?: ($secondWinner?->participant?->name ?? 'TBA') }}">
-                                                {{ $secondWinner ? ($secondWinner->participant?->display_name ?: $secondWinner->participant?->name) : 'TBA' }}
-                                            </div>
+                                           
                                         </div>
                                     </div>
 
@@ -123,9 +114,7 @@
                                                 </svg>
                                             </div>
                                             <div class="award-position-title">Second Runner Up</div>
-                                            <div class="award-tba-status text-truncate px-1" title="{{ $thirdWinner?->participant?->display_name ?: ($thirdWinner?->participant?->name ?? 'TBA') }}">
-                                                {{ $thirdWinner ? ($thirdWinner->participant?->display_name ?: $thirdWinner->participant?->name) : 'TBA' }}
-                                            </div>
+                                           
                                         </div>
                                     </div>
 

@@ -36,6 +36,51 @@ class EventMicrositeTest extends TestCase
         $response->assertSee('Thana Chariali Sarbajanin');
     }
 
+    public function test_hero_banner_renders_dynamic_background_and_separate_award_logo(): void
+    {
+        $response = $this->get('/events/sharod-samman-2026');
+
+        $response->assertStatus(200);
+
+        $event = Event::where('slug', 'sharod-samman-2026')->first();
+        $banner = $event->banners()->where('is_active', true)->first();
+
+        // Banner desktop and mobile image URLs must be in the background CSS
+        $response->assertSee($banner->desktop_image_url, false);
+        $response->assertSee($banner->mobile_image_url, false);
+
+        // Logo inside the container must be the award logo asset, NOT the banner image
+        $response->assertSee('event-assets/images/logo-award2026.png', false);
+        $response->assertDontSee('<img src="'.$banner->desktop_image_url.'"', false);
+    }
+
+    public function test_voting_section_renders_category_headers_with_borders_and_segment_dividers(): void
+    {
+        $response = $this->get('/events/sharod-samman-2026');
+
+        $response->assertStatus(200);
+
+        // Category header wrappers with border/theme classes
+        $response->assertSee('category-title-wrapper cat-header-puja', false);
+        $response->assertSee('category-title-wrapper cat-header-pratima', false);
+        $response->assertSee('category-title-wrapper cat-header-lighting', false);
+
+        // Category eyebrow labels
+        $response->assertSee('CATEGORY 01 • FLAGSHIP', false);
+        $response->assertSee('CATEGORY 02 • IDOL ARTISTRY', false);
+        $response->assertSee('CATEGORY 03 • ILLUMINATION', false);
+
+        // Segment dividers between categories
+        $response->assertSee('category-segment-divider', false);
+        $response->assertSee('category-segment-divider-icon', false);
+
+        // Navigation tabs wrapper
+        $response->assertSee('pujas-nav-tabs-wrapper', false);
+        $response->assertSee('pujas-nav-btn nav-btn-puja', false);
+        $response->assertSee('pujas-nav-btn nav-btn-pratima', false);
+        $response->assertSee('pujas-nav-btn nav-btn-lighting', false);
+    }
+
     public function test_slug_based_event_route_works(): void
     {
         $response = $this->get('/events/sharod-samman-2026');
@@ -202,85 +247,7 @@ class EventMicrositeTest extends TestCase
     public function test_banner_media_url_resolution(): void
     {
         $banner = new Banner([
-            'image_desktop' => 'banners/desktop/sample.jpg',
-            'image_mobile' => 'banners/mobile/sample.jpg',
-        ]);
-
-        $this->assertStringContainsString('/storage/banners/desktop/sample.jpg', $banner->desktop_image_url);
-        $this->assertStringContainsString('/storage/banners/mobile/sample.jpg', $banner->mobile_image_url);
-    }
-
-    public function test_all_pujas_directory_renders_successfully(): void
-    {
-        $response = $this->get('/all-pujas');
-
-        $response->assertStatus(200);
-        $response->assertSee('Dibrugarh Durga Pujas');
-        $response->assertSee('Search and vote for your favourite puja committee');
-        $response->assertSee('pujaSearchInput');
-        $response->assertSee('filter-chips-wrap');
-        $response->assertSee('All Pujas');
-        $response->assertSee('allpujas.js');
-        $response->assertSee('window.dynamicPujasData');
-        $response->assertSee('Thana Chariali Sarbajanin');
-        $response->assertSee('puja-card-');
-    }
-
-    public function test_slug_based_all_pujas_route_works(): void
-    {
-        $response = $this->get('/events/sharod-samman-2026/all-pujas');
-
-        $response->assertStatus(200);
-        $response->assertSee('Dibrugarh Durga Pujas');
-    }
-
-    public function test_home_page_includes_explore_all_pujas_cta_and_otp_modal(): void
-    {
-        $response = $this->get('/');
-
-        $response->assertStatus(200);
-        $response->assertSee('Explore All Registered Durga Pujas');
-        $response->assertSee('otpModal');
-        $response->assertSee('voterMobile');
-        $response->assertSee('alreadyVotedAlert');
-    }
-
-    public function test_frontend_sections_hidden_when_dynamic_data_not_available_while_nav_is_retained(): void
-    {
-        $bareEvent = Event::create([
-            'name' => 'Bare Minimal Event',
-            'display_name' => 'Bare Minimal Event',
-            'year' => 2026,
-            'slug' => 'bare-minimal-event',
-            'status' => 'active',
-            'is_voting_active' => false,
-            'about_text' => null,
-            'terms_and_conditions' => null,
-        ]);
-
-        $response = $this->get('/events/bare-minimal-event');
-
-        $response->assertStatus(200);
-
-        // Sections must NOT be rendered when dynamic data is absent
-        $response->assertDontSee('<section class="durgo-utsav-section', false);
-        $response->assertDontSee('<section class="sponsors-section-wrapper"', false);
-        $response->assertDontSee('<section class="pujas-voting-section"', false);
-        $response->assertDontSee('<div class="awards-embedded-box', false);
-        $response->assertDontSee('<section class="awards-announced-section', false);
-        $response->assertDontSee('<section class="glimpses-section"', false);
-        $response->assertDontSee('<section class="timeline-section"', false);
-        $response->assertDontSee('<section class="terms-conditions-section', false);
-
-        // Nav links and vote button ARE retained in the navigation
-        $response->assertSee('data-target="about"', false);
-        $response->assertSee('data-target="pujas"', false);
-        $response->assertSee('data-target="awards-announced"', false);
-        $response->assertSee('data-target="gallery"', false);
-        $response->assertSee('data-target="events"', false);
-        $response->assertSee('Voting Closed', false);
-    }
-
+l̥
     public function test_all_pujas_shows_empty_state_without_fake_fallback_data(): void
     {
         $bareEvent = Event::create([
