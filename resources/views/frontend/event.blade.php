@@ -8,57 +8,37 @@
         <!-- Festive Awards Hero Section -->
         @include('frontend.partials.hero')
 
-        <!-- Durgo Utsav About & Mandala Section -->
-        @if (!empty($event->about_text))
-            @include('frontend.partials.about')
-        @endif
 
-        <!-- Sponsor Tiers (Organised by, Title, Hospitality, Trophy & Associate Partners) -->
-        @if ($event->sponsors && $event->sponsors->where('is_active', true)->isNotEmpty())
-            @include('frontend.partials.sponsors')
-        @endif
+        @include('frontend.partials.about')
 
 
-        <!-- Awards to be Presented Matrix -->
-        @if ($event->awards && $event->awards->where('is_active', true)->isNotEmpty())
-            @include('frontend.partials.awards')
-        @endif
+        @include('frontend.partials.sponsors')
+
+
+        @include('frontend.partials.awards')
 
 
         @include('frontend.partials.explore-all-puja')
 
-        <!-- Official Award Winners Section -->
-        @if (isset($publishedWinners) && $publishedWinners->isNotEmpty())
-            @include('frontend.partials.awards-announced')
-        @endif
 
-
-        <!-- Glimpses of Puja (Vertical 9:16 Video Shorts Carousel) -->
-        @if ($event->videoShorts && $event->videoShorts->where('is_active', true)->isNotEmpty())
-            @include('frontend.partials.gallery')
-        @endif
+        @include('frontend.partials.new')
 
 
 
-
-        <!-- Event Timeline Tracker -->
-        @if ($event->timelineItems && $event->timelineItems->isNotEmpty())
-            @include('frontend.partials.timeline')
-        @endif
+        @include('frontend.partials.awards-announced')
 
 
-        <!-- Official Guidelines & Terms -->
-        @if (!empty($event->terms_and_conditions))
-            @include('frontend.partials.terms')
-        @endif
+        @include('frontend.partials.gallery')
 
+
+
+        @include('frontend.partials.timeline')
+
+
+        @include('frontend.partials.terms')
 
         <!-- Marketing Promotional Banner -->
         @include('frontend.partials.marketing-banner')
-
-
-
-
 
 
     </main>

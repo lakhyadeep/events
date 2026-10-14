@@ -675,7 +675,7 @@ body {
 /* Embedded Awards Box inside Vote Section with slightly darker background */
 .awards-embedded-box {
     background: rgba(18, 2, 5, 0.55);
-    border-bottom: 1px solid rgba(255, 204, 0, 0.22);
+    border-bottom: none;
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
     backdrop-filter: blur(10px);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -1162,6 +1162,7 @@ body {
     background: radial-gradient(circle at 50% 0%, #680912 0%, #450308 45%, #240104 100%);
     box-shadow: inset 0 12px 36px rgba(0, 0, 0, 0.45);
     overflow: hidden;
+    border-bottom: 2px solid rgba(255, 204, 0, 0.5);
 }
 
 .pujas-header-box .pujas-badge-tag {
@@ -2660,7 +2661,7 @@ footer.site-footer {
 .awards-announced-section {
     background: linear-gradient(180deg, #fdf8f2 0%, #fbf1e4 50%, #f7e8d5 100%);
     position: relative;
-    border-top: 3px solid rgba(183, 13, 24, 0.15);
+    border-top: none;
     border-bottom: 3px solid rgba(183, 13, 24, 0.15);
     overflow: hidden;
 }

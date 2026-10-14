@@ -5,6 +5,11 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 // Public Flagship Event Microsite
+
+Route::get('/welcome', function () {
+    return view('welcome');
+})->name('welcome');
+
 Route::get('/', [EventMicrositeController::class, 'show'])->name('home');
 
 // Specific Event by Slug

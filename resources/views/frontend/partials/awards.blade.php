@@ -1,8 +1,8 @@
 @if ($event->awards && $event->awards->where('is_active', true)->isNotEmpty())
 <!-- Vote for the Best — Sharad Samman 2026 Section -->
-<section class="pujas-voting-section" id="pujas">
+<section class="pujas-voting-section" id="pujas" style="border-bottom: 2px solid rgba(255, 204, 0, 0.5);">
     <!-- Embedded Awards to be Presented with slightly darker background -->
-    <div class="awards-embedded-box mb-5 " id="categories">
+    <div class="awards-embedded-box mb-0" id="categories" style="border-bottom: none;">
         <div class="container">
             <!-- Section Title & Festive Divider Motif -->
             <h2 class="awards-main-heading text-white">Awards to be Presented</h2>

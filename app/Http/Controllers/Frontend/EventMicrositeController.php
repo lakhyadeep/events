@@ -362,8 +362,9 @@ class EventMicrositeController extends Controller
         $otherSponsors = $event->sponsors
             ->whereNotIn('sponsor_type', [SponsorType::PresentingPartner, SponsorType::AssociateSponsor]);
 
-        $trophySponsor = $event->sponsors->first(fn ($s) => str_contains(strtolower($s->title.' '.($s->sponsor_tag ?? '')), 'trophy') ||
-            str_contains(strtolower($s->title), 'toni')
+        $trophySponsor = $event->sponsors->first(
+            fn ($s) => str_contains(strtolower($s->title.' '.($s->sponsor_tag ?? '')), 'trophy') ||
+                str_contains(strtolower($s->title), 'toni')
         );
 
         return view('frontend.vote-success', compact(
