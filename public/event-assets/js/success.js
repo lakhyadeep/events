@@ -76,8 +76,20 @@ function loadVoteConfirmationDetails() {
         categoryLabel = 'Best ' + categoryLabel;
     }
 
+    let voterName = null;
+    try {
+        voterName = localStorage.getItem('last_voted_name');
+    } catch (e) {}
+
     // Populate UI
     $('#confirmedPandalName').text(targetName);
+
+    if (voterName && voterName.trim()) {
+        $('#confirmedVoterName').text(voterName.trim());
+        $('#confirmedVoterNameWrap').show();
+    } else {
+        $('#confirmedVoterNameWrap').hide();
+    }
 
     if (categoryLabel) {
         $('#confirmedCategoryBadge').text(categoryLabel).show();

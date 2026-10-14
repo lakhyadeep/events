@@ -111,6 +111,8 @@ class VoteController extends Controller
             'award_ids.*' => ['integer', 'exists:awards,id'],
             'phone' => ['required', 'string', 'min:10', 'max:20'],
             'otp' => ['required', 'string', 'min:4', 'max:10'],
+            'name' => ['nullable', 'string', 'max:255'],
+            'voter_name' => ['nullable', 'string', 'max:255'],
         ]);
 
         /** @var Event $event */
@@ -169,8 +171,12 @@ class VoteController extends Controller
             $cleanPhone = substr($cleanPhone, -10);
         }
 
+        $voterName = ! empty($validated['voter_name'])
+            ? trim($validated['voter_name'])
+            : (! empty($validated['name']) ? trim($validated['name']) : null);
+
         try {
-            $vote = DB::transaction(function () use ($event, $participant, $awardId, $cleanPhone, $request) {
+            $vote = DB::transaction(function () use ($event, $participant, $awardId, $cleanPhone, $voterName, $request) {
                 $recheck = $event->canMobileVote($cleanPhone, $participant->id, $awardId);
                 if (! $recheck['allowed']) {
                     throw new \RuntimeException($recheck['message']);
@@ -181,6 +187,7 @@ class VoteController extends Controller
                     'participant_id' => $participant->id,
                     'award_id' => $awardId,
                     'mobile_number' => $cleanPhone,
+                    'voter_name' => $voterName,
                     'ip_address' => $request->ip(),
                     'user_agent' => $request->userAgent(),
                 ]);
@@ -202,6 +209,7 @@ class VoteController extends Controller
                 'vote_ids' => [$vote->id],
                 'votes_count' => 1,
                 'participant_name' => $recipientName,
+                'voter_name' => $vote->voter_name,
                 'award_id' => $awardId,
                 'award_ids' => array_values(array_filter([$awardId])),
             ],

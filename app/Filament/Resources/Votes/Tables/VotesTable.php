@@ -17,6 +17,12 @@ class VotesTable
     {
         return $table
             ->columns([
+                TextColumn::make('voter_name')
+                    ->label('Voter Name')
+                    ->placeholder('Anonymous')
+                    ->searchable()
+                    ->sortable(),
+
                 TextColumn::make('mobile_number')
                     ->label('Voter Mobile')
                     ->formatStateUsing(function (string $state): string {

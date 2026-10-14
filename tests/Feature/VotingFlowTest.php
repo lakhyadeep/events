@@ -670,4 +670,86 @@ class VotingFlowTest extends TestCase
         ]);
         $this->assertNull($winner->rank_order);
     }
+
+    public function test_vote_can_be_cast_with_optional_voter_name(): void
+    {
+        $event = $this->createEvent();
+        $participant = $this->createParticipant($event);
+        $mobile = '9876543210';
+
+        // 1. Request OTP
+        $this->postJson('/api/v1/otp/send', [
+            'phone' => $mobile,
+            'purpose' => 'voting',
+            'event_id' => $event->id,
+            'participant_id' => $participant->id,
+        ])->assertStatus(200);
+
+        $code = $this->getLastOtpCode();
+
+        // 2. Cast vote with optional voter_name
+        $response = $this->postJson('/api/v1/votes/cast', [
+            'event_id' => $event->id,
+            'participant_id' => $participant->id,
+            'phone' => $mobile,
+            'voter_name' => 'Rahul Sharma',
+            'otp' => $code,
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'success' => true,
+                'data' => [
+                    'voter_name' => 'Rahul Sharma',
+                ],
+            ]);
+
+        $this->assertDatabaseHas('votes', [
+            'event_id' => $event->id,
+            'participant_id' => $participant->id,
+            'mobile_number' => $mobile,
+            'voter_name' => 'Rahul Sharma',
+        ]);
+
+        $vote = Vote::where('mobile_number', $mobile)->firstOrFail();
+        $this->assertEquals('Rahul Sharma', $vote->voter_name);
+    }
+
+    public function test_vote_can_be_cast_without_voter_name(): void
+    {
+        $event = $this->createEvent();
+        $participant = $this->createParticipant($event);
+        $mobile = '9876543211';
+
+        $this->postJson('/api/v1/otp/send', [
+            'phone' => $mobile,
+            'purpose' => 'voting',
+            'event_id' => $event->id,
+            'participant_id' => $participant->id,
+        ])->assertStatus(200);
+
+        $code = $this->getLastOtpCode();
+
+        $response = $this->postJson('/api/v1/votes/cast', [
+            'event_id' => $event->id,
+            'participant_id' => $participant->id,
+            'phone' => $mobile,
+            'otp' => $code,
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'success' => true,
+                'data' => [
+                    'voter_name' => null,
+                ],
+            ]);
+
+        $this->assertDatabaseHas('votes', [
+            'event_id' => $event->id,
+            'participant_id' => $participant->id,
+            'mobile_number' => $mobile,
+            'voter_name' => null,
+        ]);
+    }
 }

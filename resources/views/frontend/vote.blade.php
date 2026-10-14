@@ -274,7 +274,7 @@
                                         <i class="bi bi-person-fill text-danger me-1"></i> Your Name (Optional)
                                     </label>
                                     <input type="text" class="form-control form-control-lg fs-6" id="voterNameInput"
-                                        placeholder="Enter your name">
+                                        name="voter_name" placeholder="Enter your name" maxlength="255" autocomplete="name">
                                 </div>
 
                                 <div class="col-md-6">

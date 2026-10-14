@@ -500,6 +500,8 @@ function setupOtpHandlers() {
                 event_id: pendingSubmission.eventId,
                 participant_id: pendingSubmission.participantId,
                 award_id: pendingSubmission.awardId,
+                name: pendingSubmission.name || null,
+                voter_name: pendingSubmission.name || null,
                 phone: pendingSubmission.mobile,
                 otp: enteredOtp
             }),
@@ -617,6 +619,11 @@ function handleVoteSuccess(res) {
                 localStorage.setItem('last_voted_pandal', pendingSubmission.pandal);
                 localStorage.setItem('last_voted_category', pendingSubmission.feature);
                 localStorage.setItem('last_voted_mobile', pendingSubmission.mobile);
+                if (pendingSubmission.name) {
+                    localStorage.setItem('last_voted_name', pendingSubmission.name);
+                } else {
+                    localStorage.removeItem('last_voted_name');
+                }
                 if (res && res.data && res.data.vote_id) {
                     sessionStorage.setItem('user_ballot_id', '#SS2026-VOTE-' + res.data.vote_id);
                 }

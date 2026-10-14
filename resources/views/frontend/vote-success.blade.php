@@ -67,6 +67,10 @@
                         </div>
                         <h3 class="fw-bold text-dark mb-1 fs-5" id="confirmedPandalName"></h3>
                         <div class="small text-muted d-flex flex-wrap align-items-center justify-content-center gap-2">
+                            <span id="confirmedVoterNameWrap" style="display: none;">
+                                <i class="bi bi-person-fill text-danger me-1"></i>
+                                <span>Voter: <strong class="text-dark" id="confirmedVoterName"></strong></span>
+                            </span>
                             <span id="confirmedPandalLocWrap" style="display: none;">
                                 <i class="bi bi-geo-alt-fill text-danger me-1"></i>
                                 <span id="confirmedPandalLoc"></span>

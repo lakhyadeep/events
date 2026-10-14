@@ -40,6 +40,10 @@ class VoteForm
                     Section::make('Voter Verification & Audit')
                         ->description('Audit trail recorded during OTP verification.')
                         ->schema([
+                            TextInput::make('voter_name')
+                                ->label('Voter Name')
+                                ->placeholder('Anonymous / Not provided')
+                                ->disabled(),
                             TextInput::make('mobile_number')
                                 ->label('Verified Mobile Number')
                                 ->disabled(),

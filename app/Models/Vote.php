@@ -16,6 +16,7 @@ class Vote extends Model
         'participant_id',
         'award_id',
         'mobile_number',
+        'voter_name',
         'ip_address',
         'user_agent',
     ];
