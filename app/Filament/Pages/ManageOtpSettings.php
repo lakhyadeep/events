@@ -65,11 +65,11 @@ class ManageOtpSettings extends Page
                         Select::make('otp_length')
                             ->label('OTP Digit Length')
                             ->options([
-                                4 => '4 Digits (Quick)',
-                                6 => '6 Digits (Recommended Standard)',
+                                4 => '4 Digits (Standard Default)',
+                                6 => '6 Digits (Extended)',
                                 8 => '8 Digits (High Security)',
                             ])
-                            ->default(6)
+                            ->default(4)
                             ->required(),
 
                         TextInput::make('expiry_minutes')

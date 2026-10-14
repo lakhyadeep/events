@@ -40,6 +40,7 @@
             window.selectedParticipantId = {{ $selectedParticipant?->id ?? 'null' }};
             window.selectedParticipantSlug = @json($selectedParticipant?->slug ?? null);
             window.voteBaseUrl = @json(url('/vote'));
+            window.otpConfig = @json($otpConfig ?? ['length' => 4, 'resendCooldown' => 60, 'expiryMinutes' => 5]);
         </script>
 
         <!-- Voting Form Section: People's Favorite Award -->
@@ -199,21 +200,24 @@
                                 </div>
                             </div>
 
-                            <!-- Field 2: Award Categories to Vote For (Multi-Select Supported) -->
+                            <!-- Field 2: Award Category to Vote For (Single Selection Only) -->
                             <div class="mb-4">
                                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
                                     <label class="form-label fw-bold text-dark mb-0">
-                                        <i class="bi bi-stars text-warning me-1"></i> What do you like most here? (Vote for Award Categories) <span class="text-danger">*</span>
+                                        <i class="bi bi-stars text-warning me-1"></i> Select an Award Category to Vote For <span class="text-danger">*</span>
                                     </label>
-                                    <span class="badge bg-warning bg-opacity-10 text-dark border border-warning rounded-pill px-3 py-1 small">
-                                        <i class="bi bi-check2-square text-danger me-1"></i> Multi-select supported
+                                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger-subtle rounded-pill px-3 py-1 small">
+                                        <i class="bi bi-check-circle-fill me-1"></i> 1 Category per Vote
                                     </span>
                                 </div>
-                                <div class="form-text small text-muted mb-3">Choose one or more categories where this puja committee excelled:</div>
+                                <div class="form-text small text-muted mb-3">Choose the single category where this puja committee excelled:</div>
 
                                 <div class="row g-3" id="awardPreferenceGrid">
-                                    @if ($event->awards && $event->awards->where('is_active', true)->isNotEmpty())
-                                        @foreach ($event->awards->where('is_active', true) as $award)
+                                    @php
+                                        $votingAwards = $event->awards ? $event->awards->where('is_active', true)->where('is_voting_allowed', true) : collect();
+                                    @endphp
+                                    @if ($votingAwards->isNotEmpty())
+                                        @foreach ($votingAwards as $award)
                                             @php
                                                 $name = strtolower($award->name . ' ' . ($award->category ?? ''));
                                                 $isCrown = $loop->first || str_contains($name, 'overall') || str_contains($name, 'serar sera') || str_contains($name, 'grand championship');
@@ -235,12 +239,12 @@
                                                 }
                                             @endphp
                                             <div class="col-6 col-md-4">
-                                                <label class="preference-card-label h-100" for="award_check_{{ $award->id }}">
-                                                    <input type="checkbox" name="award_ids[]" value="{{ $award->id }}"
-                                                        id="award_check_{{ $award->id }}"
+                                                <label class="preference-card-label h-100" for="award_radio_{{ $award->id }}">
+                                                    <input type="radio" name="award_id" value="{{ $award->id }}"
+                                                        id="award_radio_{{ $award->id }}"
                                                         data-award-name="{{ $award->display_name ?: $award->name }}"
                                                         data-award-category="{{ $award->category ?: $award->name }}"
-                                                        class="preference-checkbox-input"
+                                                        class="preference-radio-input"
                                                         {{ $loop->first ? 'checked' : '' }}>
                                                     <div class="preference-card text-center p-3 h-100 {{ $isCrown ? 'pref-card-overall' : '' }}">
                                                         <div class="pref-icon-circle mx-auto mb-2">
@@ -297,8 +301,13 @@
                                         <i class="bi bi-check2-circle"></i>
                                     </span>
                                 </button>
+                                @php
+                                    $otpDigits = (int) ($otpConfig['length'] ?? 4);
+                                    if ($otpDigits < 4) $otpDigits = 4;
+                                    if ($otpDigits > 8) $otpDigits = 8;
+                                @endphp
                                 <div class="text-muted small mt-2">
-                                    <i class="bi bi-lock-fill text-secondary me-1"></i> Verified with instant 4-digit SMS OTP
+                                    <i class="bi bi-lock-fill text-secondary me-1"></i> Verified with instant {{ $otpDigits }}-digit SMS OTP
                                 </div>
                             </div>
                         </form>
@@ -345,25 +354,22 @@
                     </div>
                     <h4 class="fw-bold mb-1" id="otpModalLabel">Enter Verification Code</h4>
                     <p class="text-muted small mb-3">
-                        We have sent a 4-digit OTP to <strong id="displayMobileNum" class="text-dark">+91 XXXXX XXXXX</strong>
+                        We have sent a {{ $otpDigits }}-digit OTP to <strong id="displayMobileNum" class="text-dark">+91 XXXXX XXXXX</strong>
                     </p>
 
                     <form id="otpForm">
-                        <!-- 4 Digit OTP Input Boxes -->
-                        <div class="d-flex justify-content-center gap-2 my-3" id="otpInputContainer">
-                            <input type="text" class="form-control text-center fs-4 fw-bold otp-digit-box" maxlength="1"
-                                pattern="[0-9]" inputmode="numeric" required autocomplete="off" data-index="1">
-                            <input type="text" class="form-control text-center fs-4 fw-bold otp-digit-box" maxlength="1"
-                                pattern="[0-9]" inputmode="numeric" required autocomplete="off" data-index="2">
-                            <input type="text" class="form-control text-center fs-4 fw-bold otp-digit-box" maxlength="1"
-                                pattern="[0-9]" inputmode="numeric" required autocomplete="off" data-index="3">
-                            <input type="text" class="form-control text-center fs-4 fw-bold otp-digit-box" maxlength="1"
-                                pattern="[0-9]" inputmode="numeric" required autocomplete="off" data-index="4">
+                        <!-- Dynamic Digit OTP Input Boxes -->
+                        <div class="d-flex justify-content-center gap-2 my-3" id="otpInputContainer" data-otp-length="{{ $otpDigits }}">
+                            @for ($i = 1; $i <= $otpDigits; $i++)
+                                <input type="text" class="form-control text-center fs-4 fw-bold otp-digit-box" maxlength="1"
+                                    pattern="[0-9]" inputmode="numeric" required autocomplete="off" data-index="{{ $i }}"
+                                    style="{{ $otpDigits > 6 ? 'max-width: 44px; padding: 6px 2px;' : ($otpDigits > 4 ? 'max-width: 50px; padding: 8px 4px;' : 'max-width: 60px;') }}">
+                            @endfor
                         </div>
 
                         <!-- Invalid OTP Alert Message -->
                         <div id="otpInvalidAlert" class="alert alert-danger d-none py-2 px-3 small text-start mb-3">
-                            <i class="bi bi-x-circle-fill me-1"></i> <span id="otpInvalidMsg">Invalid OTP entered! Please enter the correct 4-digit code.</span>
+                            <i class="bi bi-x-circle-fill me-1"></i> <span id="otpInvalidMsg">Invalid OTP entered! Please enter the correct {{ $otpDigits }}-digit code.</span>
                         </div>
 
                         <!-- Valid OTP Alert Message -->
@@ -378,7 +384,7 @@
 
                         <!-- Resend OTP Alert Toast Message -->
                         <div id="otpResendAlert" class="alert alert-warning d-none py-2 px-3 small text-start mb-3">
-                            <i class="bi bi-send-check-fill me-1"></i> A new 4-digit OTP has been sent to your mobile number!
+                            <i class="bi bi-send-check-fill me-1"></i> A new {{ $otpDigits }}-digit OTP has been sent to your mobile number!
                         </div>
 
                         <div class="d-grid gap-2 mt-4">
@@ -389,7 +395,8 @@
                             </button>
                             <button type="button" class="btn btn-sm btn-link text-muted text-decoration-none mt-1"
                                 id="btnResendOtp">
-                                Didn't receive OTP? <span class="text-danger fw-semibold">Resend OTP</span>
+                                Didn't receive OTP? <span class="text-danger fw-semibold" id="btnResendOtpText">Resend OTP</span>
+                                <span id="resendCountdownWrap" class="small text-muted d-none ms-1">(wait <span id="resendTimerSecs">60</span>s)</span>
                             </button>
                         </div>
                     </form>

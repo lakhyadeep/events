@@ -11,6 +11,7 @@ use App\Models\OtpSetting;
 use App\Models\Participant;
 use App\Models\User;
 use App\Models\Vote;
+use App\Models\Winner;
 use App\Services\Otp\Drivers\LogSmsDriver;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\Middleware\ThrottleRequests;
@@ -85,7 +86,7 @@ class VotingFlowTest extends TestCase
     protected function getLastOtpCode(): string
     {
         $lastMessage = end(LogSmsDriver::$sentMessages);
-        preg_match('/\d{6}/', $lastMessage['message'] ?? '', $matches);
+        preg_match('/\b\d{4,8}\b/', $lastMessage['message'] ?? '', $matches);
 
         return $matches[0] ?? '';
     }
@@ -468,11 +469,19 @@ class VotingFlowTest extends TestCase
             'name' => 'Best Theme Special',
             'display_name' => 'Best Theme Special',
             'category' => 'Artistry',
+            'is_voting_allowed' => true,
         ]);
         $award2 = $this->createAward($event, [
             'name' => 'Best Idol Special',
             'display_name' => 'Best Idol Special',
             'category' => 'Pratima',
+            'is_voting_allowed' => true,
+        ]);
+        $awardDisabled = $this->createAward($event, [
+            'name' => 'Jury Secret Award',
+            'display_name' => 'Jury Secret Award',
+            'category' => 'Jury',
+            'is_voting_allowed' => false,
         ]);
 
         $participant = $this->createParticipant($event);
@@ -480,15 +489,64 @@ class VotingFlowTest extends TestCase
         $response = $this->followingRedirects()->get('/vote/'.$participant->slug);
 
         $response->assertStatus(200);
-        $response->assertSee('name="award_ids[]"', false);
+        $response->assertSee('name="award_id"', false);
+        $response->assertDontSee('name="award_ids[]"', false);
         $response->assertSee('value="'.$award1->id.'"', false);
         $response->assertSee('value="'.$award2->id.'"', false);
+        $response->assertDontSee('value="'.$awardDisabled->id.'"', false);
         $response->assertSee('Best Theme Special');
         $response->assertSee('Best Idol Special');
-        $response->assertSee('Multi-select supported');
+        $response->assertDontSee('Jury Secret Award');
+        $response->assertSee('1 Category per Vote');
+        $response->assertDontSee('Multi-select supported');
     }
 
-    public function test_multi_select_award_voting_casts_votes_across_selected_awards_atomically(): void
+    public function test_multi_select_award_voting_rejected_when_multiple_awards_passed(): void
+    {
+        $event = $this->createEvent([
+            'is_voting_active' => true,
+        ]);
+
+        $award1 = $this->createAward($event, ['name' => 'Award A', 'is_voting_allowed' => true]);
+        $award2 = $this->createAward($event, ['name' => 'Award B', 'is_voting_allowed' => true]);
+
+        $participant = $this->createParticipant($event);
+        $mobile = '9876543210';
+
+        // 1. checkEligibility rejects multiple awards
+        $checkResponse = $this->postJson('/api/v1/votes/check', [
+            'event_id' => $event->id,
+            'participant_id' => $participant->id,
+            'phone' => $mobile,
+            'award_ids' => [$award1->id, $award2->id],
+        ]);
+        $checkResponse->assertStatus(422)
+            ->assertJsonFragment(['message' => 'Only one award category is allowed per vote.']);
+
+        // 2. OTP send rejects multiple awards
+        $otpResponse = $this->postJson('/api/v1/otp/send', [
+            'phone' => $mobile,
+            'purpose' => 'voting',
+            'event_id' => $event->id,
+            'participant_id' => $participant->id,
+            'award_ids' => [$award1->id, $award2->id],
+        ]);
+        $otpResponse->assertStatus(422)
+            ->assertJsonFragment(['message' => 'Only one award category is allowed to be voted on.']);
+
+        // 3. Vote cast rejects multiple awards
+        $castResponse = $this->postJson('/api/v1/votes/cast', [
+            'event_id' => $event->id,
+            'participant_id' => $participant->id,
+            'award_ids' => [$award1->id, $award2->id],
+            'phone' => $mobile,
+            'otp' => '1234',
+        ]);
+        $castResponse->assertStatus(422)
+            ->assertJsonFragment(['message' => 'Only one award category is allowed to be voted on.']);
+    }
+
+    public function test_single_award_voting_casts_single_vote_atomically(): void
     {
         $event = $this->createEvent([
             'is_voting_active' => true,
@@ -497,32 +555,29 @@ class VotingFlowTest extends TestCase
         $award1 = $this->createAward($event, [
             'name' => 'Award Category A',
             'display_name' => 'Award Category A',
-        ]);
-        $award2 = $this->createAward($event, [
-            'name' => 'Award Category B',
-            'display_name' => 'Award Category B',
+            'is_voting_allowed' => true,
         ]);
 
         $participant = $this->createParticipant($event);
         $mobile = '9876543210';
 
-        // 1. Preflight OTP with multiple award IDs
+        // 1. Preflight OTP with single award ID
         $otpResponse = $this->postJson('/api/v1/otp/send', [
             'phone' => $mobile,
             'purpose' => 'voting',
             'event_id' => $event->id,
             'participant_id' => $participant->id,
-            'award_ids' => [$award1->id, $award2->id],
+            'award_id' => $award1->id,
         ]);
         $otpResponse->assertStatus(200);
 
         $code = $this->getLastOtpCode();
 
-        // 2. Cast vote for both awards at once
+        // 2. Cast vote for single award
         $castResponse = $this->postJson('/api/v1/votes/cast', [
             'event_id' => $event->id,
             'participant_id' => $participant->id,
-            'award_ids' => [$award1->id, $award2->id],
+            'award_id' => $award1->id,
             'phone' => $mobile,
             'otp' => $code,
         ]);
@@ -531,7 +586,8 @@ class VotingFlowTest extends TestCase
             ->assertJson([
                 'success' => true,
                 'data' => [
-                    'votes_count' => 2,
+                    'votes_count' => 1,
+                    'award_id' => $award1->id,
                 ],
             ]);
 
@@ -542,54 +598,76 @@ class VotingFlowTest extends TestCase
             'mobile_number' => $mobile,
         ]);
 
-        $this->assertDatabaseHas('votes', [
-            'event_id' => $event->id,
-            'participant_id' => $participant->id,
-            'award_id' => $award2->id,
-            'mobile_number' => $mobile,
-        ]);
-
-        $this->assertSame(2, Vote::where('event_id', $event->id)->where('mobile_number', $mobile)->count());
+        $this->assertSame(1, Vote::where('event_id', $event->id)->where('mobile_number', $mobile)->count());
     }
 
-    public function test_multi_select_award_voting_fails_preflight_if_already_voted_in_any_selected_award(): void
+    public function test_voting_rejected_for_award_category_with_voting_disabled(): void
     {
         $event = $this->createEvent([
             'is_voting_active' => true,
         ]);
 
-        $award1 = $this->createAward($event, [
-            'name' => 'Category Gold',
-            'display_name' => 'Category Gold',
-        ]);
-        $award2 = $this->createAward($event, [
-            'name' => 'Category Silver',
-            'display_name' => 'Category Silver',
+        $disabledAward = $this->createAward($event, [
+            'name' => 'Jury Lifetime Award',
+            'display_name' => 'Jury Lifetime Award',
+            'is_voting_allowed' => false,
         ]);
 
         $participant = $this->createParticipant($event);
         $mobile = '9876543210';
 
-        // Pre-existing vote in Award 1
-        Vote::create([
+        // 1. Eligibility check fails
+        $checkResponse = $this->postJson('/api/v1/votes/check', [
             'event_id' => $event->id,
             'participant_id' => $participant->id,
-            'award_id' => $award1->id,
-            'mobile_number' => $mobile,
+            'phone' => $mobile,
+            'award_id' => $disabledAward->id,
         ]);
+        $checkResponse->assertStatus(422)
+            ->assertJsonFragment(['message' => 'This award category is not open for public voting.']);
 
-        // Attempting to send OTP including Award 1 should fail
+        // 2. OTP send fails
         $otpResponse = $this->postJson('/api/v1/otp/send', [
             'phone' => $mobile,
             'purpose' => 'voting',
             'event_id' => $event->id,
             'participant_id' => $participant->id,
-            'award_ids' => [$award1->id, $award2->id],
+            'award_id' => $disabledAward->id,
+        ]);
+        $otpResponse->assertStatus(422)
+            ->assertJsonFragment(['message' => 'This award category is not open for public voting.']);
+
+        // 3. Vote cast fails
+        $castResponse = $this->postJson('/api/v1/votes/cast', [
+            'event_id' => $event->id,
+            'participant_id' => $participant->id,
+            'award_id' => $disabledAward->id,
+            'phone' => $mobile,
+            'otp' => '1234',
+        ]);
+        $castResponse->assertStatus(422)
+            ->assertJsonFragment(['message' => 'This award category is not open for public voting.']);
+    }
+
+    public function test_winner_can_be_created_without_rank_order(): void
+    {
+        $event = $this->createEvent();
+        $award = $this->createAward($event);
+        $participant = $this->createParticipant($event);
+
+        $winner = Winner::create([
+            'event_id' => $event->id,
+            'award_id' => $award->id,
+            'participant_id' => $participant->id,
+            'year' => 2026,
+            'rank_order' => null,
+            'status' => 'published',
         ]);
 
-        $otpResponse->assertStatus(422);
-        $otpResponse->assertJsonFragment([
-            'success' => false,
+        $this->assertDatabaseHas('winners', [
+            'id' => $winner->id,
+            'rank_order' => null,
         ]);
+        $this->assertNull($winner->rank_order);
     }
 }

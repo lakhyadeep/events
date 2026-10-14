@@ -17,7 +17,7 @@ return [
     | General OTP Parameters
     |--------------------------------------------------------------------------
     */
-    'length' => (int) env('OTP_LENGTH', 6),
+    'length' => (int) env('OTP_LENGTH', 4),
     'expiry_minutes' => (int) env('OTP_EXPIRY_MINUTES', 5),
     'resend_cooldown_seconds' => (int) env('OTP_RESEND_COOLDOWN', 60),
     'max_attempts' => (int) env('OTP_MAX_ATTEMPTS', 5),

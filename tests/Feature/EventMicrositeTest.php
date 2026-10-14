@@ -385,7 +385,7 @@ class EventMicrositeTest extends TestCase
         $response = $this->get('/vote/'.$participant->slug);
 
         $response->assertStatus(200);
-        $response->assertSee('What do you like most here');
+        $response->assertSee('Select an Award Category to Vote For');
         $response->assertSee('voterMobile');
         $response->assertSee('btnSubmitYourVote');
         $response->assertSee('id="formErrorAlert"', false);

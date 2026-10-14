@@ -109,7 +109,7 @@ class OtpSetting extends Model
             $setting = static::query()->create([
                 'id' => 1,
                 'active_driver' => config('otp.default', 'log'),
-                'otp_length' => config('otp.length', 6),
+                'otp_length' => config('otp.length', 4),
                 'expiry_minutes' => config('otp.expiry_minutes', 5),
                 'resend_cooldown_seconds' => config('otp.resend_cooldown_seconds', 60),
                 'max_attempts' => config('otp.max_attempts', 5),

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Event;
+use App\Models\OtpSetting;
 use App\Services\Otp\OtpService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -19,13 +20,20 @@ class OtpController extends Controller
      */
     public function send(Request $request): JsonResponse
     {
+        if ($request->has('award_ids') && is_array($request->input('award_ids')) && count(array_filter($request->input('award_ids'))) > 1) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only one award category is allowed to be voted on.',
+            ], 422);
+        }
+
         $validated = $request->validate([
             'phone' => ['required', 'string', 'min:7', 'max:20'],
             'purpose' => ['nullable', 'string', 'max:50'],
             'event_id' => ['nullable', 'integer', 'exists:events,id'],
             'participant_id' => ['nullable', 'integer', 'exists:participants,id'],
             'award_id' => ['nullable', 'integer', 'exists:awards,id'],
-            'award_ids' => ['nullable', 'array'],
+            'award_ids' => ['nullable', 'array', 'max:1'],
             'award_ids.*' => ['integer', 'exists:awards,id'],
         ]);
 
@@ -43,19 +51,25 @@ class OtpController extends Controller
                 }
 
                 $participantId = ! empty($validated['participant_id']) ? (int) $validated['participant_id'] : null;
-                $awardIds = ! empty($validated['award_ids'])
-                    ? array_unique(array_filter(array_map('intval', $validated['award_ids'])))
-                    : (! empty($validated['award_id']) ? [(int) $validated['award_id']] : []);
+                $awardId = ! empty($validated['award_id'])
+                    ? (int) $validated['award_id']
+                    : (! empty($validated['award_ids']) ? (int) reset($validated['award_ids']) : null);
 
-                if (! empty($awardIds)) {
-                    foreach ($awardIds as $aId) {
-                        $check = $event->canMobileVote($validated['phone'], $participantId, $aId);
-                        if (! $check['allowed']) {
-                            return response()->json([
-                                'success' => false,
-                                'message' => $check['message'],
-                            ], 422);
-                        }
+                if ($awardId) {
+                    $award = $event->awards()->find($awardId);
+                    if (! $award || ! $award->is_active || ! $award->is_voting_allowed) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'This award category is not open for public voting.',
+                        ], 422);
+                    }
+
+                    $check = $event->canMobileVote($validated['phone'], $participantId, $awardId);
+                    if (! $check['allowed']) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => $check['message'],
+                        ], 422);
                     }
                 } else {
                     $check = $event->canMobileVote($validated['phone'], $participantId, null);
@@ -81,12 +95,15 @@ class OtpController extends Controller
             ], 422);
         }
 
+        $setting = OtpSetting::current();
+
         return response()->json([
             'success' => true,
             'message' => $result->message,
             'data' => [
                 'resend_after_seconds' => $result->resendAfterSeconds,
                 'expires_in_seconds' => $result->expiresInSeconds,
+                'otp_length' => $setting->otp_length,
             ],
         ], 200);
     }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Frontend;
 use App\Enums\SponsorType;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
+use App\Models\OtpSetting;
 use App\Models\Participant;
 use App\Models\Zone;
 use Illuminate\Support\Str;
@@ -203,7 +204,7 @@ class EventMicrositeController extends Controller
         $query = Event::with([
             'banners' => fn ($q) => $q->where('is_active', true)->orderBy('sort_order'),
             'sponsors' => fn ($q) => $q->where('is_active', true)->orderBy('slot_order'),
-            'awards' => fn ($q) => $q->where('is_active', true)->orderBy('sort_order'),
+            'awards' => fn ($q) => $q->where('is_active', true)->where('is_voting_allowed', true)->orderBy('sort_order'),
         ]);
 
         $event = $query->where('status', 'active')->latest('year')->first()
@@ -237,7 +238,7 @@ class EventMicrositeController extends Controller
                 $event->loadMissing([
                     'banners' => fn ($q) => $q->where('is_active', true)->orderBy('sort_order'),
                     'sponsors' => fn ($q) => $q->where('is_active', true)->orderBy('slot_order'),
-                    'awards' => fn ($q) => $q->where('is_active', true)->orderBy('sort_order'),
+                    'awards' => fn ($q) => $q->where('is_active', true)->where('is_voting_allowed', true)->orderBy('sort_order'),
                 ]);
                 $participants = $event->participants()
                     ->approved()
@@ -280,6 +281,13 @@ class EventMicrositeController extends Controller
         $otherSponsors = $event->sponsors
             ->whereNotIn('sponsor_type', [SponsorType::PresentingPartner, SponsorType::AssociateSponsor]);
 
+        $otpSetting = OtpSetting::current();
+        $otpConfig = [
+            'length' => (int) $otpSetting->otp_length,
+            'resendCooldown' => (int) $otpSetting->resend_cooldown_seconds,
+            'expiryMinutes' => (int) $otpSetting->expiry_minutes,
+        ];
+
         return view('frontend.vote', compact(
             'event',
             'participants',
@@ -287,7 +295,8 @@ class EventMicrositeController extends Controller
             'selectedParticipant',
             'presentingPartner',
             'associateSponsors',
-            'otherSponsors'
+            'otherSponsors',
+            'otpConfig'
         ));
     }
 

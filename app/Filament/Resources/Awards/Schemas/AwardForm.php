@@ -72,6 +72,10 @@ class AwardForm
                                 ->label('Active Award Category')
                                 ->helperText('Visible in public awards matrix')
                                 ->default(true),
+                            Toggle::make('is_voting_allowed')
+                                ->label('Allow Public Voting')
+                                ->helperText('Enable public polling for this category on the voting ballot')
+                                ->default(true),
                         ]),
                 ])->columnSpan(['default' => 1, 'lg' => 1]),
             ]);

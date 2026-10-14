@@ -416,21 +416,26 @@
                             $rZone = is_object($rPart?->zone) ? $rPart->zone->name : ($rPart?->zone ?: 'Dibrugarh');
                             $rLocation = ($rLoc ? $rLoc . ', ' : '') . $rZone;
                             $rImg = $rPart?->primary_image_url ?: asset('event-assets/images/hero.png');
-                            $rRankLabel = $remWinner->rank_order instanceof \App\Enums\WinnerRank ? $remWinner->rank_order->label() : ($remWinner->rank_order ?: 'Honorable Mention');
+                            $hasExplicitRank = ! empty($remWinner->rank_order);
+                            $rRankLabel = $remWinner->rank_order instanceof \App\Enums\WinnerRank
+                                ? $remWinner->rank_order->label()
+                                : ($remWinner->rank_order ?: 'Official Winner');
                         @endphp
                         <div class="col-12 col-md-6 col-lg-4">
-                            <div class="winner-podium-card winner-bronze h-100">
-                                <span class="winner-rank-badge badge-bronze">
-                                    <i class="bi bi-star-fill me-1"></i> {{ $rRankLabel }}
+                            <div class="winner-podium-card {{ $hasExplicitRank ? 'winner-bronze' : 'winner-gold' }} h-100">
+                                <span class="winner-rank-badge {{ $hasExplicitRank ? 'badge-bronze' : 'badge-gold' }}">
+                                    <i class="bi {{ $hasExplicitRank ? 'bi-star-fill' : 'bi-trophy-fill' }} me-1"></i> {{ $rRankLabel }}
                                 </span>
                                 <div class="winner-img-wrap">
                                     <img src="{{ $rImg }}"
                                         alt="{{ $rPart?->display_name ?: $rPart?->name }}">
                                     <div class="winner-img-overlay d-flex justify-content-between align-items-end">
                                         <span class="winner-vote-pill text-light">
-                                            <i class="bi bi-hand-thumbs-up me-1"></i> {{ $rPart?->votes_count ? number_format($rPart->votes_count) . ' Votes' : 'Honoree' }}
+                                            <i class="bi bi-hand-thumbs-up me-1"></i> {{ $rPart?->votes_count ? number_format($rPart->votes_count) . ' Votes' : 'Winner' }}
                                         </span>
-                                        <span class="badge bg-danger bg-opacity-75 text-white fw-bold">HONORABLE</span>
+                                        <span class="badge {{ $hasExplicitRank ? 'bg-danger bg-opacity-75' : 'bg-warning text-dark' }} fw-bold">
+                                            {{ $hasExplicitRank ? 'HONORABLE' : 'WINNER' }}
+                                        </span>
                                     </div>
                                 </div>
                                 <div class="p-3 text-center">

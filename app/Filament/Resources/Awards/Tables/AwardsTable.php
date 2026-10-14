@@ -41,6 +41,9 @@ class AwardsTable
                 IconColumn::make('is_active')
                     ->label('Active')
                     ->boolean(),
+                IconColumn::make('is_voting_allowed')
+                    ->label('Voting')
+                    ->boolean(),
                 TextColumn::make('event.display_name')
                     ->label('Event')
                     ->searchable()
@@ -62,6 +65,8 @@ class AwardsTable
                     ->options(fn () => Award::whereNotNull('category')->where('category', '!=', '')->distinct()->pluck('category', 'category')->toArray()),
                 TernaryFilter::make('is_active')
                     ->label('Active Award'),
+                TernaryFilter::make('is_voting_allowed')
+                    ->label('Voting Allowed'),
                 SelectFilter::make('year')
                     ->options(fn () => Award::distinct()->pluck('year', 'year')->toArray()),
             ], layout: FiltersLayout::AboveContent)

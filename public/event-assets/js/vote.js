@@ -10,11 +10,56 @@ const votePujasData = (window.dynamicPujasData && Array.isArray(window.dynamicPu
 let pendingSubmission = {
     pandal: '',
     participantId: null,
+    awardId: null,
     feature: 'Theme',
     name: '',
     mobile: '',
     eventId: null
 };
+
+let resendTimerInterval = null;
+
+function getExpectedOtpLength() {
+    if (window.otpConfig && window.otpConfig.length) {
+        return parseInt(window.otpConfig.length);
+    }
+    const containerLen = $('#otpInputContainer').attr('data-otp-length');
+    if (containerLen) {
+        return parseInt(containerLen);
+    }
+    const boxCount = $('.otp-digit-box').length;
+    return boxCount > 0 ? boxCount : 4;
+}
+
+function startResendCooldown(seconds) {
+    if (resendTimerInterval) {
+        clearInterval(resendTimerInterval);
+        resendTimerInterval = null;
+    }
+
+    const duration = parseInt(seconds) || (window.otpConfig ? parseInt(window.otpConfig.resendCooldown) : 60);
+    let remaining = duration;
+
+    const $btn = $('#btnResendOtp');
+    const $wrap = $('#resendCountdownWrap');
+    const $secs = $('#resendTimerSecs');
+
+    $btn.prop('disabled', true).addClass('disabled opacity-50');
+    $wrap.removeClass('d-none');
+    $secs.text(remaining);
+
+    resendTimerInterval = setInterval(function () {
+        remaining--;
+        if (remaining <= 0) {
+            clearInterval(resendTimerInterval);
+            resendTimerInterval = null;
+            $btn.prop('disabled', false).removeClass('disabled opacity-50');
+            $wrap.addClass('d-none');
+        } else {
+            $secs.text(remaining);
+        }
+    }, 1000);
+}
 
 $(document).ready(function () {
 
@@ -45,7 +90,7 @@ $(document).ready(function () {
     });
 
     // Clear error message when user edits inputs
-    $('#voterMobileInput, #voterNameInput, #votePandalSelect, input[name="award_ids[]"], input[name="favorite_feature"]').on('input change', function () {
+    $('#voterMobileInput, #voterNameInput, #votePandalSelect, input[name="award_id"], input[name="award_ids[]"], input[name="favorite_feature"]').on('input change', function () {
         $('#formErrorAlert, #alreadyVotedAlert').addClass('d-none');
     });
 
@@ -133,36 +178,22 @@ function checkUrlParameters() {
 
         displaySelectedPandal(paramPandal, paramParticipantId);
 
-        // Multi-select or single select award selection from URL
-        if (paramAwards) {
-            const ids = paramAwards.split(',').map(s => s.trim());
-            $('input[name="award_ids[]"]').prop('checked', false);
-            ids.forEach(id => {
-                $(`input[name="award_ids[]"][value="${id}"]`).prop('checked', true);
-            });
-        } else if (paramAward) {
-            $('input[name="award_ids[]"]').prop('checked', false);
-            $(`input[name="award_ids[]"][value="${paramAward}"]`).prop('checked', true);
+        // Single select award selection from URL
+        const targetAwardId = paramAward || (paramAwards ? paramAwards.split(',')[0].trim() : null);
+        if (targetAwardId) {
+            $('input[name="award_id"]').prop('checked', false);
+            $(`input[name="award_id"][value="${targetAwardId}"]`).prop('checked', true);
         } else if (paramFeature) {
             const cleanFeature = decodeURIComponent(paramFeature).toLowerCase();
-            let matched = false;
-            $('input[name="award_ids[]"]').each(function () {
+            $('input[name="award_id"]').each(function () {
                 const name = ($(this).attr('data-award-name') || '').toLowerCase();
                 const cat = ($(this).attr('data-award-category') || '').toLowerCase();
                 if (name.includes(cleanFeature) || cat.includes(cleanFeature)) {
-                    if (!matched) {
-                        $('input[name="award_ids[]"]').prop('checked', false);
-                        matched = true;
-                    }
+                    $('input[name="award_id"]').prop('checked', false);
                     $(this).prop('checked', true);
+                    return false;
                 }
             });
-            if (!matched) {
-                const $radio = $(`input[name="favorite_feature"][value="${paramFeature}"]`);
-                if ($radio.length) {
-                    $radio.prop('checked', true);
-                }
-            }
         }
     } catch (err) {
         console.error('Error in checkUrlParameters:', err);
@@ -242,24 +273,18 @@ function handleVoteFormSubmit() {
     const selectedPandal = $('#votePandalSelect').val();
     const participantId = $('#voteParticipantId').val();
 
-    // Multi-select awards gathering
-    const selectedAwardIds = $('input[name="award_ids[]"]:checked').map(function () {
-        return parseInt($(this).val());
-    }).get();
-
-    const selectedAwardNames = $('input[name="award_ids[]"]:checked').map(function () {
-        return $(this).attr('data-award-name') || $(this).val();
-    }).get();
-
-    let selectedFeature = selectedAwardNames.join(', ');
+    // Single award category gathering
+    const $selectedAward = $('input[name="award_id"]:checked');
+    const selectedAwardId = $selectedAward.val() ? parseInt($selectedAward.val()) : null;
+    let selectedFeature = $selectedAward.attr('data-award-name') || $selectedAward.attr('data-award-category') || '';
 
     // Fallback for legacy favorite_feature
-    if (selectedAwardIds.length === 0) {
+    if (!selectedAwardId) {
         const legacyVal = $('input[name="favorite_feature"]:checked').val();
         if (legacyVal) {
             selectedFeature = legacyVal;
         } else {
-            showFormError('Please select at least one award category before submitting your vote.');
+            showFormError('Please select an award category before submitting your vote.');
             return;
         }
     }
@@ -281,12 +306,11 @@ function handleVoteFormSubmit() {
         return;
     }
 
-    // Save pending submission data with multi-select support
+    // Save pending submission data (strictly single award)
     pendingSubmission = {
         pandal: selectedPandal,
         participantId: parseInt(participantId),
-        awardIds: selectedAwardIds,
-        awardId: selectedAwardIds.length > 0 ? selectedAwardIds[0] : null,
+        awardId: selectedAwardId,
         feature: selectedFeature,
         name: voterName,
         mobile: mobile,
@@ -311,12 +335,12 @@ function handleVoteFormSubmit() {
             purpose: 'voting',
             event_id: pendingSubmission.eventId,
             participant_id: pendingSubmission.participantId,
-            award_id: pendingSubmission.awardId,
-            award_ids: pendingSubmission.awardIds
+            award_id: pendingSubmission.awardId
         }),
-        success: function () {
+        success: function (res) {
             $btn.prop('disabled', false).html(originalBtnText);
-            openOtpModal(mobile);
+            const cooldown = (res && res.data && res.data.resend_after_seconds) ? res.data.resend_after_seconds : (window.otpConfig ? window.otpConfig.resendCooldown : 60);
+            openOtpModal(mobile, cooldown);
         },
         error: function (xhr) {
             $btn.prop('disabled', false).html(originalBtnText);
@@ -332,8 +356,7 @@ function handleVoteFormSubmit() {
                     showFormError(msg, 'Please Check Your Input');
                 }
             } else {
-                // If backend API is offline or demo mode, open OTP modal directly
-                openOtpModal(mobile);
+                openOtpModal(mobile, 60);
             }
         }
     });
@@ -375,11 +398,13 @@ function showAlreadyVoted(mobile, eventName) {
     }
 }
 
-function openOtpModal(mobile) {
+function openOtpModal(mobile, cooldown) {
     $('#displayMobileNum').text('+91 ' + mobile);
     $('.otp-digit-box').val('').removeClass('is-invalid');
     $('#otpInvalidAlert, #otpValidAlert, #voteSubmittedAlert, #otpResendAlert').addClass('d-none');
     $('#btnVerifyOtp').prop('disabled', false).html('<span>Verify OTP &amp; Submit Vote</span> <i class="bi bi-check-lg ms-1"></i>');
+
+    startResendCooldown(cooldown);
 
     const modalEl = document.getElementById('otpModal');
     if (modalEl) {
@@ -408,11 +433,12 @@ function setupOtpHandlers() {
         const $this = $(this);
         const val = $this.val();
         const index = parseInt($this.attr('data-index'));
+        const dynamicTotal = getExpectedOtpLength();
 
         $('.otp-digit-box').removeClass('is-invalid');
         $('#otpInvalidAlert').addClass('d-none');
 
-        if (val.length === 1 && index < 4 && e.key !== 'Backspace') {
+        if (val.length === 1 && index < dynamicTotal && e.key !== 'Backspace') {
             $('.otp-digit-box[data-index="' + (index + 1) + '"]').focus();
         }
 
@@ -426,6 +452,7 @@ function setupOtpHandlers() {
         e.preventDefault();
         const pasteData = (e.originalEvent.clipboardData || window.clipboardData).getData('text').trim();
         const digits = pasteData.replace(/\D/g, '').split('');
+        const dynamicTotal = getExpectedOtpLength();
 
         if (digits.length > 0) {
             $('.otp-digit-box').each(function (idx) {
@@ -433,7 +460,7 @@ function setupOtpHandlers() {
                     $(this).val(digits[idx]).removeClass('is-invalid');
                 }
             });
-            const focusIdx = Math.min(digits.length, 4);
+            const focusIdx = Math.min(digits.length, dynamicTotal);
             $('.otp-digit-box[data-index="' + focusIdx + '"]').focus();
         }
     });
@@ -449,9 +476,10 @@ function setupOtpHandlers() {
 
         $('#otpInvalidAlert, #otpValidAlert, #voteSubmittedAlert, #otpResendAlert').addClass('d-none');
 
-        if (enteredOtp.length < 4) {
+        const requiredDigits = getExpectedOtpLength();
+        if (enteredOtp.length < requiredDigits) {
             $('.otp-digit-box').addClass('is-invalid');
-            $('#otpInvalidMsg').text('Please enter the complete 4-digit verification code.');
+            $('#otpInvalidMsg').text('Please enter the complete ' + requiredDigits + '-digit verification code.');
             $('#otpInvalidAlert').removeClass('d-none').hide().fadeIn(200);
             return;
         }
@@ -472,7 +500,6 @@ function setupOtpHandlers() {
                 event_id: pendingSubmission.eventId,
                 participant_id: pendingSubmission.participantId,
                 award_id: pendingSubmission.awardId,
-                award_ids: pendingSubmission.awardIds,
                 phone: pendingSubmission.mobile,
                 otp: enteredOtp
             }),
@@ -480,12 +507,6 @@ function setupOtpHandlers() {
                 handleVoteSuccess(res);
             },
             error: function (xhr) {
-                // If demo fallback OTP 1234
-                if (enteredOtp === '1234') {
-                    handleVoteSuccess({ message: 'Vote recorded successfully!' });
-                    return;
-                }
-
                 $verifyBtn.prop('disabled', false).html('<span>Verify OTP &amp; Submit Vote</span> <i class="bi bi-check-lg ms-1"></i>');
                 $('.otp-digit-box').addClass('is-invalid');
 
@@ -524,11 +545,19 @@ function setupOtpHandlers() {
     });
 
     // Resend OTP
-    $('#btnResendOtp').on('click', function () {
+    $('#btnResendOtp').on('click', function (e) {
+        e.preventDefault();
+        if ($(this).prop('disabled') || $(this).hasClass('disabled')) {
+            return;
+        }
+
         $('.otp-digit-box').val('').removeClass('is-invalid');
         $('#otpInvalidAlert, #otpValidAlert, #voteSubmittedAlert').addClass('d-none');
 
         if (pendingSubmission.mobile) {
+            const $resendBtn = $(this);
+            $resendBtn.prop('disabled', true).addClass('disabled opacity-50');
+
             $.ajax({
                 url: (window.apiBaseUrl || '/api/v1') + '/otp/send',
                 type: 'POST',
@@ -542,12 +571,20 @@ function setupOtpHandlers() {
                     purpose: 'voting',
                     event_id: pendingSubmission.eventId,
                     participant_id: pendingSubmission.participantId,
-                    award_id: pendingSubmission.awardId,
-                    award_ids: pendingSubmission.awardIds
+                    award_id: pendingSubmission.awardId
                 }),
-                complete: function () {
+                success: function (res) {
+                    const cooldown = (res && res.data && res.data.resend_after_seconds) ? res.data.resend_after_seconds : (window.otpConfig ? window.otpConfig.resendCooldown : 60);
+                    startResendCooldown(cooldown);
                     $('#otpResendAlert').removeClass('d-none').hide().fadeIn(200).delay(3500).fadeOut(300);
                     $('.otp-digit-box[data-index="1"]').focus();
+                },
+                error: function (xhr) {
+                    const msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Unable to resend OTP.';
+                    $('#otpInvalidMsg').text(msg);
+                    $('#otpInvalidAlert').removeClass('d-none').hide().fadeIn(200);
+                    const cooldown = (xhr.responseJSON && xhr.responseJSON.data && xhr.responseJSON.data.resend_after_seconds) ? xhr.responseJSON.data.resend_after_seconds : 30;
+                    startResendCooldown(cooldown);
                 }
             });
         }
