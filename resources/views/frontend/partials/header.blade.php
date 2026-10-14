@@ -2,8 +2,16 @@
         <nav class="navbar navbar-expand-lg py-2">
             <div class="container-fluid px-lg-5 px-3">
 
+                @php
+                    $isAllPujasPage = request()->routeIs('all-pujas') || request()->routeIs('events.all-pujas');
+                    $isVotePage = request()->routeIs('vote.participant');
+                    $isVoteSuccessPage = request()->routeIs('vote-success') || request()->routeIs('vote-success.participant') || request()->routeIs('events.vote-success') || request()->routeIs('events.vote-success.participant');
+                    $isHomePage = ! $isAllPujasPage && ! $isVotePage && ! $isVoteSuccessPage;
+                    $homeUrl = route('home');
+                    $allPujasUrl = route('all-pujas');
+                @endphp
                 <!-- Logo Branding -->
-                <a class="brand-logo-container" href="{{ (request()->routeIs('all-pujas') || request()->routeIs('events.all-pujas')) ? (isset($event) && $event->slug ? route('events.show', $event->slug) : route('home')) : '#home' }}" id="brandLogo">
+                <a class="brand-logo-container" href="{{ $isHomePage ? '#home' : $homeUrl . '#home' }}" id="brandLogo">
                     <img src="{{ asset('event-assets/images/logo-dibru.png') }}" alt="Dibrugarh 24x7" class="img-fluid navbar-brand-logo">
                 </a>
 
@@ -17,15 +25,6 @@
                 <!-- Navbar Collapsible Menu (Centered links) -->
                 <div class="collapse navbar-collapse" id="navbarFestiveMenu">
                     <ul class="navbar-nav mx-auto custom-nav my-3 my-lg-0">
-                        @php
-                            $isAllPujasPage = request()->routeIs('all-pujas') || request()->routeIs('events.all-pujas');
-                            $isVotePage = request()->routeIs('vote') || request()->routeIs('events.vote');
-                            $isVoteSuccessPage = request()->routeIs('vote-success') || request()->routeIs('events.vote-success');
-                            $isHomePage = ! $isAllPujasPage && ! $isVotePage && ! $isVoteSuccessPage;
-                            $homeUrl = isset($event) && $event->slug ? route('events.show', $event->slug) : route('home');
-                            $allPujasUrl = isset($event) && $event->slug ? route('events.all-pujas', $event->slug) : route('all-pujas');
-                            $voteUrl = isset($event) && $event->slug ? route('events.vote', $event->slug) : route('vote');
-                        @endphp
                         <li class="nav-item">
                             <a class="nav-link {{ $isHomePage ? 'active' : '' }}" data-target="home" href="{{ $isHomePage ? '#home' : $homeUrl . '#home' }}">Home</a>
                         </li>
@@ -67,7 +66,7 @@
                                     </span>
                                 </a>
                             @else
-                                <a href="{{ $voteUrl }}" class="btn btn-vote-pill w-100 w-lg-auto text-decoration-none" id="btnVoteModalNav">
+                                <a href="{{ $allPujasUrl }}" class="btn btn-vote-pill w-100 w-lg-auto text-decoration-none" id="btnVoteModalNav">
                                     <span>Vote Now</span>
                                     <span class="vote-icon-badge">
                                         <i class="bi bi-hand-index-thumb-fill"></i>

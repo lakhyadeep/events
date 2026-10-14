@@ -145,11 +145,33 @@ function setupCouponCopy() {
 }
 
 function setupWhatsAppShare() {
-    const pandal = $('#confirmedPandalName').text() || 'my favorite Durga Puja';
-    const voteLink = window.voteBaseUrl || (window.location.origin + '/vote');
+    function getWhatsAppShareUrl() {
+        const pandal = $('#confirmedPandalName').text().trim() || window.serverVotedPandal || 'my favorite Durga Puja';
+        const eventTitle = window.serverEventName || 'Dibrugarh Sharad Samman 2026';
+        let allPujasLink = window.allPujasUrl || $('#btnShareWhatsApp').data('all-pujas-url') || (window.location.origin + '/all-pujas');
 
-    const shareText = `🎉 I just voted for *${pandal}* in Dibrugarh Sharad Samman 2026! 🏆\n\nCast your vote for your favorite puja and claim an exclusive *FLAT 20% OFF* Salon Voucher from *TONI&GUY Dibrugarh*!\n\n👉 Vote Now: ${voteLink}`;
+        if (window.location && window.location.origin) {
+            try {
+                if (window.location.hostname !== 'events.test' || window.location.protocol === 'https:') {
+                    allPujasLink = window.location.origin + '/all-pujas';
+                }
+            } catch (e) {}
+        }
 
-    const whatsappUrl = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(shareText);
-    $('#btnShareWhatsApp').attr('href', whatsappUrl);
+        const shareText = `🎉 I just voted for *${pandal}* in ${eventTitle}! 🏆\n\nCast your vote for your favorite puja and claim an exclusive *FLAT 20% OFF* Salon Voucher from *TONI&GUY Dibrugarh*!\n\n👉 Vote for all pujas here:\n${allPujasLink}`;
+
+        return 'https://wa.me/?text=' + encodeURIComponent(shareText);
+    }
+
+    function updateWhatsAppShareLink() {
+        const whatsappUrl = getWhatsAppShareUrl();
+        $('#btnShareWhatsApp').attr('href', whatsappUrl);
+    }
+
+    updateWhatsAppShareLink();
+
+    $('#btnShareWhatsApp').on('click', function () {
+        updateWhatsAppShareLink();
+    });
 }
+

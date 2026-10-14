@@ -60,10 +60,10 @@
         window.isVotingOpen = {{ ($currentEvent && $currentEvent->isVotingOpen()) ? 'true' : 'false' }};
         window.votingClosedMessage = {!! json_encode($currentEvent ? $currentEvent->getVotingClosedMessage() : 'Voting is currently closed for this event.') !!};
         window.votingCountdownTarget = {!! json_encode($currentEvent && $currentEvent->countdown_datetime ? $currentEvent->countdown_datetime->toIso8601String() : null) !!};
-        window.homeUrl = {!! json_encode($currentEvent && $currentEvent->slug ? route('events.show', $currentEvent->slug) : route('home')) !!};
-        window.allPujasUrl = {!! json_encode($currentEvent && $currentEvent->slug ? route('events.all-pujas', $currentEvent->slug) : route('all-pujas')) !!};
-        window.voteBaseUrl = {!! json_encode($currentEvent && $currentEvent->slug ? route('events.vote', $currentEvent->slug) : route('vote')) !!};
-        window.voteSuccessUrl = {!! json_encode($currentEvent && $currentEvent->slug ? route('events.vote-success', $currentEvent->slug) : route('vote-success')) !!};
+        window.homeUrl = {!! json_encode(route('home')) !!};
+        window.allPujasUrl = {!! json_encode(route('all-pujas')) !!};
+        window.voteBaseUrl = {!! json_encode(url('/vote')) !!};
+        window.voteSuccessUrl = {!! json_encode(url('/vote-success')) !!};
     </script>
     @if (!empty($useAllPujasScript))
         <!-- All Pujas JavaScript Logic -->

@@ -6,10 +6,9 @@
     $voteMetaDesc = $pandalTitle
         ? "Cast your vote for {$pandalTitle} in " . ($event->display_name ?: $event->name) . ". Vote for theme, pandal, idol, or overall best."
         : ($event->meta_description ?: ("Cast your vote for the People's Favorite Award in " . ($event->display_name ?: $event->name) . ". Select your favorite puja committee and vote for theme, pandal, idol, or overall best."));
-    $isEventSlugRoute = request()->routeIs('events.*') || request()->route('slug');
     $canonicalUrl = $selectedParticipant && $selectedParticipant->slug
-        ? ($isEventSlugRoute ? route('events.vote.participant', ['slug' => $event->slug, 'participant' => $selectedParticipant->slug]) : route('vote.participant', ['participant' => $selectedParticipant->slug]))
-        : ($isEventSlugRoute ? route('events.vote', $event->slug) : route('vote'));
+        ? route('vote.participant', ['participant' => $selectedParticipant->slug])
+        : url('/vote');
 @endphp
 <x-layouts.microsite
     :event="$event"
@@ -40,7 +39,7 @@
             window.currentEventName = @json($event->display_name ?: $event->name);
             window.selectedParticipantId = {{ $selectedParticipant?->id ?? 'null' }};
             window.selectedParticipantSlug = @json($selectedParticipant?->slug ?? null);
-            window.voteBaseUrl = @json($isEventSlugRoute ? route('events.vote', $event->slug) : route('vote'));
+            window.voteBaseUrl = @json(url('/vote'));
         </script>
 
         <!-- Voting Form Section: People's Favorite Award -->
@@ -162,7 +161,7 @@
                                                 <span class="selected-choice-badge">
                                                     <i class="bi bi-patch-check-fill text-danger me-1"></i> Nominated Choice
                                                 </span>
-                                                <a href="{{ isset($event) && $event->slug ? route('events.all-pujas', $event->slug) : route('all-pujas') }}" class="btn btn-sm btn-outline-danger rounded-pill px-2 py-0" style="font-size: 0.75rem;">
+                                                <a href="{{ route('all-pujas') }}" class="btn btn-sm btn-outline-danger rounded-pill px-2 py-0" style="font-size: 0.75rem;">
                                                     Change
                                                 </a>
                                             </div>

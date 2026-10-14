@@ -55,19 +55,18 @@
             <div class="col-12 col-lg-6 text-center">
                 @php
                     $isAllPujasPage = request()->routeIs('all-pujas') || request()->routeIs('events.all-pujas');
-                    $isVotePage = request()->routeIs('vote') || request()->routeIs('events.vote');
-                    $isVoteSuccessPage = request()->routeIs('vote-success') || request()->routeIs('events.vote-success');
+                    $isVotePage = request()->routeIs('vote.participant');
+                    $isVoteSuccessPage = request()->routeIs('vote-success') || request()->routeIs('vote-success.participant') || request()->routeIs('events.vote-success') || request()->routeIs('events.vote-success.participant');
                     $isHomePage = ! $isAllPujasPage && ! $isVotePage && ! $isVoteSuccessPage;
-                    $homeUrl = isset($event) && $event->slug ? route('events.show', $event->slug) : route('home');
-                    $allPujasUrl = isset($event) && $event->slug ? route('events.all-pujas', $event->slug) : route('all-pujas');
-                    $voteUrl = isset($event) && $event->slug ? route('events.vote', $event->slug) : route('vote');
+                    $homeUrl = route('home');
+                    $allPujasUrl = route('all-pujas');
                 @endphp
                 <ul class="footer-nav">
                     <li><a href="{{ $isHomePage ? '#home' : $homeUrl . '#home' }}" class="nav-link-item {{ $isHomePage ? 'active' : '' }}" data-page="Home">Home</a></li>
                     <li class="nav-sep">|</li>
                     <li><a href="{{ $allPujasUrl }}" class="nav-link-item {{ $isAllPujasPage ? 'active' : '' }}" data-page="All Pujas">All Pujas</a></li>
                     <li class="nav-sep">|</li>
-                    <li><a href="{{ $voteUrl }}" class="nav-link-item {{ $isVotePage ? 'active' : '' }}" data-page="Vote">Vote</a></li>
+                    <li><a href="{{ $allPujasUrl }}" class="nav-link-item {{ $isVotePage ? 'active' : '' }}" data-page="Vote">Vote</a></li>
                     <li class="nav-sep">|</li>
                     <li><a href="{{ $isHomePage ? '#gallery' : $homeUrl . '#gallery' }}" class="nav-link-item" data-page="Gallery">Gallery</a></li>
                     <li class="nav-sep">|</li>

@@ -433,7 +433,7 @@ class VotingFlowTest extends TestCase
         $directoryResponse->assertSee('count-puja-'.$participant->id);
         $directoryResponse->assertSee('2 votes');
 
-        $voteResponse = $this->followingRedirects()->get('/events/'.$event->slug.'/vote?participant='.$participant->id);
+        $voteResponse = $this->followingRedirects()->get('/vote/'.$participant->slug);
         $voteResponse->assertStatus(200);
         $voteResponse->assertSee('id="previewPandalVotes"', false);
         $voteResponse->assertSee('2 votes');
@@ -477,7 +477,7 @@ class VotingFlowTest extends TestCase
 
         $participant = $this->createParticipant($event);
 
-        $response = $this->followingRedirects()->get('/events/'.$event->slug.'/vote?participant='.$participant->id);
+        $response = $this->followingRedirects()->get('/vote/'.$participant->slug);
 
         $response->assertStatus(200);
         $response->assertSee('name="award_ids[]"', false);

@@ -115,10 +115,10 @@ function setupCouponCopy() {
 function setupWhatsAppShare() {
     const pandal = $('#confirmedPandalName').text() || 'my favorite Durga Puja';
     const currentBaseUrl = window.location.href.split('vote-success.html')[0] || '';
-    const voteLink = currentBaseUrl + 'vote.html';
+    const allPujasLink = currentBaseUrl + 'allpujas.html';
 
-    const shareText = `🎉 I just voted for *${pandal}* in Dibrugarh Sharad Samman 2026! 🏆\n\nCast your vote for your favorite puja and claim an exclusive *FLAT 20% OFF* Salon Voucher from *TONI&GUY Dibrugarh*!\n\n👉 Vote Now: ${voteLink}`;
+    const shareText = `🎉 I just voted for *${pandal}* in Dibrugarh Sharad Samman 2026! 🏆\n\nCast your vote for your favorite puja and claim an exclusive *FLAT 20% OFF* Salon Voucher from *TONI&GUY Dibrugarh*!\n\n👉 Vote for all pujas here:\n${allPujasLink}`;
 
-    const whatsappUrl = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(shareText);
+    const whatsappUrl = 'https://wa.me/?text=' + encodeURIComponent(shareText);
     $('#btnShareWhatsApp').attr('href', whatsappUrl);
 }

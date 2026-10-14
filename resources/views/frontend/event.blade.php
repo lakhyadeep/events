@@ -1,5 +1,6 @@
 <x-layouts.microsite :event="$event" :meta-title="$event->meta_title ?: 'Dibrugarh 24x7 - Festive Awards & Navigation'"
-    :meta-description="$event->meta_description ?: 'Dibrugarh Durgo Utsav 2026'" :og-image="$event->og_image">
+    :meta-description="$event->meta_description ?: 'Dibrugarh Durgo Utsav 2026'" :og-image="$event->og_image"
+    :canonical-url="request()->routeIs('home') || ($event->status === 'active') ? route('home') : route('events.show', $event->slug)">
     <!-- Top Navigation Header -->
     @include('frontend.partials.header')
 

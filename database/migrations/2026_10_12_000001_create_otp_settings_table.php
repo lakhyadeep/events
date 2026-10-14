@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -21,10 +20,7 @@ return new class extends Migration
             $table->text('message_template')->nullable();
             $table->string('master_otp')->nullable();
             $table->text('test_phone_numbers')->nullable();
-            $table->text('twilio_settings')->nullable();
-            $table->text('msg91_settings')->nullable();
-            $table->text('fast2sms_settings')->nullable();
-            $table->text('custom_http_settings')->nullable();
+            $table->text('brevo_settings')->nullable();
             $table->timestamps();
         });
     }

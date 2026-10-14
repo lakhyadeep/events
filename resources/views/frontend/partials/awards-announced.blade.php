@@ -3,7 +3,7 @@
 <section class="awards-announced-section py-5" id="awards-announced">
     <div class="container py-3">
         <!-- Section Header Box (Clickable redirect to All Pujas) -->
-        <a href="{{ isset($event) && $event->slug ? route('events.all-pujas', $event->slug) : route('all-pujas') }}"
+        <a href="{{ route('all-pujas') }}"
             class="awards-announced-header-box text-center d-block text-decoration-none"
             title="Click to view all Dibrugarh Durga Pujas">
             <!-- Top Corner Click Indicator Badge -->

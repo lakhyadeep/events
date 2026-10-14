@@ -3,10 +3,9 @@
     $successMetaTitle = $confirmedTitle
         ? "Vote Confirmed for {$confirmedTitle} — People's Favorite Award | " . ($event->display_name ?: $event->name)
         : ($event->meta_title ?: ("Vote Confirmed — People's Favorite Award | " . ($event->display_name ?: $event->name)));
-    $isEventSlugRoute = request()->routeIs('events.*') || request()->route('slug');
     $canonicalUrl = $selectedParticipant && $selectedParticipant->slug
-        ? ($isEventSlugRoute ? route('events.vote-success.participant', ['slug' => $event->slug, 'participant' => $selectedParticipant->slug]) : route('vote-success.participant', ['participant' => $selectedParticipant->slug]))
-        : ($isEventSlugRoute ? route('events.vote-success', $event->slug) : route('vote-success'));
+        ? route('vote-success.participant', ['participant' => $selectedParticipant->slug])
+        : route('all-pujas');
 @endphp
 <x-layouts.microsite
     :event="$event"
@@ -27,6 +26,7 @@
             window.serverVotedCategory = @json($votedCategory ?? null);
             window.serverVotedMobile = @json($votedMobile ?? null);
             window.serverParticipantSlug = @json($selectedParticipant?->slug ?? null);
+            window.serverEventName = @json($event->display_name ?: $event->name);
         </script>
 
         <!-- Compact Banner below Header -->
@@ -133,7 +133,15 @@
                     <!-- Next Actions & Social Share -->
                     <div class="d-flex flex-column flex-sm-row justify-content-center align-items-center gap-2 pt-2">
                         <!-- WhatsApp Share -->
-                        <a href="#" id="btnShareWhatsApp"
+                        @php
+                            $sharePandalName = $confirmedTitle ?: 'my favorite Durga Puja';
+                            $shareEventName = $event->display_name ?: $event->name;
+                            $shareAllPujasUrl = route('all-pujas');
+                            $defaultShareMessage = "🎉 I just voted for *{$sharePandalName}* in {$shareEventName}! 🏆\n\nCast your vote for your favorite puja and claim an exclusive *FLAT 20% OFF* Salon Voucher from *TONI&GUY Dibrugarh*!\n\n👉 Vote for all pujas here:\n{$shareAllPujasUrl}";
+                            $defaultWhatsappLink = 'https://wa.me/?text=' . rawurlencode($defaultShareMessage);
+                        @endphp
+                        <a href="{{ $defaultWhatsappLink }}" id="btnShareWhatsApp"
+                            data-all-pujas-url="{{ $shareAllPujasUrl }}"
                             class="btn btn-share-whatsapp w-100 w-sm-auto text-decoration-none" target="_blank"
                             rel="noopener">
                             <i class="bi bi-whatsapp fs-5"></i>
@@ -141,13 +149,13 @@
                         </a>
 
                         <!-- Explore All Pujas -->
-                        <a href="{{ isset($event) && $event->slug ? route('events.all-pujas', $event->slug) : route('all-pujas') }}"
+                        <a href="{{ route('all-pujas') }}"
                             class="btn btn-outline-danger rounded-pill px-3 py-3 fw-semibold w-100 w-sm-auto">
                             <i class="bi bi-compass me-1"></i> Explore All Pujas
                         </a>
 
                         <!-- Return to Home -->
-                        <a href="{{ isset($event) && $event->slug ? route('events.show', $event->slug) : route('home') }}"
+                        <a href="{{ route('home') }}"
                             class="btn btn-outline-secondary rounded-pill px-3 py-3 w-100 w-sm-auto">
                             <i class="bi bi-house me-1"></i> Home
                         </a>

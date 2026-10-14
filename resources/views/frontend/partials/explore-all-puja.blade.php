@@ -10,7 +10,7 @@
                 and live community voting.</p>
         </div>
         <div class="col-md-4 text-center text-md-end">
-            <a href="{{ isset($event) && $event->slug ? route('events.all-pujas', $event->slug) : route('all-pujas') }}"
+            <a href="{{ route('all-pujas') }}"
                 class="btn btn-vote-pill px-4 py-2 text-decoration-none">
                 <span>Browse All Pujas</span>
                 <span class="vote-icon-badge">
