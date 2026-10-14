@@ -6,8 +6,18 @@
                 <div class="shorts-player-container" id="shortsPlayerContainer">
 
                     <!-- HTML5 Video Element with splash poster -->
-                    <video id="shortsVideoElement" class="shorts-video-element" loop playsinline muted>
+                    <video id="shortsVideoElement" class="shorts-video-element d-none" loop playsinline muted>
                     </video>
+
+                    <!-- YouTube / Embedded Video Iframe -->
+                    <iframe id="shortsIframeElement" class="shorts-iframe-element"
+                        src=""
+                        title="Shorts Video Player"
+                        frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        referrerpolicy="strict-origin-when-cross-origin"
+                        allowfullscreen>
+                    </iframe>
 
                     <!-- Vignette & Shadows -->
                     <div class="shorts-vignette"></div>
@@ -25,7 +35,7 @@
                     <div class="shorts-header">
                         <div class="shorts-badge">
                             <i class="bi bi-broadcast text-danger"></i>
-                            <span id="shortsLocationLabel">Dibrugarh 24Ã7 Shorts</span>
+                            <span id="shortsLocationLabel">Dibrugarh 24&times;7 Shorts</span>
                         </div>
                         <button type="button" class="shorts-close-btn" data-bs-dismiss="modal" aria-label="Close">
                             <i class="bi bi-x-lg"></i>

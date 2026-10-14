@@ -1789,13 +1789,19 @@ body {
     overflow: hidden;
 }
 
-.shorts-video-element {
+.shorts-video-element,
+.shorts-iframe-element {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
     z-index: 1;
+    border: 0;
+    background: #000;
+}
+
+.shorts-video-element {
     cursor: pointer;
 }
 

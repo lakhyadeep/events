@@ -382,9 +382,12 @@ $(document).ready(function () {
     // ==========================================================================
     const $cards = $('.reel-card');
     const videoElem = document.getElementById('shortsVideoElement');
+    const iframeElem = document.getElementById('shortsIframeElement');
     let currentReelIndex = 0;
     let shortsModalInstance = null;
     let isLikedState = {};
+    let isYtMuted = false;
+    let currentMode = 'youtube'; // 'youtube' or 'video'
 
     function getShortsModal() {
         if (!shortsModalInstance) {
@@ -394,6 +397,16 @@ $(document).ready(function () {
             }
         }
         return shortsModalInstance;
+    }
+
+    function sendYouTubeCommand(func, args) {
+        if (iframeElem && iframeElem.contentWindow) {
+            iframeElem.contentWindow.postMessage(JSON.stringify({
+                event: 'command',
+                func: func,
+                args: args || []
+            }), '*');
+        }
     }
 
     function loadReel(index) {
@@ -408,6 +421,8 @@ $(document).ready(function () {
         const theme = $card.attr('data-theme') || 'Sharad Utsav Celebration';
         const splash = $card.attr('data-splash') || '';
         const videoUrl = $card.attr('data-video') || '';
+        const embedUrl = $card.attr('data-embed') || '';
+        const platform = $card.attr('data-platform') || 'youtube_shorts';
 
         // Update Text Info
         $('#shortsModalPandalName').text(pandal);
@@ -423,27 +438,59 @@ $(document).ready(function () {
             $('#shortsLikeBtn i').attr('class', 'bi bi-heart');
         }
 
-        // Set Video Sources
-        if (videoElem) {
-            videoElem.pause();
-            if (splash) videoElem.poster = splash;
-            videoElem.src = videoUrl;
-            videoElem.currentTime = 0;
-            videoElem.muted = false; // default to sound on
+        const isDirect = (platform === 'direct' || videoUrl.toLowerCase().endsWith('.mp4')) && !embedUrl.includes('youtube');
 
-            // Update Audio Button Display
-            $('#audioIcon').attr('class', 'bi bi-volume-up-fill');
-            $('#audioLabel').text('Sound On');
+        if (isDirect) {
+            currentMode = 'video';
+            if (iframeElem) {
+                $(iframeElem).addClass('d-none').attr('src', '');
+            }
+            if (videoElem) {
+                $(videoElem).removeClass('d-none');
+                videoElem.pause();
+                if (splash) videoElem.poster = splash;
+                videoElem.src = videoUrl;
+                videoElem.currentTime = 0;
+                videoElem.muted = false;
 
-            videoElem.play().then(() => {
-                showCenterIndicator('bi-play-fill');
-            }).catch(err => {
-                console.log('Autoplay muted fallback:', err);
-                videoElem.muted = true;
-                $('#audioIcon').attr('class', 'bi bi-volume-mute-fill');
-                $('#audioLabel').text('Muted');
-                videoElem.play().catch(() => {});
-            });
+                $('#audioIcon').attr('class', 'bi bi-volume-up-fill');
+                $('#audioLabel').text('Sound On');
+
+                videoElem.play().then(() => {
+                    showCenterIndicator('bi-play-fill');
+                }).catch(err => {
+                    console.log('Autoplay muted fallback:', err);
+                    videoElem.muted = true;
+                    $('#audioIcon').attr('class', 'bi bi-volume-mute-fill');
+                    $('#audioLabel').text('Muted');
+                    videoElem.play().catch(() => {});
+                });
+            }
+            $('#shortsProgressBar').show();
+        } else {
+            currentMode = 'youtube';
+            if (videoElem) {
+                videoElem.pause();
+                $(videoElem).addClass('d-none');
+            }
+            if (iframeElem) {
+                $(iframeElem).removeClass('d-none');
+
+                let targetSrc = embedUrl;
+                if (!targetSrc && videoUrl) {
+                    const match = videoUrl.match(/(?:shorts\/|youtu\.be\/|v=)([\w\-]+)/);
+                    if (match) {
+                        targetSrc = 'https://www.youtube-nocookie.com/embed/' + match[1] + '?autoplay=1&enablejsapi=1&rel=0&playsinline=1&modestbranding=1&loop=1&playlist=' + match[1];
+                    } else {
+                        targetSrc = videoUrl;
+                    }
+                }
+                iframeElem.src = targetSrc;
+                isYtMuted = false;
+                $('#audioIcon').attr('class', 'bi bi-volume-up-fill');
+                $('#audioLabel').text('Sound On');
+            }
+            $('#shortsProgressFill').css('width', '100%');
         }
     }
 
@@ -485,13 +532,8 @@ $(document).ready(function () {
         }
     });
 
-    // Tap Video to Toggle Play/Pause
-    $('#shortsVideoElement, #shortsPlayerContainer').on('click', function (e) {
-        // Prevent click if clicking direct controls/buttons
-        if ($(e.target).closest('.shorts-actions, .shorts-header, .shorts-footer, .shorts-nav-btn').length > 0) {
-            return;
-        }
-
+    // Tap Video to Toggle Play/Pause for direct video
+    $('#shortsVideoElement').on('click', function (e) {
         if (videoElem) {
             if (videoElem.paused) {
                 videoElem.play();
@@ -520,7 +562,7 @@ $(document).ready(function () {
 
     // Scrub Progress Bar on Click
     $('#shortsProgressBar').on('click', function (e) {
-        if (videoElem && videoElem.duration) {
+        if (currentMode === 'video' && videoElem && videoElem.duration) {
             const rect = this.getBoundingClientRect();
             const clickPos = (e.clientX - rect.left) / rect.width;
             videoElem.currentTime = clickPos * videoElem.duration;
@@ -530,7 +572,18 @@ $(document).ready(function () {
     // Mute / Unmute Sound Button
     $('#shortsAudioBtn').on('click', function (e) {
         e.stopPropagation();
-        if (videoElem) {
+        if (currentMode === 'youtube') {
+            isYtMuted = !isYtMuted;
+            if (isYtMuted) {
+                sendYouTubeCommand('mute');
+                $('#audioIcon').attr('class', 'bi bi-volume-mute-fill');
+                $('#audioLabel').text('Muted');
+            } else {
+                sendYouTubeCommand('unMute');
+                $('#audioIcon').attr('class', 'bi bi-volume-up-fill');
+                $('#audioLabel').text('Sound On');
+            }
+        } else if (videoElem) {
             videoElem.muted = !videoElem.muted;
             if (videoElem.muted) {
                 $('#audioIcon').attr('class', 'bi bi-volume-mute-fill');
@@ -584,6 +637,9 @@ $(document).ready(function () {
             if (videoElem) {
                 videoElem.pause();
                 videoElem.currentTime = 0;
+            }
+            if (iframeElem) {
+                iframeElem.src = '';
             }
         });
     }

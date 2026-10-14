@@ -53,14 +53,23 @@
             <div class="reels-viewport" id="reelsViewport">
                 <div class="reels-track" id="reelsTrack">
                     @foreach ($event->videoShorts->where('is_active', true) as $index => $short)
+                        @php
+                            $thumbnail = $short->thumbnail_image_url ?: asset('event-assets/images/hero.png');
+                            $isDirectVideo = $short->platform?->value === 'direct' || str_ends_with(strtolower($short->video_url ?? ''), '.mp4');
+                        @endphp
                         <div class="reel-card" data-index="{{ $index }}" data-pandal="{{ $short->name }}"
                             data-likes="{{ $short->caption ?: '' }}"
                             data-theme="{{ $short->caption ?: $short->name }}"
-                            data-splash="{{ $short->thumbnail_image_url ?: asset('event-assets/images/hero.png') }}"
-                            data-video="{{ $short->video_url }}">
-                            <video class="reel-bg"
-                                poster="{{ $short->thumbnail_image_url ?: asset('event-assets/images/hero.png') }}"
-                                src="{{ $short->video_url }}" muted loop playsinline></video>
+                            data-splash="{{ $thumbnail }}"
+                            data-video="{{ $short->video_url }}"
+                            data-embed="{{ $short->embed_url }}"
+                            data-platform="{{ $short->platform?->value ?? 'youtube_shorts' }}">
+                            <img class="reel-bg" src="{{ $thumbnail }}" alt="{{ $short->name }}" loading="lazy" />
+                            @if ($isDirectVideo)
+                                <video class="reel-bg"
+                                    poster="{{ $thumbnail }}"
+                                    src="{{ $short->video_url }}" muted loop playsinline></video>
+                            @endif
                             <div class="reel-overlay"></div>
                             <div class="reel-play-btn" title="Watch Short">
                                 <svg viewBox="0 0 24 24">
