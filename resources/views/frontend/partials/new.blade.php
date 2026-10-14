@@ -1,4 +1,3 @@
-@if (isset($publishedWinners) && $publishedWinners->isNotEmpty())
 <section class="awards-announced-section py-5" id="">
     <div class="container">
         <a href="{{ route('all-pujas') }}"
@@ -42,4 +41,3 @@
     </div>
 
 </section>
-@endif
