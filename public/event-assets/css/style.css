@@ -1789,19 +1789,13 @@ body {
     overflow: hidden;
 }
 
-.shorts-video-element,
-.shorts-iframe-element {
+.shorts-video-element {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
     z-index: 1;
-    border: 0;
-    background: #000;
-}
-
-.shorts-video-element {
     cursor: pointer;
 }
 
@@ -2193,8 +2187,15 @@ body {
 
 .step-date {
     font-size: 0.85rem;
-    font-weight: 600;
     color: var(--text-gold);
+    margin: 0;
+    font-weight: 400;
+}
+
+.step-desc {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #fff !important;
     margin: 0;
 }
 
@@ -3581,6 +3582,12 @@ footer.site-footer {
     border-top: 1px solid rgba(212, 163, 115, 0.35);
     border-bottom: 1px solid rgba(212, 163, 115, 0.35);
     overflow: hidden;
+
+    @media (max-width: 767.98px) {
+
+        padding: 20px 0 70px;
+
+    }
 }
 
 .vote-form-card {
@@ -3588,7 +3595,7 @@ footer.site-footer {
     border: 1px solid rgba(212, 163, 115, 0.4);
     border-radius: 24px;
     box-shadow: 0 16px 48px rgba(140, 12, 22, 0.08), 0 4px 16px rgba(0, 0, 0, 0.04);
-    padding: 32px 24px;
+    padding: 32px 14px;
     position: relative;
     z-index: 2;
     transition: box-shadow 0.3s ease;
@@ -3616,8 +3623,7 @@ footer.site-footer {
     user-select: none;
 }
 
-.preference-radio-input,
-.preference-checkbox-input {
+.preference-radio-input {
     position: absolute;
     opacity: 0;
     pointer-events: none;
@@ -3640,8 +3646,7 @@ footer.site-footer {
     background: #ffffff;
 }
 
-.preference-radio-input:checked+.preference-card,
-.preference-checkbox-input:checked+.preference-card {
+.preference-radio-input:checked+.preference-card {
     border-color: var(--crimson-red);
     background: linear-gradient(180deg, #fff5f5 0%, #ffffff 100%);
     box-shadow: 0 8px 26px rgba(183, 13, 24, 0.18), 0 0 0 3px rgba(255, 204, 0, 0.3);
@@ -3661,8 +3666,7 @@ footer.site-footer {
     transition: all 0.25s ease;
 }
 
-.preference-radio-input:checked+.preference-card .pref-icon-circle,
-.preference-checkbox-input:checked+.preference-card .pref-icon-circle {
+.preference-radio-input:checked+.preference-card .pref-icon-circle {
     background: var(--crimson-red);
     color: #ffffff;
     box-shadow: 0 4px 14px rgba(183, 13, 24, 0.3);
@@ -3673,15 +3677,13 @@ footer.site-footer {
     color: #b45309;
 }
 
-.preference-radio-input:checked+.pref-card-overall,
-.preference-checkbox-input:checked+.pref-card-overall {
+.preference-radio-input:checked+.pref-card-overall {
     border-color: #d97706;
     background: linear-gradient(180deg, #fffbeb 0%, #ffffff 100%);
     box-shadow: 0 8px 26px rgba(217, 119, 6, 0.2), 0 0 0 3px rgba(255, 204, 0, 0.4);
 }
 
-.preference-radio-input:checked+.pref-card-overall .pref-icon-circle,
-.preference-checkbox-input:checked+.pref-card-overall .pref-icon-circle {
+.preference-radio-input:checked+.pref-card-overall .pref-icon-circle {
     background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
     color: #ffffff;
 }
@@ -3708,8 +3710,7 @@ footer.site-footer {
     transition: all 0.25s ease;
 }
 
-.preference-radio-input:checked+.preference-card .pref-check-badge,
-.preference-checkbox-input:checked+.preference-card .pref-check-badge {
+.preference-radio-input:checked+.preference-card .pref-check-badge {
     opacity: 1;
     transform: scale(1);
 }
@@ -3730,6 +3731,14 @@ footer.site-footer {
     margin-bottom: 26px;
     box-shadow: 0 10px 30px rgba(183, 13, 24, 0.12), 0 2px 12px rgba(198, 138, 76, 0.18);
     transition: all 0.3s ease;
+
+    @media (max-width: 767.98px) {
+        padding: 20px 14px;
+    }
+
+    >* {
+        flex-direction: column;
+    }
 }
 
 .selected-puja-preview:hover {
@@ -3777,17 +3786,6 @@ footer.site-footer {
     margin-bottom: 24px;
 }
 
-.vote-error-toast-banner {
-    display: none;
-    background: linear-gradient(135deg, #991b1b 0%, #b91c1c 100%);
-    color: #ffffff;
-    border-radius: 16px;
-    padding: 20px;
-    box-shadow: 0 10px 30px rgba(185, 28, 28, 0.28);
-    margin-bottom: 24px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-}
-
 /* ==========================================================================
    11. VOTE SUCCESS PAGE & TONI & GUY SPECIAL COUPON
    ========================================================================== */
@@ -3796,6 +3794,10 @@ footer.site-footer {
     background: radial-gradient(circle at 50% 15%, #ffffff 0%, #fdf8f0 50%, #f7ebe0 100%);
     padding: 40px 16px 60px;
     overflow: hidden;
+
+    @media(max-width:767.98px) {
+        padding: 15px 0 60px;
+    }
 }
 
 .success-main-card {
@@ -3806,6 +3808,10 @@ footer.site-footer {
     padding: 36px 24px;
     position: relative;
     z-index: 2;
+
+    @media(max-width:767.98px) {
+        padding: 30px 10px;
+    }
 }
 
 @media (min-width: 768px) {
@@ -3862,6 +3868,19 @@ footer.site-footer {
     margin-bottom: 30px;
     text-align: left;
     box-shadow: 0 6px 18px rgba(183, 13, 24, 0.05);
+
+    @media(max-width:767.98px) {
+        padding: 15px 10px;
+    }
+
+    >div>.d-flex {
+        flex-direction: column;
+        width: 100%;
+        justify-content: start;
+        text-align: left;
+        align-items: start !important;
+
+    }
 }
 
 /* TONI & GUY Luxury Coupon Card */
@@ -3875,6 +3894,10 @@ footer.site-footer {
     border: 2px dashed rgba(255, 204, 0, 0.65);
     box-shadow: 0 18px 45px rgba(0, 0, 0, 0.28), 0 0 0 4px rgba(255, 204, 0, 0.1);
     overflow: hidden;
+
+    >.d-flex {
+        justify-content: center !important;
+    }
 }
 
 .toniguy-coupon-card::before {

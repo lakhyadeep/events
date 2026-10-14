@@ -45,7 +45,7 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <!-- Custom Festive Stylesheet -->
-    <link rel="stylesheet" href="{{ asset('event-assets/css/style.css') }}?v={{ file_exists(public_path('event-assets/css/style.css')) ? filemtime(public_path('event-assets/css/style.css')) : '1.0' }}">
+    <link rel="stylesheet" href="{{ vasset('event-assets/css/style.css') }}">
 </head>
 <body>
 
@@ -67,16 +67,16 @@
     </script>
     @if (!empty($useAllPujasScript))
         <!-- All Pujas JavaScript Logic -->
-        <script src="{{ asset('event-assets/js/allpujas.js') }}?v={{ file_exists(public_path('event-assets/js/allpujas.js')) ? filemtime(public_path('event-assets/js/allpujas.js')) : '1.0' }}"></script>
+        <script src="{{ vasset('event-assets/js/allpujas.js') }}"></script>
     @elseif (!empty($useVoteScript))
         <!-- Vote Page Logic -->
-        <script src="{{ asset('event-assets/js/vote.js') }}?v={{ file_exists(public_path('event-assets/js/vote.js')) ? filemtime(public_path('event-assets/js/vote.js')) : '1.0' }}"></script>
+        <script src="{{ vasset('event-assets/js/vote.js') }}"></script>
     @elseif (!empty($useSuccessScript))
         <!-- Vote Success Page Logic -->
-        <script src="{{ asset('event-assets/js/success.js') }}?v={{ file_exists(public_path('event-assets/js/success.js')) ? filemtime(public_path('event-assets/js/success.js')) : '1.0' }}"></script>
+        <script src="{{ vasset('event-assets/js/success.js') }}"></script>
     @else
         <!-- Festive Microsite Script -->
-        <script src="{{ asset('event-assets/js/script.js') }}?v={{ file_exists(public_path('event-assets/js/script.js')) ? filemtime(public_path('event-assets/js/script.js')) : '1.0' }}"></script>
+        <script src="{{ vasset('event-assets/js/script.js') }}"></script>
     @endif
 
     {{ $scripts ?? '' }}
