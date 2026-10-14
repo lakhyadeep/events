@@ -59,13 +59,6 @@ function loadVoteConfirmationDetails() {
     const targetName = matched ? matched.name : cleanName;
     const targetLoc = matched ? matched.location : "Dibrugarh, Assam";
 
-    // Generate random 5-digit ballot ID if not present in session
-    let ballotId = sessionStorage.getItem('user_ballot_id');
-    if (!ballotId) {
-        ballotId = '#SS2026-VOTE-' + Math.floor(10000 + Math.random() * 90000);
-        sessionStorage.setItem('user_ballot_id', ballotId);
-    }
-
     // Mask phone number: +91 98•••• ••99
     let maskedMobile = '+91 98•••• ••' + (mobile.length >= 2 ? mobile.slice(-2) : '99');
 
@@ -74,7 +67,6 @@ function loadVoteConfirmationDetails() {
     $('#confirmedCategoryBadge').text(decodeURIComponent(category));
     $('#confirmedPandalLoc').text(targetLoc);
     $('#confirmedVoterMobile').text(maskedMobile);
-    $('#confirmedBallotId').text(ballotId);
 }
 
 function setupCouponCopy() {

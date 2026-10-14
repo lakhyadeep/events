@@ -150,7 +150,6 @@ function renderNextBatch(countToLoad) {
             <div class="col-12 col-md-6 col-lg-4 card-appear-animate" id="puja-card-${puja.id}" data-pandal="${escapeHtml(puja.name)}" data-id="${puja.id}">
                 <div class="vote-card h-100 p-2 p-md-3 d-flex flex-column">
                     <div class="position-relative mb-3">
-                        <span class="card-num-badge">#${String(puja.id).padStart(2, '0')}</span>
                         <img src="${puja.image}"
                              alt="${escapeHtml(puja.name)}"
                              class="img-fluid rounded-3 w-100"

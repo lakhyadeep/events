@@ -59,14 +59,11 @@
 
                     <!-- Confirmed Vote Summary Box -->
                     <div class="vote-confirmed-summary-box">
-                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
-                            <div class="d-flex align-items-center gap-2">
-                                <span class="badge bg-danger text-white rounded-pill px-3 py-1">
-                                    <i class="bi bi-award-fill me-1"></i> Your Chosen Pandal
-                                </span>
-                                <span class="badge bg-warning text-dark rounded-pill px-3 py-1 fw-bold" id="confirmedCategoryBadge" style="display: none;"></span>
-                            </div>
-                            <span class="badge bg-light text-secondary border px-2 py-1 font-monospace" id="confirmedBallotId"></span>
+                        <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+                            <span class="badge bg-danger text-white rounded-pill px-3 py-1">
+                                <i class="bi bi-award-fill me-1"></i> Your Chosen Pandal
+                            </span>
+                            <span class="badge bg-warning text-dark rounded-pill px-3 py-1 fw-bold" id="confirmedCategoryBadge" style="display: none;"></span>
                         </div>
                         <h3 class="fw-bold text-dark mb-1 fs-5" id="confirmedPandalName"></h3>
                         <div class="small text-muted d-flex flex-wrap align-items-center justify-content-center gap-2">

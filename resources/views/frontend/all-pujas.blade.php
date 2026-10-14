@@ -1,11 +1,7 @@
-<x-layouts.microsite
-    :event="$event"
+<x-layouts.microsite :event="$event"
     :meta-title="($event->meta_title ?: 'All Pujas Directory — ' . ($event->display_name ?? 'Dibrugarh Durgo Utsav 2026'))"
     :meta-description="$event->meta_description ?: 'Explore the complete directory of registered Sarbajanin Durga Pujas across Dibrugarh with interactive search, auto-suggestions, and live voting.'"
-    :og-image="$event->og_image ?? null"
-    :canonical-url="route('all-pujas')"
-    :use-all-pujas-script="true"
->
+    :og-image="$event->og_image ?? null" :canonical-url="route('all-pujas')" :use-all-pujas-script="true">
     <!-- Top Navigation Header -->
     @include('frontend.partials.header')
 
@@ -27,8 +23,9 @@
                 <h1 class="allpujas-title mb-1">Dibrugarh Durga Pujas</h1>
                 <p class="allpujas-subtitle mb-3">Search and vote for your favourite puja committee</p>
 
-                @if (isset($event) && ! $event->isVotingOpen())
-                    <div class="alert alert-warning border-0 shadow-sm rounded-pill px-4 py-2 d-inline-flex align-items-center gap-2 mb-4 mx-auto" style="max-width: 500px;">
+                @if (isset($event) && !$event->isVotingOpen())
+                    <div class="alert alert-warning border-0 shadow-sm rounded-pill px-4 py-2 d-inline-flex align-items-center gap-2 mb-4 mx-auto"
+                        style="max-width: 500px;">
                         <i class="bi bi-lock-fill text-warning"></i>
                         <span class="small fw-semibold text-dark">{{ $event->getVotingClosedMessage() }}</span>
                     </div>
@@ -42,8 +39,8 @@
                                 <i class="bi bi-search"></i>
                             </span>
                             <input type="text" id="pujaSearchInput" class="search-field-input"
-                                placeholder="Search by puja name, location, or theme..."
-                                autocomplete="off" aria-label="Search all Dibrugarh pujas">
+                                placeholder="Search by puja name, location, or theme..." autocomplete="off"
+                                aria-label="Search all Dibrugarh pujas">
                             <button type="button" id="searchClearBtn" class="search-clear-btn" aria-label="Clear search">
                                 <i class="bi bi-x-circle-fill"></i>
                             </button>
@@ -63,7 +60,8 @@
                                 <!-- Populated dynamically via allpujas.js -->
                             </ul>
                             <div class="autosuggest-footer">
-                                <span><i class="bi bi-arrow-down-up me-1"></i> Navigate with &uarr; &darr;, Enter to pick</span>
+                                <span><i class="bi bi-arrow-down-up me-1"></i> Navigate with &uarr; &darr;, Enter to
+                                    pick</span>
                                 <span>Esc to close</span>
                             </div>
                         </div>
@@ -88,7 +86,8 @@
                             @foreach ($filterZones as $fz)
                                 @if ($fz['count'] > 0)
                                     <button class="filter-chip-btn" data-zone="{{ $fz['name'] }}">
-                                        <i class="bi {{ $fz['icon'] }}" @if(!empty($fz['color'])) style="color: {{ $fz['color'] }};" @endif></i> {{ $fz['label'] }}
+                                        <i class="bi {{ $fz['icon'] }}" @if(!empty($fz['color'])) style="color: {{ $fz['color'] }};"
+                                        @endif></i> {{ $fz['label'] }}
                                         <span class="chip-count">{{ $fz['count'] }}</span>
                                     </button>
                                 @endif
@@ -126,18 +125,16 @@
                 <!-- Dynamic Card Grid -->
                 <div class="row g-4" id="pujasCardsGrid">
                     @forelse (collect($pujasData)->take(12) as $puja)
-                        <div class="col-12 col-md-6 col-lg-4 card-appear-animate" id="puja-card-{{ $puja['id'] }}" data-pandal="{{ $puja['name'] }}" data-id="{{ $puja['id'] }}" data-slug="{{ $puja['slug'] }}">
+                        <div class="col-12 col-md-6 col-lg-4 card-appear-animate" id="puja-card-{{ $puja['id'] }}"
+                            data-pandal="{{ $puja['name'] }}" data-id="{{ $puja['id'] }}" data-slug="{{ $puja['slug'] }}">
                             <div class="vote-card h-100 p-2 p-md-3 d-flex flex-column">
                                 <div class="position-relative mb-3">
-                                    <span class="card-num-badge">#{{ sprintf('%02d', $puja['id']) }}</span>
-                                    <img src="{{ $puja['image'] }}"
-                                         alt="{{ $puja['name'] }}"
-                                         class="img-fluid rounded-3 w-100"
-                                         style="height: 200px; object-fit: cover;"
-                                         loading="lazy"
-                                         onerror="this.onerror=null;this.src='{{ asset('event-assets/images/hero.png') }}';">
+                                    <img src="{{ $puja['image'] }}" alt="{{ $puja['name'] }}"
+                                        class="img-fluid rounded-3 w-100" style="height: 200px; object-fit: cover;"
+                                        loading="lazy"
+                                        onerror="this.onerror=null;this.src='{{ asset('event-assets/images/hero.png') }}';">
                                 </div>
-                                
+
                                 <div class="d-flex justify-content-between align-items-baseline mb-1">
                                     <h5 class="fw-bold mb-0 text-dark fs-6 fs-md-5">{{ $puja['name'] }}</h5>
                                 </div>
@@ -149,7 +146,8 @@
                                 @endif
 
                                 @if (!empty($puja['theme']))
-                                    <div class="small text-secondary mb-3 fst-italic" style="font-size: 0.82rem; line-height: 1.4;">
+                                    <div class="small text-secondary mb-3 fst-italic"
+                                        style="font-size: 0.82rem; line-height: 1.4;">
                                         <i class="bi bi-stars text-warning me-1"></i> Theme: "{{ $puja['theme'] }}"
                                     </div>
                                 @endif
@@ -164,11 +162,13 @@
                                     @endphp
                                     @if ($isVotingOpen)
                                         <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn"
-                                            data-pandal="{{ $puja['name'] }}" data-slug="{{ $puja['slug'] }}" data-puja-id="{{ $puja['id'] }}" data-participant-id="{{ $puja['id'] }}">
+                                            data-pandal="{{ $puja['name'] }}" data-slug="{{ $puja['slug'] }}"
+                                            data-puja-id="{{ $puja['id'] }}" data-participant-id="{{ $puja['id'] }}">
                                             <i class="bi bi-hand-thumbs-up me-1"></i> Vote
                                         </button>
                                     @else
-                                        <button class="btn btn-sm btn-secondary rounded-pill px-3 opacity-75" disabled title="{{ isset($event) ? $event->getVotingClosedMessage() : 'Voting Closed' }}">
+                                        <button class="btn btn-sm btn-secondary rounded-pill px-3 opacity-75" disabled
+                                            title="{{ isset($event) ? $event->getVotingClosedMessage() : 'Voting Closed' }}">
                                             <i class="bi bi-lock-fill me-1"></i> Closed
                                         </button>
                                     @endif
@@ -203,7 +203,8 @@
                         </button>
 
                         <div id="allLoadedIndicator" class="text-muted small py-3" style="display: none;">
-                            <i class="bi bi-check-circle-fill text-success me-1"></i> You've explored all {{ $totalPujasCount }} {{ $event->display_name ?? 'Dibrugarh' }}
+                            <i class="bi bi-check-circle-fill text-success me-1"></i> You've explored all
+                            {{ $totalPujasCount }} {{ $event->display_name ?? 'Dibrugarh' }}
                             Pandals • Don't forget to cast your vote!
                         </div>
 

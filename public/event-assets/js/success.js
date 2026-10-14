@@ -67,13 +67,6 @@ function loadVoteConfirmationDetails() {
     const targetName = matched ? matched.name : cleanName;
     const targetLoc = matched ? (matched.location || "") : "";
 
-    // Retrieve or generate ballot ID
-    let ballotId = sessionStorage.getItem('user_ballot_id');
-    if (!ballotId) {
-        ballotId = '#VOTE-' + Math.floor(10000 + Math.random() * 90000);
-        sessionStorage.setItem('user_ballot_id', ballotId);
-    }
-
     // Mask phone number: +91 ••••• •••99
     let maskedMobile = mobile ? ('+91 ••••• •••' + (mobile.length >= 2 ? mobile.slice(-2) : '')) : '';
 
@@ -105,8 +98,6 @@ function loadVoteConfirmationDetails() {
     } else {
         $('#confirmedVoterMobileWrap').hide();
     }
-
-    $('#confirmedBallotId').text(ballotId);
 }
 
 function setupCouponCopy() {
