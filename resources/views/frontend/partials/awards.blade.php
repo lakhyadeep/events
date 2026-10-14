@@ -330,7 +330,7 @@
                                     </span>
                                     <div class="award-header-title-wrap">
                                         <h3 class="award-header-title">{{ $award->display_name ?: $award->name }}</h3>
-                                        <div class="award-header-subtitle">{{ $award->category ?: 'Concept & Artistry' }}</div>
+                                        <div class="award-header-subtitle">{{ $award->category ?: '' }}</div>
                                     </div>
                                 </div>
 
