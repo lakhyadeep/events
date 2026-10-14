@@ -1,4 +1,4 @@
-<section class="awards-announced-section py-5" id="">
+<section class="py-5" id="">
     <div class="container">
         <a href="{{ route('all-pujas') }}"
             class="awards-announced-header-box text-center d-block text-decoration-none mb-5"
