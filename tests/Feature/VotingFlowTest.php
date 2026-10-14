@@ -428,12 +428,12 @@ class VotingFlowTest extends TestCase
             'mobile_number' => '9876543211',
         ]);
 
-        $directoryResponse = $this->get('/events/'.$event->slug.'/all-pujas');
+        $directoryResponse = $this->followingRedirects()->get('/events/'.$event->slug.'/all-pujas');
         $directoryResponse->assertStatus(200);
         $directoryResponse->assertSee('count-puja-'.$participant->id);
         $directoryResponse->assertSee('2 votes');
 
-        $voteResponse = $this->get('/events/'.$event->slug.'/vote?participant='.$participant->id);
+        $voteResponse = $this->followingRedirects()->get('/events/'.$event->slug.'/vote?participant='.$participant->id);
         $voteResponse->assertStatus(200);
         $voteResponse->assertSee('id="previewPandalVotes"', false);
         $voteResponse->assertSee('2 votes');
@@ -477,7 +477,7 @@ class VotingFlowTest extends TestCase
 
         $participant = $this->createParticipant($event);
 
-        $response = $this->get('/events/'.$event->slug.'/vote?participant='.$participant->id);
+        $response = $this->followingRedirects()->get('/events/'.$event->slug.'/vote?participant='.$participant->id);
 
         $response->assertStatus(200);
         $response->assertSee('name="award_ids[]"', false);
