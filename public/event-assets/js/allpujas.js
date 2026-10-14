@@ -64,8 +64,9 @@ function populateBallotOptions() {
     }
     allPujasData.forEach((puja, index) => {
         const isSelected = index === 0 ? 'selected' : '';
-        const loc = puja.location || puja.zone || 'Dibrugarh';
-        $pandalSelect.append(`<option value="${puja.id}" data-name="${escapeHtml(puja.name)}" ${isSelected}>${escapeHtml(puja.name)} (${escapeHtml(loc)})</option>`);
+        const loc = puja.location || puja.zone || '';
+        const locSuffix = loc ? ` (${escapeHtml(loc)})` : '';
+        $pandalSelect.append(`<option value="${puja.id}" data-name="${escapeHtml(puja.name)}" ${isSelected}>${escapeHtml(puja.name)}${locSuffix}</option>`);
     });
 }
 
@@ -162,13 +163,15 @@ function renderNextBatch(countToLoad) {
                         <h5 class="fw-bold mb-0 text-dark fs-6 fs-md-5">${escapeHtml(puja.name)}</h5>
                     </div>
 
+                    ${puja.location ? `
                     <p class="text-muted small mb-2">
                         <i class="bi bi-geo-alt-fill text-danger me-1"></i> ${escapeHtml(puja.location)}
-                    </p>
+                    </p>` : ''}
 
+                    ${puja.theme ? `
                     <div class="small text-secondary mb-3 fst-italic" style="font-size: 0.82rem; line-height: 1.4;">
                         <i class="bi bi-stars text-warning me-1"></i> Theme: "${escapeHtml(puja.theme)}"
-                    </div>
+                    </div>` : ''}
 
                     <div class="d-flex justify-content-between align-items-center pt-2 border-top mt-auto">
                         <div>
@@ -177,7 +180,7 @@ function renderNextBatch(countToLoad) {
                         </div>
                         ${(typeof window.isVotingOpen === "undefined" || window.isVotingOpen) ? `
                         <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn"
-                            data-pandal="${escapeHtml(puja.name)}" data-puja-id="${puja.id}" data-participant-id="${puja.id}">
+                            data-pandal="${escapeHtml(puja.name)}" data-slug="${escapeHtml(puja.slug || '')}" data-puja-id="${puja.id}" data-participant-id="${puja.id}">
                             <i class="bi bi-hand-thumbs-up me-1"></i> Vote
                         </button>` : `
                         <button class="btn btn-sm btn-secondary rounded-pill px-3 opacity-75" disabled title="Voting Closed">
@@ -465,37 +468,32 @@ function triggerLazyBatch() {
 }
 
 // ==========================================================================
-// 7. VOTING & OTP VERIFICATION FLOW
+// 7. VOTING FLOW (v2 Redirect to Dedicated Vote Page)
 // ==========================================================================
 function setupVotingHandlers() {
 
-    // Trigger Vote Modal from any Card (event delegation)
-    $(document).on('click', '.vote-trigger-btn', function () {
-        const pandalName = $(this).attr('data-pandal');
-        const pujaId = $(this).attr('data-participant-id') || $(this).attr('data-puja-id');
-        const awardId = $(this).attr('data-award-id') || '';
+    // Redirect to vote page with selected pandal from any Card (event delegation)
+    $(document).on('click', '.vote-trigger-btn', function (e) {
+        e.preventDefault();
+        const pandalName = $(this).attr('data-pandal') || '';
+        const pujaId = $(this).attr('data-participant-id') || $(this).attr('data-puja-id') || '';
+        const participantSlug = $(this).attr('data-slug') || '';
 
-        pendingVoteData.pandal = pandalName;
-        pendingVoteData.pujaId = pujaId;
-        pendingVoteData.awardId = awardId;
+        try {
+            localStorage.setItem('selected_pandal', pandalName);
+        } catch (err) {}
 
-        if (pujaId) {
-            $('#pandalSelect').val(pujaId);
+        const baseUrl = (window.voteBaseUrl || '/vote').replace(/\/+$/, '');
+        let voteUrl = baseUrl;
+        if (participantSlug) {
+            voteUrl += '/' + encodeURIComponent(participantSlug);
         } else if (pandalName) {
-            const $opt = $(`#pandalSelect option[data-name="${pandalName}"]`);
-            if ($opt.length) {
-                $('#pandalSelect').val($opt.val());
-            }
+            const slugFallback = pandalName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+            voteUrl += slugFallback ? '/' + encodeURIComponent(slugFallback) : '';
+        } else if (pujaId) {
+            voteUrl += '/' + encodeURIComponent(pujaId);
         }
-
-        if (awardId) {
-            $('#awardSelect').val(awardId);
-        }
-
-        $('#alreadyVotedAlert').addClass('d-none');
-
-        const voteModal = new bootstrap.Modal(document.getElementById('voteModal'));
-        voteModal.show();
+        window.location.href = voteUrl;
     });
 
     // Step 1: Submit Mobile Number to trigger real OTP or show Already Voted alert

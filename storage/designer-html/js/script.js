@@ -19,12 +19,18 @@ $(document).ready(function () {
     var votedMobileNumbers = new Set(['9876543210', '9999999999']);
     var pendingVoteData = { mobile: '', pandal: '' };
 
-    $('.vote-trigger-btn').on('click', function () {
-        var pandalName = $(this).attr('data-pandal');
-        $('#pandalSelect').val(pandalName);
-        $('#alreadyVotedAlert').addClass('d-none');
-        var voteModal = new bootstrap.Modal(document.getElementById('voteModal'));
-        voteModal.show();
+    $(document).on('click', '.vote-trigger-btn', function (e) {
+        e.preventDefault();
+        var pandalName = $(this).attr('data-pandal') || '';
+        try {
+            localStorage.setItem('selected_pandal', pandalName);
+        } catch (err) {}
+        window.location.href = 'vote.html?pandal=' + encodeURIComponent(pandalName);
+    });
+
+    $('#modalVoteActionBtn').on('click', function (e) {
+        e.preventDefault();
+        window.location.href = 'vote.html';
     });
 
     // Step 1: Submit Mobile Number to trigger OTP or show Already Voted alert
@@ -482,6 +488,20 @@ $(document).ready(function () {
                 videoElem.pause();
                 videoElem.currentTime = 0;
             }
+        });
+    }
+
+    // ==========================================================================
+    // 7. MARKETING BANNER AUTO-ROTATE CAROUSEL INITIALIZATION
+    // ==========================================================================
+    const marketingCarouselEl = document.getElementById('marketingBannerCarousel');
+    if (marketingCarouselEl && typeof bootstrap !== 'undefined' && bootstrap.Carousel) {
+        new bootstrap.Carousel(marketingCarouselEl, {
+            interval: 4500,
+            ride: 'carousel',
+            pause: 'hover',
+            wrap: true,
+            touch: true
         });
     }
 

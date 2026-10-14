@@ -1,3 +1,4 @@
+@if ($event->videoShorts && $event->videoShorts->where('is_active', true)->isNotEmpty())
 <section class="glimpses-section" id="gallery">
 
     <!-- Decorative Traditional Alpana Corner Motifs -->
@@ -43,57 +44,56 @@
 
         <!-- Section Title & Subtitle -->
         <h2 class="glimpses-title">Glimpses of Puja {{ $event->year ?? 2026 }}</h2>
-        <p class="glimpses-subtitle">Moments, memories and magic from Dibrugarh's most loved pujas</p>
+        <p class="glimpses-subtitle">Moments, memories and magic from {{ $event->display_name ?? "Dibrugarh's most loved pujas" }}</p>
 
         <!-- Carousel Stage -->
         <div class="slider-stage">
 
-            <!-- Left Circular Navigation Button -->
-            <button class="nav-arrow-btn nav-arrow-prev" id="prevReelBtn" aria-label="Previous reels">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="15 18 9 12 15 6"></polyline>
-                </svg>
-            </button>
-
             <!-- Carousel Viewport -->
             <div class="reels-viewport" id="reelsViewport">
                 <div class="reels-track" id="reelsTrack">
-                    @if ($event->videoShorts && $event->videoShorts->isNotEmpty())
-                        @foreach ($event->videoShorts as $index => $short)
-                            <div class="reel-card" data-index="{{ $index }}" data-pandal="{{ $short->name }}"
-                                data-theme="{{ $short->caption ?: $short->name }}"
-                                data-splash="{{ $short->thumbnail_image_url ?: asset('event-assets/images/hero.png') }}"
-                                data-video="{{ $short->video_url }}">
-                                <video class="reel-bg"
-                                    poster="{{ $short->thumbnail_image_url ?: asset('event-assets/images/hero.png') }}"
-                                    src="{{ $short->video_url }}" muted loop
-                                    playsinline></video>
-                                <div class="reel-overlay"></div>
-                                <div class="reel-play-btn" title="Watch Short">
-                                    <svg viewBox="0 0 24 24">
-                                        <polygon points="6,3 20,12 6,21"></polygon>
-                                    </svg>
-                                </div>
-                                <div class="reel-caption-wrap">
-                                    <p class="reel-title">{{ $short->name }}</p>
-                                </div>
+                    @foreach ($event->videoShorts->where('is_active', true) as $index => $short)
+                        <div class="reel-card" data-index="{{ $index }}" data-pandal="{{ $short->name }}"
+                            data-likes="{{ $short->caption ?: '' }}"
+                            data-theme="{{ $short->caption ?: $short->name }}"
+                            data-splash="{{ $short->thumbnail_image_url ?: asset('event-assets/images/hero.png') }}"
+                            data-video="{{ $short->video_url }}">
+                            <video class="reel-bg"
+                                poster="{{ $short->thumbnail_image_url ?: asset('event-assets/images/hero.png') }}"
+                                src="{{ $short->video_url }}" muted loop playsinline></video>
+                            <div class="reel-overlay"></div>
+                            <div class="reel-play-btn" title="Watch Short">
+                                <svg viewBox="0 0 24 24">
+                                    <polygon points="6,3 20,12 6,21"></polygon>
+                                </svg>
                             </div>
-                        @endforeach
-                    @endif
+                            <div class="reel-caption-wrap">
+                                <p class="reel-title">{{ $short->name }}</p>
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
             </div>
 
-            <!-- Right Circular Navigation Button -->
-            <button class="nav-arrow-btn nav-arrow-next" id="nextReelBtn" aria-label="Next reels">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="9 18 15 12 9 6"></polyline>
-                </svg>
-            </button>
+            <!-- Navigation Controls Below Viewport -->
+            <div class="reels-nav-controls">
+                <button class="nav-arrow-btn nav-arrow-prev" id="prevReelBtn" aria-label="Previous reels">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </button>
+                <button class="nav-arrow-btn nav-arrow-next" id="nextReelBtn" aria-label="Next reels">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+            </div>
 
         </div>
 
     </div>
 
 </section>
+@endif

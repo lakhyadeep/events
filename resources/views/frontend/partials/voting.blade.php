@@ -11,9 +11,9 @@
 <div class="container">
     <div class="d-flex flex-column align-items-center mb-4 text-center pujas-header-box">
         <span class="pujas-badge-tag mb-2">
-            <i class="bi bi-trophy-fill text-warning me-1"></i> SHARAD SAMMAN VOTING HUB {{ $event->year ?? 2026 }}
+            <i class="bi bi-trophy-fill text-warning me-1"></i> SHARAD SAMMAN VOTING HUB @if($event->year) {{ $event->year }} @endif
         </span>
-        <h2 class="fw-bold mb-2 pujas-header-title">Vote for the Best — {{ $event->display_name ?? 'Sharad Samman 2026' }}</h2>
+        <h2 class="fw-bold mb-2 pujas-header-title">Vote for the Best — {{ $event->display_name ?: $event->name }}</h2>
         <p class="pujas-header-subtitle mb-3">Explore the shortlisted entries and cast your vote in each category</p>
         <div class="pujas-nav-tabs-wrapper mt-2">
             <a href="#cat-best-puja" class="pujas-nav-btn nav-btn-puja">
@@ -27,41 +27,7 @@
             </a>
         </div>
 
-        @if ($isVotingOpen && !empty($event->countdown_datetime))
-            <div class="voting-countdown-wrapper mt-3 p-3 rounded-4 shadow-sm text-center" 
-                 id="votingCountdownContainer"
-                 style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #fff; max-width: 520px; width: 100%; border: 1px solid rgba(255,255,255,0.12);">
-                <div class="small text-uppercase tracking-wider text-warning fw-semibold mb-2">
-                    <i class="bi bi-clock-history me-1"></i> Voting Deadline
-                </div>
-                <div class="d-flex justify-content-center align-items-center gap-3" 
-                     id="votingCountdownClock" 
-                     data-deadline="{{ $event->countdown_datetime->toIso8601String() }}">
-                    <div class="countdown-unit text-center">
-                        <span class="fs-4 fw-bold text-white d-block" id="countDays">00</span>
-                        <span class="text-white-50 text-uppercase" style="font-size: 0.65rem;">Days</span>
-                    </div>
-                    <span class="fs-4 text-warning fw-bold">:</span>
-                    <div class="countdown-unit text-center">
-                        <span class="fs-4 fw-bold text-white d-block" id="countHours">00</span>
-                        <span class="text-white-50 text-uppercase" style="font-size: 0.65rem;">Hours</span>
-                    </div>
-                    <span class="fs-4 text-warning fw-bold">:</span>
-                    <div class="countdown-unit text-center">
-                        <span class="fs-4 fw-bold text-white d-block" id="countMinutes">00</span>
-                        <span class="text-white-50 text-uppercase" style="font-size: 0.65rem;">Mins</span>
-                    </div>
-                    <span class="fs-4 text-warning fw-bold">:</span>
-                    <div class="countdown-unit text-center">
-                        <span class="fs-4 fw-bold text-danger d-block" id="countSeconds">00</span>
-                        <span class="text-white-50 text-uppercase" style="font-size: 0.65rem;">Secs</span>
-                    </div>
-                </div>
-                <div class="small text-white-50 mt-2" style="font-size: 0.75rem;">
-                    Voting closes on {{ $event->countdown_datetime->format('d M, Y h:i A') }}
-                </div>
-            </div>
-        @elseif (! $isVotingOpen)
+        @if (! $isVotingOpen)
             <div class="voting-closed-banner mt-3 p-3 rounded-4 shadow-sm text-center"
                  style="background: #fef2f2; border: 1px solid #fecaca; max-width: 520px; width: 100%;">
                 <div class="d-flex align-items-center justify-content-center gap-2 text-danger fw-bold fs-6 mb-1">
@@ -134,7 +100,7 @@
                         <span class="category-eyebrow text-danger"><i class="bi bi-award-fill me-1"></i>
                             CATEGORY 01 • FLAGSHIP</span>
                         <h3 class="category-title-text">{{ $pujaAward?->display_name ?: ($pujaAward?->name ?: 'Best Puja') }}</h3>
-                        <div class="category-subtitle-text">Nominated Pandals • {{ $event->display_name ?? 'Sharad Samman 2026' }}</div>
+                        <div class="category-subtitle-text">Nominated Pandals • {{ $event->display_name ?: $event->name }}</div>
                     </div>
                 </div>
                 <span class="category-badge-pill pill-puja">
@@ -153,10 +119,15 @@
                                 style="height: 200px; object-fit: cover;">
                         </div>
                         <h5 class="fw-bold mb-1">{{ $p->display_name ?: $p->name }}</h5>
-                        <p class="text-muted small mb-2">
-                            <i class="bi bi-geo-alt-fill text-danger me-1"></i>
-                            {{ $p->locality ? $p->locality . ', ' : '' }}{{ $p->zone ?: 'Dibrugarh' }}
-                        </p>
+                        @php
+                            $loc = trim(($p->locality ? $p->locality . ', ' : '') . ($p->zone ?: ''));
+                        @endphp
+                        @if ($loc)
+                            <p class="text-muted small mb-2">
+                                <i class="bi bi-geo-alt-fill text-danger me-1"></i>
+                                {{ $loc }}
+                            </p>
+                        @endif
                         @if (!empty($p->puja_theme))
                             <p class="small text-secondary mb-3 fst-italic" style="font-size: 0.8rem;">
                                 <i class="bi bi-palette me-1 text-warning"></i> Theme: {{ $p->puja_theme }}
@@ -164,8 +135,8 @@
                         @endif
                         <div class="d-flex justify-content-between align-items-center pt-2 border-top mt-auto">
                             <div>
-                                <small class="text-muted d-block" style="font-size: 0.72rem;">Zone &bull; Live Votes</small>
-                                <span class="fw-bold fs-6 text-danger">{{ $p->zone ?: 'Central' }}</span>
+                                <small class="text-muted d-block" style="font-size: 0.72rem;">@if($p->zone)Zone &bull; @endifLive Votes</small>
+                                @if($p->zone)<span class="fw-bold fs-6 text-danger">{{ $p->zone }}</span>@endif
                                 <span class="badge bg-danger-subtle text-danger rounded-pill ms-1 live-vote-count-{{ $p->id }}">
                                     <i class="bi bi-hand-thumbs-up-fill me-1"></i>{{ number_format($p->votes_count ?? 0) }}
                                 </span>
@@ -173,6 +144,7 @@
                             @if ($isVotingOpen)
                                 <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn"
                                     data-pandal="{{ $p->name }}"
+                                    data-slug="{{ $p->slug }}"
                                     data-participant-id="{{ $p->id }}"
                                     data-award-id="{{ $pujaAward?->id ?? '' }}">
                                     <i class="bi bi-hand-thumbs-up me-1"></i> Vote
@@ -226,10 +198,15 @@
                                 style="height: 200px; object-fit: cover;">
                         </div>
                         <h5 class="fw-bold mb-1">{{ $p->display_name ?: $p->name }}</h5>
-                        <p class="text-muted small mb-2">
-                            <i class="bi bi-geo-alt-fill text-danger me-1"></i>
-                            {{ $p->locality ? $p->locality . ', ' : '' }}{{ $p->zone ?: 'Dibrugarh' }}
-                        </p>
+                        @php
+                            $loc = trim(($p->locality ? $p->locality . ', ' : '') . ($p->zone ?: ''));
+                        @endphp
+                        @if ($loc)
+                            <p class="text-muted small mb-2">
+                                <i class="bi bi-geo-alt-fill text-danger me-1"></i>
+                                {{ $loc }}
+                            </p>
+                        @endif
                         @if (!empty($p->idol_artist))
                             <p class="small text-secondary mb-3" style="font-size: 0.8rem;">
                                 <i class="bi bi-brush me-1 text-primary"></i> Sculptor: {{ $p->idol_artist }}
@@ -237,8 +214,8 @@
                         @endif
                         <div class="d-flex justify-content-between align-items-center pt-2 border-top mt-auto">
                             <div>
-                                <small class="text-muted d-block" style="font-size: 0.72rem;">Zone &bull; Live Votes</small>
-                                <span class="fw-bold fs-6 text-dark">{{ $p->zone ?: 'Central' }}</span>
+                                <small class="text-muted d-block" style="font-size: 0.72rem;">@if($p->zone)Zone &bull; @endifLive Votes</small>
+                                @if($p->zone)<span class="fw-bold fs-6 text-dark">{{ $p->zone }}</span>@endif
                                 <span class="badge bg-secondary-subtle text-dark rounded-pill ms-1 live-vote-count-{{ $p->id }}">
                                     <i class="bi bi-hand-thumbs-up-fill me-1 text-danger"></i>{{ number_format($p->votes_count ?? 0) }}
                                 </span>
@@ -246,6 +223,7 @@
                             @if ($isVotingOpen)
                                 <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn"
                                     data-pandal="{{ $p->name }}"
+                                    data-slug="{{ $p->slug }}"
                                     data-participant-id="{{ $p->id }}"
                                     data-award-id="{{ $pratimaAward?->id ?? '' }}">
                                     <i class="bi bi-hand-thumbs-up me-1"></i> Vote
@@ -298,10 +276,15 @@
                                 style="height: 200px; object-fit: cover;">
                         </div>
                         <h5 class="fw-bold mb-1">{{ $p->display_name ?: $p->name }}</h5>
-                        <p class="text-muted small mb-2">
-                            <i class="bi bi-geo-alt-fill text-danger me-1"></i>
-                            {{ $p->locality ? $p->locality . ', ' : '' }}{{ $p->zone ?: 'Dibrugarh' }}
-                        </p>
+                        @php
+                            $loc = trim(($p->locality ? $p->locality . ', ' : '') . ($p->zone ?: ''));
+                        @endphp
+                        @if ($loc)
+                            <p class="text-muted small mb-2">
+                                <i class="bi bi-geo-alt-fill text-danger me-1"></i>
+                                {{ $loc }}
+                            </p>
+                        @endif
                         @if (!empty($p->light_designer))
                             <p class="small text-secondary mb-3" style="font-size: 0.8rem;">
                                 <i class="bi bi-lightbulb me-1 text-warning"></i> Illumination: {{ $p->light_designer }}
@@ -309,8 +292,8 @@
                         @endif
                         <div class="d-flex justify-content-between align-items-center pt-2 border-top mt-auto">
                             <div>
-                                <small class="text-muted d-block" style="font-size: 0.72rem;">Zone &bull; Live Votes</small>
-                                <span class="fw-bold fs-6 text-warning">{{ $p->zone ?: 'Central' }}</span>
+                                <small class="text-muted d-block" style="font-size: 0.72rem;">@if($p->zone)Zone &bull; @endifLive Votes</small>
+                                @if($p->zone)<span class="fw-bold fs-6 text-warning">{{ $p->zone }}</span>@endif
                                 <span class="badge bg-warning-subtle text-dark rounded-pill ms-1 live-vote-count-{{ $p->id }}">
                                     <i class="bi bi-hand-thumbs-up-fill me-1 text-danger"></i>{{ number_format($p->votes_count ?? 0) }}
                                 </span>
@@ -318,6 +301,7 @@
                             @if ($isVotingOpen)
                                 <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn"
                                     data-pandal="{{ $p->name }}"
+                                    data-slug="{{ $p->slug }}"
                                     data-participant-id="{{ $p->id }}"
                                     data-award-id="{{ $lightingAward?->id ?? '' }}">
                                     <i class="bi bi-hand-thumbs-up me-1"></i> Vote

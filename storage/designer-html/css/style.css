@@ -590,6 +590,86 @@ body {
 }
 
 /* ==========================================================================
+   5.1 COMPACT SPONSORS VARIANT (Vote Page)
+   ========================================================================== */
+.sponsors-compact {
+    padding: 30px 0 32px;
+    background: #ffffff;
+}
+
+.sponsors-compact .sponsors-container {
+    max-width: 980px;
+}
+
+.sponsors-compact .sponsor-box {
+    padding: 2px 4px;
+}
+
+.sponsors-compact .sponsor-title-wrap {
+    margin-bottom: 4px;
+}
+
+.sponsors-compact .sponsor-title-text {
+    font-size: 0.52rem;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    padding: 2px 10px;
+    box-shadow: 0 1px 4px rgba(140, 12, 22, 0.18);
+}
+
+.sponsors-compact .sponsor-logo-canvas {
+    min-height: 38px;
+    padding: 1px 0;
+}
+
+.sponsors-compact .sponsor-logo-canvas img {
+    max-height: 62px;
+    width: auto;
+    object-fit: contain;
+}
+
+.sponsors-compact .associate-divider-wrap {
+    margin: 8px 0 6px;
+}
+
+.sponsors-compact .associate-title-pill {
+    font-size: 0.52rem;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    padding: 1px 8px;
+}
+
+.sponsors-compact .partner-box {
+    padding: 2px 6px;
+}
+
+.sponsors-compact .partner-box img {
+    max-height: 52px;
+    width: auto;
+    object-fit: contain;
+}
+
+@media (max-width: 576px) {
+    .sponsors-compact {
+        padding: 8px 0 10px;
+    }
+
+    .sponsors-compact .sponsor-title-text {
+        font-size: 0.48rem;
+        padding: 1px 6px;
+        letter-spacing: 0.5px;
+    }
+
+    .sponsors-compact .sponsor-logo-canvas img {
+        max-height: 32px;
+    }
+
+    .sponsors-compact .partner-box img {
+        max-height: 24px;
+    }
+}
+
+/* ==========================================================================
    6. AWARDS SECTION
    ========================================================================== */
 /* Embedded Awards Box inside Vote Section with slightly darker background */
@@ -662,6 +742,8 @@ body {
     box-shadow: 0 6px 20px rgba(133, 94, 60, 0.1), 0 2px 6px rgba(0, 0, 0, 0.04);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .award-card:hover {
@@ -669,13 +751,37 @@ body {
     box-shadow: 0 12px 28px rgba(133, 94, 60, 0.15);
 }
 
+.award-card-crown {
+    position: relative;
+    background: linear-gradient(180deg, #fffdf8 0%, #fef7e7 45%, #fbedd2 100%);
+    border: 2px solid #f59e0b;
+    border-radius: 16px;
+    box-shadow:
+        0 0 0 1px rgba(254, 240, 138, 0.65),
+        0 10px 30px rgba(217, 119, 6, 0.32),
+        0 4px 12px rgba(0, 0, 0, 0.12),
+        inset 0 0 24px rgba(251, 191, 36, 0.14);
+    transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.35s ease, border-color 0.3s ease;
+    z-index: 2;
+}
+
+.award-card-crown:hover {
+    transform: translateY(-8px) scale(1.025);
+    border-color: #ffd700;
+    box-shadow:
+        0 0 0 2px rgba(254, 240, 138, 0.95),
+        0 18px 46px rgba(217, 119, 6, 0.48),
+        0 6px 18px rgba(0, 0, 0, 0.16),
+        inset 0 0 34px rgba(251, 191, 36, 0.24);
+}
+
 .award-card-header {
-    padding: 10px 14px;
+    padding: 10px 12px;
     color: #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 9px;
 }
 
 .header-crimson {
@@ -686,14 +792,42 @@ body {
     background: linear-gradient(180deg, #25282d 0%, #16181b 100%);
 }
 
+.award-header-title-wrap {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    line-height: 1.2;
+    min-width: 0;
+    text-align: left;
+}
+
 .award-header-title {
-    font-size: 1.05rem;
+    font-size: 0.95rem;
     font-weight: 700;
     margin: 0;
+    line-height: 1.25;
+}
+
+.award-header-subtitle {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #fef08a;
+    letter-spacing: 0.3px;
+    margin-top: 2px;
+    text-transform: uppercase;
+    opacity: 0.95;
+}
+
+.header-dark .award-header-subtitle {
+    color: #93c5fd;
 }
 
 .award-card-body {
     padding: 8px 4px 10px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .medal-unit {
@@ -719,11 +853,303 @@ body {
     filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.16));
 }
 
+.medal-wrapper-crown {
+    position: relative;
+    z-index: 2;
+    width: 70px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    filter: drop-shadow(0 6px 14px rgba(180, 83, 9, 0.45));
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    margin-bottom: 0;
+}
+
 .award-position-title {
     font-size: 0.68rem;
     font-weight: 700;
     color: #1e1b19;
     margin-bottom: 1px;
+}
+
+.crown-winner-title {
+    font-size: 0.74rem;
+    font-weight: 800;
+    color: #8b131a;
+    letter-spacing: 0.3px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ==========================================================================
+   FLAGSHIP AWARD CATEGORIES PRIZE STYLING (₹1,00,000 + TROPHY)
+   ========================================================================== */
+/* Top Prize Ribbon Badge for Best Theme, Best Pandal, Best Idol */
+.award-top-prize-ribbon {
+    background: linear-gradient(90deg, #991b1b 0%, #dc2626 50%, #991b1b 100%);
+    color: #fef08a;
+    font-size: 0.64rem;
+    font-weight: 800;
+    letter-spacing: 0.9px;
+    text-transform: uppercase;
+    text-align: center;
+    padding: 4px 8px;
+    border-bottom: 1.5px solid #f59e0b73;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.award-top-prize-ribbon-dark {
+    background: linear-gradient(90deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+    border-bottom: 1.5px solid #616161;
+    color: #fef08a;
+}
+
+/* Card Body Category Focus Footer */
+.award-card-prize-footer {
+    margin: 8px 8px 2px;
+    padding: 5px 10px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #8b131a;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: transform 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+}
+
+
+
+.award-card-prize-footer-dark {
+    color: #6c6c6c;
+}
+
+
+
+/* ==========================================================================
+   PINNACLE "BEST OF BEST" GRAND CHAMPION STYLING
+   ========================================================================== */
+/* Pinnacle Top Floating Ribbon Badge */
+.pinnacle-ribbon-badge {
+    background: linear-gradient(90deg, #991b1b 0%, #dc2626 50%, #991b1b 100%);
+    color: #fef08a;
+    font-size: 0.64rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-align: center;
+    padding: 4px 8px;
+    border-bottom: 1.5px solid #f59e0b;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+/* Header with Regal Midnight Garnet & Gold Accent */
+.header-crown-pinnacle {
+    background: linear-gradient(135deg, #1b0206 0%, #3d050d 45%, #1f0307 100%);
+    border-bottom: 2px solid #f59e0b;
+    padding: 10px 14px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.crown-gold-title {
+    color: #fef08a;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9), 0 0 12px rgba(251, 191, 36, 0.6);
+}
+
+.crown-header-glow {
+    filter: drop-shadow(0 0 6px rgba(255, 204, 0, 0.75));
+    animation: crownShimmer 3s ease-in-out infinite alternate;
+}
+
+@keyframes crownShimmer {
+    0% {
+        filter: drop-shadow(0 0 4px rgba(255, 204, 0, 0.5));
+    }
+
+    100% {
+        filter: drop-shadow(0 0 10px rgba(255, 204, 0, 0.95));
+    }
+}
+
+/* Body with Radiant Backdrop */
+.award-card-body-crown {
+    position: relative;
+    padding: 14px 6px 14px;
+    overflow: hidden;
+    background: radial-gradient(circle at 50% 40%, rgba(254, 240, 138, 0.45) 0%, rgba(253, 230, 138, 0.2) 50%, transparent 75%);
+}
+
+/* Radiant Halo Pulse behind the crown */
+.crown-sunburst-halo {
+    position: absolute;
+    width: 140px;
+    height: 140px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -58%);
+    background: radial-gradient(circle, rgba(251, 191, 36, 0.4) 0%, rgba(254, 240, 138, 0.22) 45%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    animation: crownPulseGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes crownPulseGlow {
+    0% {
+        transform: translate(-50%, -58%) scale(0.9);
+        opacity: 0.65;
+    }
+
+    100% {
+        transform: translate(-50%, -58%) scale(1.1);
+        opacity: 1;
+    }
+}
+
+/* Corner Sparkle Elements */
+.crown-sparkle {
+    position: absolute;
+    color: #f59e0b;
+    font-size: 0.85rem;
+    pointer-events: none;
+    line-height: 1;
+    animation: sparkleTwinkle 2.5s ease-in-out infinite alternate;
+    text-shadow: 0 0 6px rgba(251, 191, 36, 0.8);
+}
+
+.sparkle-top-left {
+    top: 8px;
+    left: 10px;
+    animation-delay: 0s;
+}
+
+.sparkle-top-right {
+    top: 8px;
+    right: 10px;
+    animation-delay: 0.8s;
+}
+
+.sparkle-bottom-left {
+    bottom: 10px;
+    left: 12px;
+    animation-delay: 1.4s;
+}
+
+.sparkle-bottom-right {
+    bottom: 10px;
+    right: 12px;
+    animation-delay: 2.1s;
+}
+
+@keyframes sparkleTwinkle {
+    0% {
+        transform: scale(0.7) rotate(0deg);
+        opacity: 0.35;
+    }
+
+    50% {
+        transform: scale(1.2) rotate(45deg);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(0.8) rotate(90deg);
+        opacity: 0.45;
+    }
+}
+
+/* Pedestal Container for Wreath + Crown */
+.crown-pedestal-wrap {
+    position: relative;
+    width: 96px;
+    height: 84px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 4px;
+}
+
+.laurel-wreath-svg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -48%);
+    width: 98px;
+    height: 86px;
+    pointer-events: none;
+    filter: drop-shadow(0 2px 5px rgba(180, 83, 9, 0.28));
+}
+
+.medal-unit-grand {
+    width: 100%;
+}
+
+.medal-unit-grand:hover .medal-wrapper-crown {
+    transform: scale(1.1) translateY(-3px);
+    filter: drop-shadow(0 8px 20px rgba(245, 158, 11, 0.7));
+}
+
+/* Prestigious CROWN WINNER Gold Badge Pill */
+.crown-badge-pill {
+    background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 50%, #7f1d1d 100%);
+    color: #fef08a;
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    padding: 4px 14px;
+    border-radius: 50px;
+    border: 1.5px solid #f59e0b;
+    box-shadow: 0 4px 10px rgba(127, 29, 29, 0.35), inset 0 1px 0 rgba(254, 240, 138, 0.45);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 3px;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.medal-unit-grand:hover .crown-badge-pill {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(127, 29, 29, 0.45), 0 0 12px rgba(251, 191, 36, 0.5);
+}
+
+.crown-subtitle-tag {
+    font-size: 0.64rem;
+    font-weight: 800;
+    color: #831843;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+}
+
+.crown-bottom-stars {
+    color: #d97706;
+    font-size: 0.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.85;
+}
+
+.crown-bottom-stars .star-center {
+    font-size: 0.78rem;
+    color: #f59e0b;
 }
 
 
@@ -2235,11 +2661,19 @@ footer.site-footer {
 .awards-announced-header-box {
     background: linear-gradient(135deg, #7c0b15 0%, #9e0e1a 50%, #59070e 100%);
     border-radius: 20px;
-    padding: 35px 25px;
+    padding: 35px 15px;
     color: #ffffff;
     box-shadow: 0 15px 35px rgba(124, 11, 21, 0.25);
     position: relative;
-    border: 2px solid rgba(255, 204, 0, 0.4);
+    border: 2px solid rgba(255, 204, 0, 0.45);
+    cursor: pointer;
+    transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.35s ease, border-color 0.35s ease;
+}
+
+.awards-announced-header-box:hover {
+    transform: translateY(-5px);
+    border-color: rgba(255, 204, 0, 0.9);
+    box-shadow: 0 22px 48px rgba(124, 11, 21, 0.38), 0 0 25px rgba(255, 204, 0, 0.28);
 }
 
 .awards-announced-header-box::before {
@@ -2252,6 +2686,89 @@ footer.site-footer {
     background-image: radial-gradient(circle at 20% 20%, rgba(255, 204, 0, 0.15) 0%, transparent 40%),
         radial-gradient(circle at 80% 80%, rgba(255, 204, 0, 0.12) 0%, transparent 40%);
     pointer-events: none;
+    border-radius: 18px;
+}
+
+.awards-announced-header-box:hover .click-arrow-icon {
+    transform: translateX(5px);
+}
+
+.awards-announced-header-box:hover .hint-arrow {
+    transform: translateX(5px);
+}
+
+.awards-announced-header-box:hover .awards-click-corner-badge {
+    background: #ffcc00;
+    color: #1a0205;
+    border-color: #ffcc00;
+    transform: scale(1.05);
+}
+
+.click-arrow-icon {
+    display: inline-block;
+    font-size: 1.35rem;
+    vertical-align: middle;
+    transition: transform 0.3s ease;
+}
+
+/* Top-right corner badge */
+.awards-click-corner-badge {
+    position: absolute;
+    top: 14px;
+    right: 18px;
+    background: rgba(255, 204, 0, 0.18);
+    border: 1px solid rgba(255, 204, 0, 0.6);
+    color: #fef08a;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    padding: 4px 12px;
+    border-radius: 50px;
+    display: inline-flex;
+    align-items: center;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    transition: all 0.3s ease;
+    z-index: 2;
+}
+
+/* Bottom Hint Bar */
+.awards-box-bottom-hint {
+    border-top: 1px dashed rgba(255, 204, 0, 0.28);
+}
+
+.awards-box-bottom-hint .hint-pill {
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 204, 0, 0.35);
+    color: #fffdf5;
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 6px 16px;
+    border-radius: 50px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.3s ease;
+}
+
+.awards-box-bottom-hint .hint-arrow {
+    display: inline-block;
+    transition: transform 0.3s ease;
+    color: #ffcc00;
+}
+
+.awards-announced-header-box:hover .hint-pill {
+    background: rgba(0, 0, 0, 0.45);
+    border-color: rgba(255, 204, 0, 0.8);
+    color: #ffcc00;
+}
+
+@media (max-width: 576px) {
+    .awards-click-corner-badge {
+        position: static;
+        margin-bottom: 12px;
+        display: inline-flex;
+    }
 }
 
 .winner-podium-card {
@@ -2267,6 +2784,101 @@ footer.site-footer {
 .winner-podium-card:hover {
     transform: translateY(-6px);
     box-shadow: 0 18px 36px rgba(0, 0, 0, 0.12);
+}
+
+/* Pinnacle Crown Grand Champion Card */
+.winner-podium-card.award-card-crown,
+.winner-podium-card.winner-crown {
+    position: relative;
+    background: linear-gradient(180deg, #fffdf8 0%, #fef7e7 45%, #fbedd2 100%);
+    border: 2px solid #f59e0b;
+    border-radius: 18px;
+    box-shadow:
+        0 0 0 1px rgba(254, 240, 138, 0.75),
+        0 14px 38px rgba(217, 119, 6, 0.35),
+        0 4px 12px rgba(0, 0, 0, 0.12),
+        inset 0 0 24px rgba(251, 191, 36, 0.15);
+    transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.35s ease, border-color 0.3s ease;
+    z-index: 2;
+}
+
+.winner-podium-card.award-card-crown:hover,
+.winner-podium-card.winner-crown:hover {
+    transform: translateY(-8px) scale(1.025);
+    border-color: #ffd700;
+    box-shadow:
+        0 0 0 2px rgba(254, 240, 138, 0.95),
+        0 22px 50px rgba(217, 119, 6, 0.5),
+        0 6px 20px rgba(0, 0, 0, 0.18),
+        inset 0 0 34px rgba(251, 191, 36, 0.25);
+}
+
+
+
+.winner-podium-card.award-card-crown .winner-rank-badge {
+    top: 38px;
+}
+
+/* Horizontal Side-by-Side Podium Card (Single / Crown Hero Winner) */
+.winner-podium-card.winner-horizontal {
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.winner-podium-card.winner-horizontal:hover {
+    transform: translateY(-5px);
+}
+
+.winner-podium-card.winner-horizontal .winner-img-wrap {
+    height: 100%;
+    min-height: 260px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+@media (min-width: 768px) {
+    .winner-podium-card.winner-horizontal .winner-img-wrap {
+        min-height: 230px;
+        border-bottom-left-radius: 18px;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .winner-podium-card.winner-horizontal .winner-img-wrap {
+        height: 230px;
+        min-height: 230px;
+    }
+}
+
+.winner-podium-card.winner-horizontal .winner-img-wrap .winner-rank-badge {
+    top: 14px;
+    right: 14px;
+    z-index: 5;
+}
+
+.winner-podium-card.winner-horizontal .crown-sunburst-halo {
+    width: 220px;
+    height: 220px;
+}
+
+/* Category Crown Wrapper */
+.category-crown-wrapper {
+    background: radial-gradient(circle at 50% 0%, rgba(254, 240, 138, 0.35) 0%, rgba(254, 243, 199, 0.15) 50%, rgba(255, 255, 255, 0.6) 100%);
+    border: 2px solid rgba(245, 158, 11, 0.4);
+    box-shadow: 0 12px 36px rgba(217, 119, 6, 0.1), inset 0 0 28px rgba(254, 240, 138, 0.2);
+    position: relative;
+}
+
+.category-crown-wrapper::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 20px;
+    right: 20px;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #f59e0b, #dc2626, #f59e0b, transparent);
+    border-radius: 3px;
 }
 
 /* Gold Champion Card */
@@ -2354,6 +2966,7 @@ footer.site-footer {
     height: 210px;
     border-top-left-radius: 17px;
     border-top-right-radius: 17px;
+    background: #dcdcdc url(../images/placeholder.jpg) no-repeat center center/contain;
 }
 
 .winner-img-wrap img {
@@ -2916,4 +3529,550 @@ footer.site-footer {
     justify-content: center;
     font-size: 2.2rem;
     margin-bottom: 20px;
+}
+
+/* ==========================================================================
+   10. VOTE PAGE & PEOPLE'S FAVORITE AWARD FORM
+   ========================================================================== */
+.vote-small-banner {
+    position: relative;
+    padding: 16px 0 18px;
+    background-color: #63050d;
+    background-image:
+        radial-gradient(circle at 50% 50%, rgba(255, 204, 0, 0.1) 0%, transparent 65%),
+        url("data:image/svg+xml,%3Csvg width='48' height='48' viewBox='0 0 48 48' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffd700' fill-opacity='0.07' fill-rule='evenodd'%3E%3Cpath d='M24 24L12 12l12-12 12 12-12 12zm0 0l12 12-12 12-12-12 12-12zm-12-12L0 0l12-12L24 0 12 12zm24 0l12-12 12 12-12 12-12-12zm0 24l12-12 12 12-12 12-12-12zm-24 0L0 24l12-12 12 12-12 12z'/%3E%3C/g%3E%3C/svg%3E"),
+        linear-gradient(135deg, #7d0b14 0%, #5a040a 50%, #3e0206 100%);
+    border-bottom: 2px solid rgba(212, 163, 115, 0.45);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.vote-banner-title {
+    font-size: clamp(1.75rem, 3.5vw, 2.3rem);
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 0.8px;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+.vote-banner-subtitle {
+    font-size: clamp(0.85rem, 1.4vw, 0.95rem);
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.88);
+    letter-spacing: 0.3px;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+}
+
+@media (max-width: 576px) {
+    .vote-small-banner {
+        padding: 12px 0 14px;
+    }
+}
+
+.vote-page-section {
+    position: relative;
+    background: radial-gradient(circle at 50% 15%, #ffffff 0%, #fdf8f0 50%, #f7ebe0 100%);
+    padding: 50px 16px 70px;
+    border-top: 1px solid rgba(212, 163, 115, 0.35);
+    border-bottom: 1px solid rgba(212, 163, 115, 0.35);
+    overflow: hidden;
+}
+
+.vote-form-card {
+    background: #ffffff;
+    border: 1px solid rgba(212, 163, 115, 0.4);
+    border-radius: 24px;
+    box-shadow: 0 16px 48px rgba(140, 12, 22, 0.08), 0 4px 16px rgba(0, 0, 0, 0.04);
+    padding: 32px 24px;
+    position: relative;
+    z-index: 2;
+    transition: box-shadow 0.3s ease;
+}
+
+@media (min-width: 768px) {
+    .vote-form-card {
+        padding: 44px 40px;
+    }
+}
+
+.vote-page-title {
+    font-size: clamp(2rem, 3.8vw, 2.65rem);
+    font-weight: 600;
+    color: var(--crimson-title);
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+/* Preference Visual Cards */
+.preference-card-label {
+    display: block;
+    cursor: pointer;
+    position: relative;
+    user-select: none;
+}
+
+.preference-radio-input,
+.preference-checkbox-input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.preference-card {
+    background: #fffcf8;
+    border: 2px solid #ecd8c5;
+    border-radius: 16px;
+    padding: 20px 12px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.preference-card:hover {
+    transform: translateY(-3px);
+    border-color: #d4a373;
+    box-shadow: 0 8px 24px rgba(183, 13, 24, 0.1);
+    background: #ffffff;
+}
+
+.preference-radio-input:checked+.preference-card,
+.preference-checkbox-input:checked+.preference-card {
+    border-color: var(--crimson-red);
+    background: linear-gradient(180deg, #fff5f5 0%, #ffffff 100%);
+    box-shadow: 0 8px 26px rgba(183, 13, 24, 0.18), 0 0 0 3px rgba(255, 204, 0, 0.3);
+    transform: translateY(-4px);
+}
+
+.pref-icon-circle {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: rgba(183, 13, 24, 0.08);
+    color: var(--crimson-red);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    transition: all 0.25s ease;
+}
+
+.preference-radio-input:checked+.preference-card .pref-icon-circle,
+.preference-checkbox-input:checked+.preference-card .pref-icon-circle {
+    background: var(--crimson-red);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(183, 13, 24, 0.3);
+}
+
+.pref-card-overall .pref-icon-circle {
+    background: rgba(255, 204, 0, 0.18);
+    color: #b45309;
+}
+
+.preference-radio-input:checked+.pref-card-overall,
+.preference-checkbox-input:checked+.pref-card-overall {
+    border-color: #d97706;
+    background: linear-gradient(180deg, #fffbeb 0%, #ffffff 100%);
+    box-shadow: 0 8px 26px rgba(217, 119, 6, 0.2), 0 0 0 3px rgba(255, 204, 0, 0.4);
+}
+
+.preference-radio-input:checked+.pref-card-overall .pref-icon-circle,
+.preference-checkbox-input:checked+.pref-card-overall .pref-icon-circle {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: #ffffff;
+}
+
+.pref-title {
+    font-size: 1.05rem;
+    color: var(--text-dark);
+    margin-bottom: 2px;
+}
+
+.pref-desc {
+    font-size: 0.78rem;
+    line-height: 1.3;
+}
+
+.pref-check-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    color: var(--crimson-red);
+    font-size: 1.1rem;
+    opacity: 0;
+    transform: scale(0.6);
+    transition: all 0.25s ease;
+}
+
+.preference-radio-input:checked+.preference-card .pref-check-badge,
+.preference-checkbox-input:checked+.preference-card .pref-check-badge {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.pref-card-overall .pref-check-badge {
+    color: #d97706;
+}
+
+/* Selected Puja Info Box — Highly Highlighted */
+.selected-puja-preview {
+    display: block;
+    position: relative;
+    background: linear-gradient(135deg, #fffcf5 0%, #fef5e6 50%, #fcedd8 100%);
+    border: 2px solid #deb887;
+    border-left: 6px solid var(--crimson-red);
+    border-radius: 18px;
+    padding: 20px 24px;
+    margin-bottom: 26px;
+    box-shadow: 0 10px 30px rgba(183, 13, 24, 0.12), 0 2px 12px rgba(198, 138, 76, 0.18);
+    transition: all 0.3s ease;
+}
+
+.selected-puja-preview:hover {
+    box-shadow: 0 14px 38px rgba(183, 13, 24, 0.16), 0 4px 16px rgba(198, 138, 76, 0.22);
+    border-color: #d4a373;
+}
+
+.selected-pandal-icon-badge {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--crimson-red) 0%, #8c0c16 100%);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.45rem;
+    flex-shrink: 0;
+    border: 2px solid #ffd700;
+    box-shadow: 0 4px 14px rgba(183, 13, 24, 0.35);
+}
+
+.selected-choice-badge {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    background: rgba(183, 13, 24, 0.08);
+    color: var(--crimson-red);
+    border: 1px solid rgba(183, 13, 24, 0.22);
+    border-radius: 30px;
+    padding: 3px 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.vote-success-toast-banner {
+    display: none;
+    background: linear-gradient(135deg, #065f46 0%, #047857 100%);
+    color: #ffffff;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(6, 95, 70, 0.25);
+    margin-bottom: 24px;
+}
+
+/* ==========================================================================
+   11. VOTE SUCCESS PAGE & TONI & GUY SPECIAL COUPON
+   ========================================================================== */
+.success-page-section {
+    position: relative;
+    background: radial-gradient(circle at 50% 15%, #ffffff 0%, #fdf8f0 50%, #f7ebe0 100%);
+    padding: 40px 16px 60px;
+    overflow: hidden;
+}
+
+.success-main-card {
+    background: #ffffff;
+    border: 1px solid rgba(212, 163, 115, 0.45);
+    border-radius: 24px;
+    box-shadow: 0 16px 48px rgba(140, 12, 22, 0.08), 0 4px 16px rgba(0, 0, 0, 0.04);
+    padding: 36px 24px;
+    position: relative;
+    z-index: 2;
+}
+
+@media (min-width: 768px) {
+    .success-main-card {
+        padding: 48px 42px;
+    }
+}
+
+.success-hero-checkmark {
+    width: 82px;
+    height: 82px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.8rem;
+    margin: 0 auto 18px;
+    box-shadow: 0 10px 25px rgba(16, 185, 129, 0.35);
+    animation: successPulse 2.4s infinite ease-in-out;
+}
+
+@keyframes successPulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 10px 25px rgba(16, 185, 129, 0.35);
+    }
+
+    50% {
+        transform: scale(1.04);
+        box-shadow: 0 14px 35px rgba(16, 185, 129, 0.5);
+    }
+
+    100% {
+        transform: scale(1);
+        box-shadow: 0 10px 25px rgba(16, 185, 129, 0.35);
+    }
+}
+
+.success-title {
+    font-size: clamp(1.8rem, 3.5vw, 2.4rem);
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 6px;
+}
+
+.vote-confirmed-summary-box {
+    background: linear-gradient(135deg, #fffbf5 0%, #fef5e7 100%);
+    border: 2px solid #e7cbb2;
+    border-left: 6px solid var(--crimson-red);
+    border-radius: 16px;
+    padding: 18px 22px;
+    margin-bottom: 30px;
+    text-align: left;
+    box-shadow: 0 6px 18px rgba(183, 13, 24, 0.05);
+}
+
+/* TONI & GUY Luxury Coupon Card */
+.toniguy-coupon-card {
+    position: relative;
+    background: linear-gradient(135deg, #830911 0%, #4a161a 50%, #860b13 100%);
+    color: #ffffff;
+    border-radius: 20px;
+    padding: 30px 22px;
+    margin-bottom: 30px;
+    border: 2px dashed rgba(255, 204, 0, 0.65);
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.28), 0 0 0 4px rgba(255, 204, 0, 0.1);
+    overflow: hidden;
+}
+
+.toniguy-coupon-card::before {
+    content: "";
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 204, 0, 0.25) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.coupon-brand-wrap {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 8px 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.coupon-brand-wrap img {
+    max-height: 42px;
+    width: auto;
+    object-fit: contain;
+}
+
+.coupon-discount-text {
+    font-size: clamp(1.4rem, 2.8vw, 1.85rem);
+    font-weight: 800;
+    color: #ffcc00;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.coupon-code-pill-box {
+    background: rgb(0 0 0 / 31%);
+    border: 2px solid rgba(255, 204, 0, 0.7);
+    border-radius: 14px;
+    padding: 12px 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin: 16px 0 12px;
+}
+
+.coupon-code-text {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1.6rem;
+    font-weight: 800;
+    letter-spacing: 3.5px;
+    color: #ffffff;
+}
+
+.btn-copy-coupon {
+    background: linear-gradient(135deg, #ffcc00 0%, #f59e0b 100%);
+    color: #18181b;
+    font-weight: 700;
+    font-size: 0.85rem;
+    border: none;
+    border-radius: 10px;
+    padding: 9px 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4);
+    cursor: pointer;
+}
+
+.btn-copy-coupon:hover {
+    background: linear-gradient(135deg, #ffd700 0%, #d97706 100%);
+    color: #000000;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(245, 158, 11, 0.55);
+}
+
+.btn-share-whatsapp {
+    background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+    color: #ffffff;
+    font-weight: 700;
+    border: none;
+    border-radius: 50px;
+    padding: 12px 28px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.25s ease;
+    box-shadow: 0 6px 18px rgba(37, 211, 102, 0.35);
+}
+
+.btn-share-whatsapp:hover {
+    background: linear-gradient(135deg, #2ae06f 0%, #0d6d62 100%);
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(37, 211, 102, 0.45);
+}
+
+/* ==========================================================================
+   MARKETING PROMOTIONAL BANNER SECTION & AUTO-ROTATE CAROUSEL
+   ========================================================================== */
+.marketing-banner-section {
+    position: relative;
+    background-color: transparent;
+}
+
+.marketing-banner-wrapper {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid rgba(212, 163, 115, 0.28);
+    background-color: #ffffff;
+    position: relative;
+    border-radius: 12px;
+}
+
+.marketing-banner-wrapper:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+}
+
+.marketing-banner-img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Carousel Control Arrows */
+.marketing-carousel-control {
+    width: 44px;
+    height: 44px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(15, 15, 15, 0.55);
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    opacity: 0;
+    transition: all 0.25s ease;
+    z-index: 5;
+}
+
+.marketing-carousel-control.carousel-control-prev {
+    left: 16px;
+}
+
+.marketing-carousel-control.carousel-control-next {
+    right: 16px;
+}
+
+.marketing-banner-wrapper:hover .marketing-carousel-control {
+    opacity: 0.9;
+}
+
+.marketing-carousel-control:hover {
+    background: #b11226;
+    border-color: #caa267;
+    opacity: 1 !important;
+    transform: translateY(-50%) scale(1.08);
+    box-shadow: 0 4px 14px rgba(177, 18, 38, 0.4);
+}
+
+.marketing-carousel-control .carousel-control-prev-icon,
+.marketing-carousel-control .carousel-control-next-icon {
+    width: 18px;
+    height: 18px;
+}
+
+/* Carousel Indicators */
+.marketing-carousel-indicators {
+    margin-bottom: 12px;
+    gap: 8px;
+    z-index: 5;
+}
+
+.marketing-carousel-indicators [data-bs-target] {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.65);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    opacity: 0.8;
+}
+
+.marketing-carousel-indicators .active {
+    width: 26px;
+    border-radius: 8px;
+    background-color: #caa267;
+    border-color: #fff;
+    opacity: 1;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+@media (max-width: 767.98px) {
+    .marketing-carousel-control {
+        width: 36px;
+        height: 36px;
+        opacity: 0.75;
+    }
+
+    .marketing-carousel-control.carousel-control-prev {
+        left: 8px;
+    }
+
+    .marketing-carousel-control.carousel-control-next {
+        right: 8px;
+    }
+
+    .marketing-carousel-indicators {
+        margin-bottom: 8px;
+    }
 }

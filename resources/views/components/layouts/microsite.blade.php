@@ -3,13 +3,17 @@
     'metaTitle' => null,
     'metaDescription' => null,
     'ogImage' => null,
+    'canonicalUrl' => null,
     'useAllPujasScript' => false,
+    'useVoteScript' => false,
+    'useSuccessScript' => false,
 ])
 @php
     $currentEvent = $event ?? ($attributes->get('event') ?? null);
     if (! $currentEvent && class_exists(\App\Models\Event::class)) {
         $currentEvent = \App\Models\Event::where('status', 'active')->latest('year')->first() ?? \App\Models\Event::latest('year')->first();
     }
+    $canonical = $canonicalUrl ?? url()->current();
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth">
@@ -19,9 +23,11 @@
     <title>{{ $metaTitle ?? 'Dibrugarh 24x7 - Festive Awards & Navigation' }}</title>
 
     <!-- SEO & Social Open Graph Tags -->
+    <link rel="canonical" href="{{ $canonical }}">
     <meta name="description" content="{{ $metaDescription ?? '' }}">
     <meta property="og:title" content="{{ $metaTitle ?? 'Dibrugarh 24x7 Festive Awards' }}">
     <meta property="og:description" content="{{ $metaDescription ?? '' }}">
+    <meta property="og:url" content="{{ $canonical }}">
     @if (!empty($ogImage))
         <meta property="og:image" content="{{ $ogImage }}">
     @endif
@@ -54,10 +60,20 @@
         window.isVotingOpen = {{ ($currentEvent && $currentEvent->isVotingOpen()) ? 'true' : 'false' }};
         window.votingClosedMessage = {!! json_encode($currentEvent ? $currentEvent->getVotingClosedMessage() : 'Voting is currently closed for this event.') !!};
         window.votingCountdownTarget = {!! json_encode($currentEvent && $currentEvent->countdown_datetime ? $currentEvent->countdown_datetime->toIso8601String() : null) !!};
+        window.homeUrl = {!! json_encode($currentEvent && $currentEvent->slug ? route('events.show', $currentEvent->slug) : route('home')) !!};
+        window.allPujasUrl = {!! json_encode($currentEvent && $currentEvent->slug ? route('events.all-pujas', $currentEvent->slug) : route('all-pujas')) !!};
+        window.voteBaseUrl = {!! json_encode($currentEvent && $currentEvent->slug ? route('events.vote', $currentEvent->slug) : route('vote')) !!};
+        window.voteSuccessUrl = {!! json_encode($currentEvent && $currentEvent->slug ? route('events.vote-success', $currentEvent->slug) : route('vote-success')) !!};
     </script>
     @if (!empty($useAllPujasScript))
         <!-- All Pujas JavaScript Logic -->
         <script src="{{ asset('event-assets/js/allpujas.js') }}?v={{ file_exists(public_path('event-assets/js/allpujas.js')) ? filemtime(public_path('event-assets/js/allpujas.js')) : '1.0' }}"></script>
+    @elseif (!empty($useVoteScript))
+        <!-- Vote Page Logic -->
+        <script src="{{ asset('event-assets/js/vote.js') }}?v={{ file_exists(public_path('event-assets/js/vote.js')) ? filemtime(public_path('event-assets/js/vote.js')) : '1.0' }}"></script>
+    @elseif (!empty($useSuccessScript))
+        <!-- Vote Success Page Logic -->
+        <script src="{{ asset('event-assets/js/success.js') }}?v={{ file_exists(public_path('event-assets/js/success.js')) ? filemtime(public_path('event-assets/js/success.js')) : '1.0' }}"></script>
     @else
         <!-- Festive Microsite Script -->
         <script src="{{ asset('event-assets/js/script.js') }}?v={{ file_exists(public_path('event-assets/js/script.js')) ? filemtime(public_path('event-assets/js/script.js')) : '1.0' }}"></script>

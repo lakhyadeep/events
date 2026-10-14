@@ -25,6 +25,8 @@ class OtpController extends Controller
             'event_id' => ['nullable', 'integer', 'exists:events,id'],
             'participant_id' => ['nullable', 'integer', 'exists:participants,id'],
             'award_id' => ['nullable', 'integer', 'exists:awards,id'],
+            'award_ids' => ['nullable', 'array'],
+            'award_ids.*' => ['integer', 'exists:awards,id'],
         ]);
 
         $purpose = $validated['purpose'] ?? 'verification';
@@ -41,13 +43,28 @@ class OtpController extends Controller
                 }
 
                 $participantId = ! empty($validated['participant_id']) ? (int) $validated['participant_id'] : null;
-                $awardId = ! empty($validated['award_id']) ? (int) $validated['award_id'] : null;
-                $check = $event->canMobileVote($validated['phone'], $participantId, $awardId);
-                if (! $check['allowed']) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => $check['message'],
-                    ], 422);
+                $awardIds = ! empty($validated['award_ids'])
+                    ? array_unique(array_filter(array_map('intval', $validated['award_ids'])))
+                    : (! empty($validated['award_id']) ? [(int) $validated['award_id']] : []);
+
+                if (! empty($awardIds)) {
+                    foreach ($awardIds as $aId) {
+                        $check = $event->canMobileVote($validated['phone'], $participantId, $aId);
+                        if (! $check['allowed']) {
+                            return response()->json([
+                                'success' => false,
+                                'message' => $check['message'],
+                            ], 422);
+                        }
+                    }
+                } else {
+                    $check = $event->canMobileVote($validated['phone'], $participantId, null);
+                    if (! $check['allowed']) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => $check['message'],
+                        ], 422);
+                    }
                 }
             }
         }

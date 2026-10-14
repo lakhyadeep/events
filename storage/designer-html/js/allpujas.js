@@ -929,19 +929,14 @@ function triggerLazyBatch() {
 // ==========================================================================
 function setupVotingHandlers() {
 
-    // Trigger Vote Modal from any Card (event delegation)
-    $(document).on('click', '.vote-trigger-btn', function () {
-        const pandalName = $(this).attr('data-pandal');
-        const pujaId = $(this).attr('data-puja-id');
-
-        pendingVoteData.pandal = pandalName;
-        pendingVoteData.pujaId = pujaId;
-
-        $('#pandalSelect').val(pandalName);
-        $('#alreadyVotedAlert').addClass('d-none');
-
-        const voteModal = new bootstrap.Modal(document.getElementById('voteModal'));
-        voteModal.show();
+    // Redirect to vote.html with selected pandal from any Card (event delegation)
+    $(document).on('click', '.vote-trigger-btn', function (e) {
+        e.preventDefault();
+        const pandalName = $(this).attr('data-pandal') || '';
+        try {
+            localStorage.setItem('selected_pandal', pandalName);
+        } catch (err) {}
+        window.location.href = 'vote.html?pandal=' + encodeURIComponent(pandalName);
     });
 
     // Step 1: Submit Mobile Number to trigger OTP or show Already Voted alert

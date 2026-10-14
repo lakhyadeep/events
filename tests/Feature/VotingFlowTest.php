@@ -384,10 +384,10 @@ class VotingFlowTest extends TestCase
             'event_id' => $event->id,
         ])->assertStatus(200)->assertJson(['success' => true]);
 
-        // Home view renders countdown clock
+        // Home view renders vote now and does not render countdown clock
         $homeResponse = $this->get('/events/'.$event->slug);
         $homeResponse->assertStatus(200);
-        $homeResponse->assertSee('votingCountdownClock');
+        $homeResponse->assertDontSee('votingCountdownClock');
         $homeResponse->assertSee('Vote Now');
     }
 
@@ -428,13 +428,15 @@ class VotingFlowTest extends TestCase
             'mobile_number' => '9876543211',
         ]);
 
-        $homeResponse = $this->get('/events/'.$event->slug);
-        $homeResponse->assertStatus(200);
-        $homeResponse->assertSee('live-vote-count-'.$participant->id);
-
         $directoryResponse = $this->get('/events/'.$event->slug.'/all-pujas');
         $directoryResponse->assertStatus(200);
         $directoryResponse->assertSee('count-puja-'.$participant->id);
+        $directoryResponse->assertSee('2 votes');
+
+        $voteResponse = $this->get('/events/'.$event->slug.'/vote?participant='.$participant->id);
+        $voteResponse->assertStatus(200);
+        $voteResponse->assertSee('id="previewPandalVotes"', false);
+        $voteResponse->assertSee('2 votes');
     }
 
     public function test_admin_can_access_votes_resource(): void
@@ -454,5 +456,140 @@ class VotingFlowTest extends TestCase
         $response = $this->actingAs($admin)->get('/admin/votes');
         $response->assertStatus(200);
         $response->assertSee('Votes');
+    }
+
+    public function test_vote_page_renders_dynamic_awards_with_multi_select_checkboxes(): void
+    {
+        $event = $this->createEvent([
+            'is_voting_active' => true,
+        ]);
+
+        $award1 = $this->createAward($event, [
+            'name' => 'Best Theme Special',
+            'display_name' => 'Best Theme Special',
+            'category' => 'Artistry',
+        ]);
+        $award2 = $this->createAward($event, [
+            'name' => 'Best Idol Special',
+            'display_name' => 'Best Idol Special',
+            'category' => 'Pratima',
+        ]);
+
+        $participant = $this->createParticipant($event);
+
+        $response = $this->get('/events/'.$event->slug.'/vote?participant='.$participant->id);
+
+        $response->assertStatus(200);
+        $response->assertSee('name="award_ids[]"', false);
+        $response->assertSee('value="'.$award1->id.'"', false);
+        $response->assertSee('value="'.$award2->id.'"', false);
+        $response->assertSee('Best Theme Special');
+        $response->assertSee('Best Idol Special');
+        $response->assertSee('Multi-select supported');
+    }
+
+    public function test_multi_select_award_voting_casts_votes_across_selected_awards_atomically(): void
+    {
+        $event = $this->createEvent([
+            'is_voting_active' => true,
+        ]);
+
+        $award1 = $this->createAward($event, [
+            'name' => 'Award Category A',
+            'display_name' => 'Award Category A',
+        ]);
+        $award2 = $this->createAward($event, [
+            'name' => 'Award Category B',
+            'display_name' => 'Award Category B',
+        ]);
+
+        $participant = $this->createParticipant($event);
+        $mobile = '9876543210';
+
+        // 1. Preflight OTP with multiple award IDs
+        $otpResponse = $this->postJson('/api/v1/otp/send', [
+            'phone' => $mobile,
+            'purpose' => 'voting',
+            'event_id' => $event->id,
+            'participant_id' => $participant->id,
+            'award_ids' => [$award1->id, $award2->id],
+        ]);
+        $otpResponse->assertStatus(200);
+
+        $code = $this->getLastOtpCode();
+
+        // 2. Cast vote for both awards at once
+        $castResponse = $this->postJson('/api/v1/votes/cast', [
+            'event_id' => $event->id,
+            'participant_id' => $participant->id,
+            'award_ids' => [$award1->id, $award2->id],
+            'phone' => $mobile,
+            'otp' => $code,
+        ]);
+
+        $castResponse->assertStatus(200)
+            ->assertJson([
+                'success' => true,
+                'data' => [
+                    'votes_count' => 2,
+                ],
+            ]);
+
+        $this->assertDatabaseHas('votes', [
+            'event_id' => $event->id,
+            'participant_id' => $participant->id,
+            'award_id' => $award1->id,
+            'mobile_number' => $mobile,
+        ]);
+
+        $this->assertDatabaseHas('votes', [
+            'event_id' => $event->id,
+            'participant_id' => $participant->id,
+            'award_id' => $award2->id,
+            'mobile_number' => $mobile,
+        ]);
+
+        $this->assertSame(2, Vote::where('event_id', $event->id)->where('mobile_number', $mobile)->count());
+    }
+
+    public function test_multi_select_award_voting_fails_preflight_if_already_voted_in_any_selected_award(): void
+    {
+        $event = $this->createEvent([
+            'is_voting_active' => true,
+        ]);
+
+        $award1 = $this->createAward($event, [
+            'name' => 'Category Gold',
+            'display_name' => 'Category Gold',
+        ]);
+        $award2 = $this->createAward($event, [
+            'name' => 'Category Silver',
+            'display_name' => 'Category Silver',
+        ]);
+
+        $participant = $this->createParticipant($event);
+        $mobile = '9876543210';
+
+        // Pre-existing vote in Award 1
+        Vote::create([
+            'event_id' => $event->id,
+            'participant_id' => $participant->id,
+            'award_id' => $award1->id,
+            'mobile_number' => $mobile,
+        ]);
+
+        // Attempting to send OTP including Award 1 should fail
+        $otpResponse = $this->postJson('/api/v1/otp/send', [
+            'phone' => $mobile,
+            'purpose' => 'voting',
+            'event_id' => $event->id,
+            'participant_id' => $participant->id,
+            'award_ids' => [$award1->id, $award2->id],
+        ]);
+
+        $otpResponse->assertStatus(422);
+        $otpResponse->assertJsonFragment([
+            'success' => false,
+        ]);
     }
 }

@@ -29,6 +29,19 @@
                {{ $event->tagline ?: ($event->display_name ?: 'Dib 24x7 Sharod Samman 2026') }}
             </p>
         </div>
+
+        @if (isset($event) && ! $event->isVotingOpen())
+            <div class="d-flex justify-content-center mt-4">
+                <div class="voting-closed-banner p-3 rounded-4 shadow-sm text-center"
+                     style="background: rgba(254, 242, 242, 0.95); border: 1px solid #fecaca; max-width: 480px; width: 100%; backdrop-filter: blur(8px);">
+                    <div class="d-flex align-items-center justify-content-center gap-2 text-danger fw-bold fs-6 mb-1">
+                        <i class="bi bi-lock-fill"></i>
+                        <span>Voting is Closed</span>
+                    </div>
+                    <p class="mb-0 text-dark small">{{ $event->getVotingClosedMessage() }}</p>
+                </div>
+            </div>
+        @endif
     </div>
 </section>
 

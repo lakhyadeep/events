@@ -27,6 +27,8 @@ class VoteController extends Controller
             'participant_id' => ['nullable', 'integer', 'exists:participants,id'],
             'phone' => ['required', 'string', 'min:10', 'max:20'],
             'award_id' => ['nullable', 'integer', 'exists:awards,id'],
+            'award_ids' => ['nullable', 'array'],
+            'award_ids.*' => ['integer', 'exists:awards,id'],
         ]);
 
         /** @var Event $event */
@@ -41,15 +43,30 @@ class VoteController extends Controller
         }
 
         $participantId = ! empty($validated['participant_id']) ? (int) $validated['participant_id'] : null;
-        $awardId = ! empty($validated['award_id']) ? (int) $validated['award_id'] : null;
-        $check = $event->canMobileVote($validated['phone'], $participantId, $awardId);
+        $awardIds = ! empty($validated['award_ids'])
+            ? array_unique(array_filter(array_map('intval', $validated['award_ids'])))
+            : (! empty($validated['award_id']) ? [(int) $validated['award_id']] : []);
 
-        if (! $check['allowed']) {
-            return response()->json([
-                'success' => false,
-                'allowed' => false,
-                'message' => $check['message'],
-            ], 422);
+        if (! empty($awardIds)) {
+            foreach ($awardIds as $aId) {
+                $check = $event->canMobileVote($validated['phone'], $participantId, $aId);
+                if (! $check['allowed']) {
+                    return response()->json([
+                        'success' => false,
+                        'allowed' => false,
+                        'message' => $check['message'],
+                    ], 422);
+                }
+            }
+        } else {
+            $check = $event->canMobileVote($validated['phone'], $participantId, null);
+            if (! $check['allowed']) {
+                return response()->json([
+                    'success' => false,
+                    'allowed' => false,
+                    'message' => $check['message'],
+                ], 422);
+            }
         }
 
         return response()->json([
@@ -68,6 +85,8 @@ class VoteController extends Controller
             'event_id' => ['required', 'integer', 'exists:events,id'],
             'participant_id' => ['required', 'integer', 'exists:participants,id'],
             'award_id' => ['nullable', 'integer', 'exists:awards,id'],
+            'award_ids' => ['nullable', 'array'],
+            'award_ids.*' => ['integer', 'exists:awards,id'],
             'phone' => ['required', 'string', 'min:10', 'max:20'],
             'otp' => ['required', 'string', 'min:4', 'max:10'],
         ]);
@@ -85,15 +104,19 @@ class VoteController extends Controller
         /** @var Participant $participant */
         $participant = $event->participants()->findOrFail($validated['participant_id']);
 
-        $awardId = ! empty($validated['award_id']) ? (int) $validated['award_id'] : null;
+        $awardIds = ! empty($validated['award_ids'])
+            ? array_unique(array_filter(array_map('intval', $validated['award_ids'])))
+            : (! empty($validated['award_id']) ? [(int) $validated['award_id']] : [null]);
 
-        // 1. Double check voting eligibility rules
-        $check = $event->canMobileVote($validated['phone'], $participant->id, $awardId);
-        if (! $check['allowed']) {
-            return response()->json([
-                'success' => false,
-                'message' => $check['message'],
-            ], 422);
+        // 1. Double check voting eligibility rules for each target award
+        foreach ($awardIds as $aId) {
+            $check = $event->canMobileVote($validated['phone'], $participant->id, $aId);
+            if (! $check['allowed']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $check['message'],
+                ], 422);
+            }
         }
 
         // 2. Verify OTP code
@@ -109,27 +132,32 @@ class VoteController extends Controller
             ], 422);
         }
 
-        // 3. Record official Vote atomically
+        // 3. Record official Vote(s) atomically
         $cleanPhone = preg_replace('/[^0-9]/', '', $validated['phone']) ?? '';
         if (strlen($cleanPhone) > 10) {
             $cleanPhone = substr($cleanPhone, -10);
         }
 
         try {
-            $vote = DB::transaction(function () use ($event, $participant, $awardId, $cleanPhone, $request) {
-                $recheck = $event->canMobileVote($cleanPhone, $participant->id, $awardId);
-                if (! $recheck['allowed']) {
-                    throw new \RuntimeException($recheck['message']);
+            $votes = DB::transaction(function () use ($event, $participant, $awardIds, $cleanPhone, $request) {
+                $recorded = [];
+                foreach ($awardIds as $aId) {
+                    $recheck = $event->canMobileVote($cleanPhone, $participant->id, $aId);
+                    if (! $recheck['allowed']) {
+                        throw new \RuntimeException($recheck['message']);
+                    }
+
+                    $recorded[] = Vote::create([
+                        'event_id' => $event->id,
+                        'participant_id' => $participant->id,
+                        'award_id' => $aId,
+                        'mobile_number' => $cleanPhone,
+                        'ip_address' => $request->ip(),
+                        'user_agent' => $request->userAgent(),
+                    ]);
                 }
 
-                return Vote::create([
-                    'event_id' => $event->id,
-                    'participant_id' => $participant->id,
-                    'award_id' => $awardId,
-                    'mobile_number' => $cleanPhone,
-                    'ip_address' => $request->ip(),
-                    'user_agent' => $request->userAgent(),
-                ]);
+                return $recorded;
             });
         } catch (\RuntimeException $e) {
             return response()->json([
@@ -139,14 +167,18 @@ class VoteController extends Controller
         }
 
         $recipientName = $participant->display_name ?: $participant->name;
+        $primaryVote = $votes[0] ?? null;
 
         return response()->json([
             'success' => true,
             'message' => "Your vote for \"{$recipientName}\" has been recorded successfully!",
             'data' => [
-                'vote_id' => $vote->id,
+                'vote_id' => $primaryVote?->id,
+                'vote_ids' => array_map(fn ($v) => $v->id, $votes),
+                'votes_count' => count($votes),
                 'participant_name' => $recipientName,
-                'award_id' => $awardId,
+                'award_id' => count($awardIds) === 1 ? reset($awardIds) : null,
+                'award_ids' => array_values(array_filter($awardIds)),
             ],
         ], 200);
     }

@@ -125,7 +125,7 @@
                 <!-- Dynamic Card Grid -->
                 <div class="row g-4" id="pujasCardsGrid">
                     @forelse (collect($pujasData)->take(12) as $puja)
-                        <div class="col-12 col-md-6 col-lg-4 card-appear-animate" id="puja-card-{{ $puja['id'] }}" data-pandal="{{ $puja['name'] }}" data-id="{{ $puja['id'] }}">
+                        <div class="col-12 col-md-6 col-lg-4 card-appear-animate" id="puja-card-{{ $puja['id'] }}" data-pandal="{{ $puja['name'] }}" data-id="{{ $puja['id'] }}" data-slug="{{ $puja['slug'] }}">
                             <div class="vote-card h-100 p-2 p-md-3 d-flex flex-column">
                                 <div class="position-relative mb-3">
                                     <span class="card-num-badge">#{{ sprintf('%02d', $puja['id']) }}</span>
@@ -141,13 +141,17 @@
                                     <h5 class="fw-bold mb-0 text-dark fs-6 fs-md-5">{{ $puja['name'] }}</h5>
                                 </div>
 
-                                <p class="text-muted small mb-2">
-                                    <i class="bi bi-geo-alt-fill text-danger me-1"></i> {{ $puja['location'] }}
-                                </p>
+                                @if (!empty($puja['location']))
+                                    <p class="text-muted small mb-2">
+                                        <i class="bi bi-geo-alt-fill text-danger me-1"></i> {{ $puja['location'] }}
+                                    </p>
+                                @endif
 
-                                <div class="small text-secondary mb-3 fst-italic" style="font-size: 0.82rem; line-height: 1.4;">
-                                    <i class="bi bi-stars text-warning me-1"></i> Theme: "{{ $puja['theme'] }}"
-                                </div>
+                                @if (!empty($puja['theme']))
+                                    <div class="small text-secondary mb-3 fst-italic" style="font-size: 0.82rem; line-height: 1.4;">
+                                        <i class="bi bi-stars text-warning me-1"></i> Theme: "{{ $puja['theme'] }}"
+                                    </div>
+                                @endif
 
                                 <div class="d-flex justify-content-between align-items-center pt-2 border-top mt-auto">
                                     <div>
@@ -159,7 +163,7 @@
                                     @endphp
                                     @if ($isVotingOpen)
                                         <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn"
-                                            data-pandal="{{ $puja['name'] }}" data-puja-id="{{ $puja['id'] }}" data-participant-id="{{ $puja['id'] }}">
+                                            data-pandal="{{ $puja['name'] }}" data-slug="{{ $puja['slug'] }}" data-puja-id="{{ $puja['id'] }}" data-participant-id="{{ $puja['id'] }}">
                                             <i class="bi bi-hand-thumbs-up me-1"></i> Vote
                                         </button>
                                     @else
@@ -208,6 +212,9 @@
                 @endif
             </div>
         </section>
+
+        <!-- Marketing Promotional Banner Section -->
+        @include('frontend.partials.marketing-banner')
 
     </main>
 

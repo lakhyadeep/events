@@ -48,9 +48,6 @@
                             <a class="nav-link active" data-target="home" href="#home">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" data-target="pujas" href="#pujas">Pujas</a>
-                        </li>
-                        <li class="nav-item">
                             <a class="nav-link" href="allpujas.html">All Pujas</a>
                         </li>
                         <li class="nav-item">
@@ -69,13 +66,13 @@
 
                     <!-- Right Action Button: Vote Now -->
                     <div class="d-flex align-items-center mt-3 mt-lg-0">
-                        <button class="btn btn-vote-pill w-100 w-lg-auto" id="btnVoteModal" type="button"
-                            data-bs-toggle="modal" data-bs-target="#voteModal">
+                        <a href="allpujas.html" class="btn btn-vote-pill w-100 w-lg-auto text-decoration-none"
+                            id="btnVoteModal">
                             <span>Vote Now</span>
                             <span class="vote-icon-badge">
                                 <i class="bi bi-hand-index-thumb-fill"></i>
                             </span>
-                        </button>
+                        </a>
                     </div>
                 </div>
 
@@ -282,12 +279,517 @@
 
                     <!-- Awards Cards Grid -->
                     <div class="row g-3 justify-content-center">
+                        <!-- ==========================================
+                        CARD 4: Best Puja Overall (Dark/Crown Header)
+                        ========================================== -->
+                        <div class="col-12 col-sm-6 col-lg-3">
+                            <div class="award-card award-card-crown" data-category="Best Puja Overall"
+                                data-header-color="pinnacle-gold">
+                                <!-- Pinnacle Best of Best Ribbon Badge -->
+                                <div class="pinnacle-ribbon-badge">
+                                    <i class="bi bi-stars text-warning me-1"></i>
+                                    <span>BEST OF BEST • GRAND CHAMPION</span>
+                                    <i class="bi bi-stars text-warning ms-1"></i>
+                                </div>
+
+                                <!-- Header -->
+                                <div class="award-card-header header-crown-pinnacle">
+                                    <span class="award-header-icon crown-header-glow">
+                                        <!-- Royal Crown SVG -->
+                                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M5 16L3 5L8.5 10L12 4L15.5 10L21 5L19 16H5Z"
+                                                fill="url(#pinnacleCrownGold)" />
+                                            <path d="M19 19C19 19.55 18.55 20 18 20H6C5.45 20 5 19.55 5 19V18H19V19Z"
+                                                fill="url(#pinnacleCrownGold)" />
+                                            <circle cx="3" cy="4" r="1.5" fill="#ffffff" />
+                                            <circle cx="8.5" cy="9" r="1.3" fill="#ffffff" />
+                                            <circle cx="12" cy="3" r="1.8" fill="#ffffff" />
+                                            <circle cx="15.5" cy="9" r="1.3" fill="#ffffff" />
+                                            <circle cx="21" cy="4" r="1.5" fill="#ffffff" />
+                                            <circle cx="12" cy="13.5" r="1.5" fill="#dc2626" />
+                                            <defs>
+                                                <linearGradient id="pinnacleCrownGold" x1="0%" y1="0%" x2="100%"
+                                                    y2="100%">
+                                                    <stop offset="0%" stop-color="#fffbeb" />
+                                                    <stop offset="50%" stop-color="#fbbf24" />
+                                                    <stop offset="100%" stop-color="#d97706" />
+                                                </linearGradient>
+                                            </defs>
+                                        </svg>
+                                    </span>
+                                    <h3 class="award-header-title crown-gold-title">Best Puja Overall</h3>
+                                </div>
+
+                                <!-- Body with 1 Crown Winner -->
+                                <div
+                                    class="award-card-body award-card-body-crown d-flex flex-column align-items-center justify-content-center position-relative">
+                                    <!-- Background Sunburst Halo & Sparkles -->
+                                    <div class="crown-sunburst-halo" aria-hidden="true"></div>
+                                    <span class="crown-sparkle sparkle-top-left" aria-hidden="true">✦</span>
+                                    <span class="crown-sparkle sparkle-top-right" aria-hidden="true">✦</span>
+                                    <span class="crown-sparkle sparkle-bottom-left" aria-hidden="true">✦</span>
+                                    <span class="crown-sparkle sparkle-bottom-right" aria-hidden="true">✦</span>
+
+                                    <div class="medal-unit medal-unit-grand" data-rank="Crown Winner (Grand Champion)"
+                                        data-category="Best Puja Overall"
+                                        title="Best Puja Overall — Crown Winner (Grand Champion)">
+                                        <!-- Pedestal with Laurel Wreath framing the Crown -->
+                                        <div class="crown-pedestal-wrap">
+                                            <!-- Golden Laurel Wreath Backing -->
+                                            <svg class="laurel-wreath-svg" width="96" height="88" viewBox="0 0 100 90"
+                                                fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <defs>
+                                                    <linearGradient id="laurelLeafGold" x1="0%" y1="0%" x2="100%"
+                                                        y2="100%">
+                                                        <stop offset="0%" stop-color="#fffbeb" />
+                                                        <stop offset="35%" stop-color="#fde047" />
+                                                        <stop offset="70%" stop-color="#f59e0b" />
+                                                        <stop offset="100%" stop-color="#b45309" />
+                                                    </linearGradient>
+                                                    <linearGradient id="laurelStemGold" x1="0%" y1="0%" x2="0%"
+                                                        y2="100%">
+                                                        <stop offset="0%" stop-color="#fbbf24" />
+                                                        <stop offset="100%" stop-color="#b45309" />
+                                                    </linearGradient>
+                                                </defs>
+                                                <!-- Left Laurel Stem -->
+                                                <path d="M 47,78 C 30,75 14,58 14,36 C 14,24 20,15 25,10" fill="none"
+                                                    stroke="url(#laurelStemGold)" stroke-width="1.8"
+                                                    stroke-linecap="round" />
+                                                <!-- Left Leaves -->
+                                                <path d="M 40,75 C 34,76 30,72 34,68 C 38,68 40,71 40,75 Z"
+                                                    fill="url(#laurelLeafGold)" />
+                                                <path d="M 43,72 C 37,70 35,65 40,63 C 44,65 44,69 43,72 Z"
+                                                    fill="url(#laurelLeafGold)" />
+                                                <path d="M 28,66 C 22,66 18,61 22,57 C 27,57 28,62 28,66 Z"
+                                                    fill="url(#laurelLeafGold)" />
+                                                <path d="M 31,61 C 25,58 23,52 28,50 C 33,52 33,57 31,61 Z"
+                                                    fill="url(#laurelLeafGold)" />
+                                                <path d="M 19,53 C 13,51 10,45 15,42 C 20,43 20,49 19,53 Z"
+                                                    fill="url(#laurelLeafGold)" />
+                                                <path d="M 22,46 C 16,42 16,36 21,35 C 26,38 25,43 22,46 Z"
+                                                    fill="url(#laurelLeafGold)" />
+                                                <path d="M 15,38 C 10,34 9,28 14,26 C 19,28 18,34 15,38 Z"
+                                                    fill="url(#laurelLeafGold)" />
+                                                <path d="M 19,30 C 14,25 15,19 20,19 C 24,22 23,27 19,30 Z"
+                                                    fill="url(#laurelLeafGold)" />
+                                                <path d="M 17,21 C 13,16 16,11 21,11 C 24,14 22,19 17,21 Z"
+                                                    fill="url(#laurelLeafGold)" />
+                                                <path d="M 24,13 C 21,8 26,4 29,6 C 31,10 28,13 24,13 Z"
+                                                    fill="url(#laurelLeafGold)" />
+
+                                                <!-- Right Laurel Stem -->
+                                                <path d="M 53,78 C 70,75 86,58 86,36 C 86,24 80,15 75,10" fill="none"
+                                                    stroke="url(#laurelStemGold)" stroke-width="1.8"
+                                                    stroke-linecap="round" />
+                                                <!-- Right Leaves -->
+                                                <path d="M 60,75 C 66,76 70,72 66,68 C 62,68 60,71 60,75 Z"
+                                                    fill="url(#laurelLeafGold)" />
+                                                <path d="M 57,72 C 63,70 65,65 60,63 C 56,65 56,69 57,72 Z"
+                                                    fill="url(#laurelLeafGold)" />
+                                                <path d="M 72,66 C 78,66 82,61 78,57 C 73,57 72,62 72,66 Z"
+                                                    fill="url(#laurelLeafGold)" />
+                                                <path d="M 69,61 C 75,58 77,52 72,50 C 67,52 67,57 69,61 Z"
+                                                    fill="url(#laurelLeafGold)" />
+                                                <path d="M 81,53 C 87,51 90,45 85,42 C 80,43 80,49 81,53 Z"
+                                                    fill="url(#laurelLeafGold)" />
+                                                <path d="M 78,46 C 84,42 84,36 79,35 C 74,38 75,43 78,46 Z"
+                                                    fill="url(#laurelLeafGold)" />
+                                                <path d="M 85,38 C 90,34 91,28 86,26 C 81,28 82,34 85,38 Z"
+                                                    fill="url(#laurelLeafGold)" />
+                                                <path d="M 81,30 C 86,25 85,19 80,19 C 76,22 77,27 81,30 Z"
+                                                    fill="url(#laurelLeafGold)" />
+                                                <path d="M 83,21 C 87,16 84,11 79,11 C 76,14 78,19 83,21 Z"
+                                                    fill="url(#laurelLeafGold)" />
+                                                <path d="M 76,13 C 79,8 74,4 71,6 C 69,10 72,13 76,13 Z"
+                                                    fill="url(#laurelLeafGold)" />
+
+                                                <!-- Ribbon Knot at bottom center -->
+                                                <path
+                                                    d="M 50,77 C 45,77 41,82 43,84.5 C 46,85.5 49,81 50,78.5 C 51,81 54,85.5 57,84.5 C 59,82 55,77 50,77 Z"
+                                                    fill="#b91c1c" stroke="#f59e0b" stroke-width="0.8" />
+                                                <circle cx="50" cy="77.5" r="2.2" fill="#fbbf24" stroke="#92400e"
+                                                    stroke-width="0.6" />
+                                            </svg>
+
+                                            <div class="medal-wrapper medal-wrapper-crown">
+                                                <!-- Royal Crown SVG (Grand Champion) -->
+                                                <svg width="86" height="78" viewBox="0 0 80 76" fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <defs>
+                                                        <!-- Rich Golden Gradient for Body & Crown Spikes -->
+                                                        <linearGradient id="royalGoldGrad" x1="0%" y1="0%" x2="100%"
+                                                            y2="100%">
+                                                            <stop offset="0%" stop-color="#fffbeb" />
+                                                            <stop offset="20%" stop-color="#fde047" />
+                                                            <stop offset="45%" stop-color="#f59e0b" />
+                                                            <stop offset="80%" stop-color="#d97706" />
+                                                            <stop offset="100%" stop-color="#92400e" />
+                                                        </linearGradient>
+
+                                                        <!-- Lustrous Light Gold Gradient for Highlights & Diadem Arches -->
+                                                        <linearGradient id="royalGoldLight" x1="20%" y1="0%" x2="80%"
+                                                            y2="100%">
+                                                            <stop offset="0%" stop-color="#ffffff" />
+                                                            <stop offset="35%" stop-color="#fef08a" />
+                                                            <stop offset="70%" stop-color="#f59e0b" />
+                                                            <stop offset="100%" stop-color="#b45309" />
+                                                        </linearGradient>
+
+                                                        <!-- Deep Shaded Gold for Undersides & Borders -->
+                                                        <linearGradient id="royalGoldDark" x1="0%" y1="0%" x2="0%"
+                                                            y2="100%">
+                                                            <stop offset="0%" stop-color="#d97706" />
+                                                            <stop offset="50%" stop-color="#b45309" />
+                                                            <stop offset="100%" stop-color="#78350f" />
+                                                        </linearGradient>
+
+                                                        <!-- Imperial Circlet Base Band Gradient -->
+                                                        <linearGradient id="royalBaseGrad" x1="0%" y1="0%" x2="100%"
+                                                            y2="0%">
+                                                            <stop offset="0%" stop-color="#b45309" />
+                                                            <stop offset="25%" stop-color="#fbbf24" />
+                                                            <stop offset="50%" stop-color="#fffbeb" />
+                                                            <stop offset="75%" stop-color="#f59e0b" />
+                                                            <stop offset="100%" stop-color="#92400e" />
+                                                        </linearGradient>
+
+                                                        <!-- Regal Crimson Velvet Cap of Maintenance -->
+                                                        <radialGradient id="royalVelvetCap" cx="50%" cy="32%" r="65%">
+                                                            <stop offset="0%" stop-color="#be123c" />
+                                                            <stop offset="40%" stop-color="#881337" />
+                                                            <stop offset="78%" stop-color="#4c0519" />
+                                                            <stop offset="100%" stop-color="#24020a" />
+                                                        </radialGradient>
+
+                                                        <!-- Radiant Faceted Ruby Gradient -->
+                                                        <radialGradient id="royalRuby" cx="35%" cy="30%" r="65%">
+                                                            <stop offset="0%" stop-color="#fca5a5" />
+                                                            <stop offset="30%" stop-color="#ef4444" />
+                                                            <stop offset="75%" stop-color="#b91c1c" />
+                                                            <stop offset="100%" stop-color="#7f1d1d" />
+                                                        </radialGradient>
+
+                                                        <!-- Vivid Faceted Emerald Gradient -->
+                                                        <radialGradient id="royalEmerald" cx="35%" cy="30%" r="65%">
+                                                            <stop offset="0%" stop-color="#6ee7b7" />
+                                                            <stop offset="35%" stop-color="#10b981" />
+                                                            <stop offset="80%" stop-color="#047857" />
+                                                            <stop offset="100%" stop-color="#064e3b" />
+                                                        </radialGradient>
+
+                                                        <!-- Brilliant Royal Sapphire Gradient -->
+                                                        <radialGradient id="royalSapphire" cx="35%" cy="30%" r="65%">
+                                                            <stop offset="0%" stop-color="#93c5fd" />
+                                                            <stop offset="35%" stop-color="#3b82f6" />
+                                                            <stop offset="80%" stop-color="#1d4ed8" />
+                                                            <stop offset="100%" stop-color="#1e3a8a" />
+                                                        </radialGradient>
+
+                                                        <!-- Gleaming Pearl Gradient -->
+                                                        <radialGradient id="royalPearl" cx="35%" cy="30%" r="70%">
+                                                            <stop offset="0%" stop-color="#ffffff" />
+                                                            <stop offset="45%" stop-color="#fffbeb" />
+                                                            <stop offset="85%" stop-color="#fde68a" />
+                                                            <stop offset="100%" stop-color="#d97706" />
+                                                        </radialGradient>
+
+                                                        <!-- Golden Aura Glow Filter -->
+                                                        <filter id="royalCrownGlow" x="-20%" y="-20%" width="140%"
+                                                            height="140%">
+                                                            <feDropShadow dx="0" dy="2" stdDeviation="2.5"
+                                                                flood-color="#f59e0b" flood-opacity="0.38" />
+                                                        </filter>
+                                                    </defs>
+
+                                                    <!-- Layer 1: Imperial Velvet Cap of Maintenance -->
+                                                    <g filter="url(#royalCrownGlow)">
+                                                        <path
+                                                            d="M 16,57 C 15,36 24,24 40,24 C 56,24 65,36 64,57 C 56,60 24,60 16,57 Z"
+                                                            fill="url(#royalVelvetCap)" />
+                                                        <path d="M 25,56 C 24,42 31,31 40,26" fill="none"
+                                                            stroke="#24020a" stroke-width="1.8" opacity="0.65" />
+                                                        <path d="M 55,56 C 56,42 49,31 40,26" fill="none"
+                                                            stroke="#24020a" stroke-width="1.8" opacity="0.65" />
+                                                        <path d="M 40,25 C 40,36 40,48 40,57" fill="none"
+                                                            stroke="#f43f5e" stroke-width="2.2" opacity="0.3" />
+                                                    </g>
+
+                                                    <!-- Layer 2: Golden Diadem Arches -->
+                                                    <g>
+                                                        <!-- Left Arch -->
+                                                        <path d="M 19,54 C 17,37 25,23 39.5,21.5" fill="none"
+                                                            stroke="url(#royalGoldDark)" stroke-width="3.6"
+                                                            stroke-linecap="round" />
+                                                        <path d="M 19,54 C 17,37 25,23 39.5,21.5" fill="none"
+                                                            stroke="url(#royalGoldLight)" stroke-width="2.2"
+                                                            stroke-linecap="round" />
+                                                        <circle cx="21" cy="45" r="1.1" fill="url(#royalPearl)" />
+                                                        <circle cx="23.5" cy="37" r="1.1" fill="url(#royalPearl)" />
+                                                        <circle cx="28.5" cy="30" r="1.1" fill="url(#royalPearl)" />
+                                                        <circle cx="34" cy="24.5" r="1.1" fill="url(#royalPearl)" />
+
+                                                        <!-- Right Arch -->
+                                                        <path d="M 61,54 C 63,37 55,23 40.5,21.5" fill="none"
+                                                            stroke="url(#royalGoldDark)" stroke-width="3.6"
+                                                            stroke-linecap="round" />
+                                                        <path d="M 61,54 C 63,37 55,23 40.5,21.5" fill="none"
+                                                            stroke="url(#royalGoldLight)" stroke-width="2.2"
+                                                            stroke-linecap="round" />
+                                                        <circle cx="59" cy="45" r="1.1" fill="url(#royalPearl)" />
+                                                        <circle cx="56.5" cy="37" r="1.1" fill="url(#royalPearl)" />
+                                                        <circle cx="51.5" cy="30" r="1.1" fill="url(#royalPearl)" />
+                                                        <circle cx="46" cy="24.5" r="1.1" fill="url(#royalPearl)" />
+
+                                                        <!-- Center Rib -->
+                                                        <path d="M 40,54 L 40,21.5" fill="none"
+                                                            stroke="url(#royalGoldDark)" stroke-width="2.6" />
+                                                        <path d="M 40,54 L 40,21.5" fill="none"
+                                                            stroke="url(#royalGoldLight)" stroke-width="1.6" />
+                                                        <circle cx="40" cy="43" r="1.0" fill="url(#royalPearl)" />
+                                                        <circle cx="40" cy="35" r="1.0" fill="url(#royalPearl)" />
+                                                        <circle cx="40" cy="27" r="1.0" fill="url(#royalPearl)" />
+                                                    </g>
+
+                                                    <!-- Layer 3: Top Monde & Royal Cross Formée -->
+                                                    <g>
+                                                        <circle cx="40" cy="18" r="3.6" fill="url(#royalGoldGrad)"
+                                                            stroke="#78350f" stroke-width="0.7" />
+                                                        <ellipse cx="40" cy="18" rx="3.5" ry="1.2" fill="none"
+                                                            stroke="#fffbeb" stroke-width="0.6" />
+                                                        <circle cx="38.8" cy="16.8" r="1.0" fill="#ffffff"
+                                                            opacity="0.85" />
+
+                                                        <path
+                                                            d="M 39.2,14.5 L 40.8,14.5 L 40.8,12.2 L 43.6,13 L 44.2,10.6 L 40.8,11.2 L 40.8,8.8 L 42.4,7.8 L 37.6,7.8 L 39.2,8.8 L 39.2,11.2 L 35.8,10.6 L 36.4,13 L 39.2,12.2 Z"
+                                                            fill="url(#royalGoldLight)" stroke="#78350f"
+                                                            stroke-width="0.65" stroke-linejoin="round" />
+                                                        <circle cx="40" cy="11.7" r="0.9" fill="#ffffff" />
+                                                        <polygon
+                                                            points="40,5.5 40.7,7.2 42.5,7.8 40.7,8.4 40,10.1 39.3,8.4 37.5,7.8 39.3,7.2"
+                                                            fill="#ffffff" opacity="0.95" />
+                                                    </g>
+
+                                                    <!-- Layer 4: Front Coronet Pinnacles & Regal Fleur-de-lis Spikes -->
+                                                    <g>
+                                                        <!-- Left Outer Wing Pinnacle -->
+                                                        <path d="M 14,56 C 13,49 10,45 11.5,41.5 C 13,44 16,48 18,55 Z"
+                                                            fill="url(#royalGoldDark)" stroke="#78350f"
+                                                            stroke-width="0.6" />
+                                                        <path
+                                                            d="M 14.2,55.5 C 13.5,49.5 10.8,46 11.8,42.2 C 13.2,44.5 15.8,48 17.5,54.5 Z"
+                                                            fill="url(#royalGoldLight)" />
+                                                        <circle cx="11.5" cy="41" r="2.0" fill="url(#royalPearl)"
+                                                            stroke="#b45309" stroke-width="0.5" />
+                                                        <circle cx="11" cy="40.5" r="0.7" fill="#ffffff" />
+
+                                                        <!-- Right Outer Wing Pinnacle -->
+                                                        <path d="M 66,56 C 67,49 70,45 68.5,41.5 C 67,44 64,48 62,55 Z"
+                                                            fill="url(#royalGoldDark)" stroke="#78350f"
+                                                            stroke-width="0.6" />
+                                                        <path
+                                                            d="M 65.8,55.5 C 66.5,49.5 69.2,46 68.2,42.2 C 66.8,44.5 64.2,48 62.5,54.5 Z"
+                                                            fill="url(#royalGoldLight)" />
+                                                        <circle cx="68.5" cy="41" r="2.0" fill="url(#royalPearl)"
+                                                            stroke="#b45309" stroke-width="0.5" />
+                                                        <circle cx="68" cy="40.5" r="0.7" fill="#ffffff" />
+
+                                                        <!-- Left Intermediate Spire -->
+                                                        <path d="M 21,55 L 25.5,35 L 29.5,55 Z"
+                                                            fill="url(#royalGoldGrad)" stroke="#78350f"
+                                                            stroke-width="0.6" stroke-linejoin="round" />
+                                                        <path d="M 23,54 L 25.5,36 L 27.5,54 Z"
+                                                            fill="url(#royalGoldLight)" opacity="0.7" />
+                                                        <circle cx="25.5" cy="34" r="2.2" fill="url(#royalPearl)"
+                                                            stroke="#b45309" stroke-width="0.5" />
+                                                        <circle cx="25" cy="33.5" r="0.8" fill="#ffffff" />
+                                                        <path
+                                                            d="M 25.5,42 C 24.2,44 24,47 25.5,48.5 C 27,47 26.8,44 25.5,42 Z"
+                                                            fill="url(#royalEmerald)" stroke="#064e3b"
+                                                            stroke-width="0.4" />
+
+                                                        <!-- Right Intermediate Spire -->
+                                                        <path d="M 59,55 L 54.5,35 L 50.5,55 Z"
+                                                            fill="url(#royalGoldGrad)" stroke="#78350f"
+                                                            stroke-width="0.6" stroke-linejoin="round" />
+                                                        <path d="M 57,54 L 54.5,36 L 52.5,54 Z"
+                                                            fill="url(#royalGoldLight)" opacity="0.7" />
+                                                        <circle cx="54.5" cy="34" r="2.2" fill="url(#royalPearl)"
+                                                            stroke="#b45309" stroke-width="0.5" />
+                                                        <circle cx="54" cy="33.5" r="0.8" fill="#ffffff" />
+                                                        <path
+                                                            d="M 54.5,42 C 53.2,44 53,47 54.5,48.5 C 56,47 55.8,44 54.5,42 Z"
+                                                            fill="url(#royalEmerald)" stroke="#064e3b"
+                                                            stroke-width="0.4" />
+
+                                                        <!-- Center Fleur-de-lis Spire -->
+                                                        <path
+                                                            d="M 37.5,53 C 34,48 29,43 31.5,38.5 C 34.5,39.5 36.5,43 38,47 Z"
+                                                            fill="url(#royalGoldGrad)" stroke="#78350f"
+                                                            stroke-width="0.6" />
+                                                        <path
+                                                            d="M 42.5,53 C 46,48 51,43 48.5,38.5 C 45.5,39.5 43.5,43 42,47 Z"
+                                                            fill="url(#royalGoldGrad)" stroke="#78350f"
+                                                            stroke-width="0.6" />
+                                                        <path
+                                                            d="M 35.5,54 C 36.5,45 35,37 40,27.5 C 45,37 43.5,45 44.5,54 Z"
+                                                            fill="url(#royalGoldGrad)" stroke="#78350f"
+                                                            stroke-width="0.6" stroke-linejoin="round" />
+                                                        <path
+                                                            d="M 37.5,53.5 C 38.2,46 37.5,38 40,29.5 C 42.5,38 41.8,46 42.5,53.5 Z"
+                                                            fill="url(#royalGoldLight)" />
+                                                        <circle cx="40" cy="26" r="2.6" fill="url(#royalPearl)"
+                                                            stroke="#b45309" stroke-width="0.6" />
+                                                        <circle cx="39.2" cy="25.2" r="0.9" fill="#ffffff" />
+
+                                                        <!-- Center Ruby Rhombus -->
+                                                        <polygon points="40,37 43.2,42.5 40,48 36.8,42.5"
+                                                            fill="url(#royalRuby)" stroke="#78350f"
+                                                            stroke-width="0.6" />
+                                                        <polygon points="40,37 43.2,42.5 40,41" fill="#ffffff"
+                                                            opacity="0.45" />
+                                                        <circle cx="39.5" cy="40.5" r="0.7" fill="#ffffff" />
+                                                    </g>
+
+                                                    <!-- Layer 5: Imperial Circlet Base Headband & Jewels -->
+                                                    <g>
+                                                        <path
+                                                            d="M 13,54.5 Q 40,57.5 67,54.5 L 67,56.5 Q 40,59.5 13,56.5 Z"
+                                                            fill="url(#royalGoldDark)" />
+
+                                                        <path d="M 13,56 Q 40,59.2 67,56 L 67,64.5 Q 40,67.8 13,64.5 Z"
+                                                            fill="url(#royalBaseGrad)" stroke="#78350f"
+                                                            stroke-width="0.7" />
+
+                                                        <path d="M 14,57.2 Q 40,60.4 66,57.2" fill="none"
+                                                            stroke="#fffbeb" stroke-width="0.7" opacity="0.8" />
+                                                        <path d="M 14,63.5 Q 40,66.8 66,63.5" fill="none"
+                                                            stroke="#78350f" stroke-width="0.7" opacity="0.6" />
+
+                                                        <!-- Gemstones on Circlet -->
+                                                        <!-- Center Ruby -->
+                                                        <ellipse cx="40" cy="62" rx="4.0" ry="3.2" fill="#78350f" />
+                                                        <ellipse cx="40" cy="62" rx="3.4" ry="2.6"
+                                                            fill="url(#royalRuby)" stroke="#fbbf24"
+                                                            stroke-width="0.5" />
+                                                        <ellipse cx="39" cy="61.2" rx="1.4" ry="0.8" fill="#ffffff"
+                                                            opacity="0.75" />
+
+                                                        <!-- Left Emerald -->
+                                                        <rect x="27" y="59.3" width="4.4" height="4" rx="1"
+                                                            transform="rotate(45 29.2 61.3)" fill="#064e3b" />
+                                                        <rect x="27.4" y="59.7" width="3.6" height="3.2" rx="0.8"
+                                                            transform="rotate(45 29.2 61.3)" fill="url(#royalEmerald)"
+                                                            stroke="#fbbf24" stroke-width="0.4" />
+                                                        <circle cx="28.8" cy="60.6" r="0.6" fill="#ffffff"
+                                                            opacity="0.8" />
+
+                                                        <!-- Right Emerald -->
+                                                        <rect x="49" y="59.3" width="4.4" height="4" rx="1"
+                                                            transform="rotate(45 51.2 61.3)" fill="#064e3b" />
+                                                        <rect x="49.4" y="59.7" width="3.6" height="3.2" rx="0.8"
+                                                            transform="rotate(45 51.2 61.3)" fill="url(#royalEmerald)"
+                                                            stroke="#fbbf24" stroke-width="0.4" />
+                                                        <circle cx="50.8" cy="60.6" r="0.6" fill="#ffffff"
+                                                            opacity="0.8" />
+
+                                                        <!-- Sapphires -->
+                                                        <circle cx="19.5" cy="60" r="2.4" fill="#1e3a8a" />
+                                                        <circle cx="19.5" cy="60" r="1.9" fill="url(#royalSapphire)"
+                                                            stroke="#fbbf24" stroke-width="0.4" />
+                                                        <circle cx="19" cy="59.4" r="0.6" fill="#ffffff"
+                                                            opacity="0.8" />
+
+                                                        <circle cx="60.5" cy="60" r="2.4" fill="#1e3a8a" />
+                                                        <circle cx="60.5" cy="60" r="1.9" fill="url(#royalSapphire)"
+                                                            stroke="#fbbf24" stroke-width="0.4" />
+                                                        <circle cx="60" cy="59.4" r="0.6" fill="#ffffff"
+                                                            opacity="0.8" />
+
+                                                        <!-- Diamonds -->
+                                                        <circle cx="24.2" cy="60.7" r="1.1" fill="#ffffff"
+                                                            stroke="#b45309" stroke-width="0.4" />
+                                                        <circle cx="34.5" cy="61.7" r="1.1" fill="#ffffff"
+                                                            stroke="#b45309" stroke-width="0.4" />
+                                                        <circle cx="45.5" cy="61.7" r="1.1" fill="#ffffff"
+                                                            stroke="#b45309" stroke-width="0.4" />
+                                                        <circle cx="55.8" cy="60.7" r="1.1" fill="#ffffff"
+                                                            stroke="#b45309" stroke-width="0.4" />
+
+                                                        <!-- Bottom Pearl Rim -->
+                                                        <circle cx="14" cy="64.8" r="1.2" fill="url(#royalPearl)"
+                                                            stroke="#78350f" stroke-width="0.3" />
+                                                        <circle cx="18" cy="65.4" r="1.2" fill="url(#royalPearl)"
+                                                            stroke="#78350f" stroke-width="0.3" />
+                                                        <circle cx="22" cy="66.0" r="1.2" fill="url(#royalPearl)"
+                                                            stroke="#78350f" stroke-width="0.3" />
+                                                        <circle cx="26" cy="66.5" r="1.2" fill="url(#royalPearl)"
+                                                            stroke="#78350f" stroke-width="0.3" />
+                                                        <circle cx="30" cy="66.9" r="1.2" fill="url(#royalPearl)"
+                                                            stroke="#78350f" stroke-width="0.3" />
+                                                        <circle cx="35" cy="67.3" r="1.2" fill="url(#royalPearl)"
+                                                            stroke="#78350f" stroke-width="0.3" />
+                                                        <circle cx="40" cy="67.5" r="1.3" fill="url(#royalPearl)"
+                                                            stroke="#78350f" stroke-width="0.3" />
+                                                        <circle cx="45" cy="67.3" r="1.2" fill="url(#royalPearl)"
+                                                            stroke="#78350f" stroke-width="0.3" />
+                                                        <circle cx="50" cy="66.9" r="1.2" fill="url(#royalPearl)"
+                                                            stroke="#78350f" stroke-width="0.3" />
+                                                        <circle cx="54" cy="66.5" r="1.2" fill="url(#royalPearl)"
+                                                            stroke="#78350f" stroke-width="0.3" />
+                                                        <circle cx="58" cy="66.0" r="1.2" fill="url(#royalPearl)"
+                                                            stroke="#78350f" stroke-width="0.3" />
+                                                        <circle cx="62" cy="65.4" r="1.2" fill="url(#royalPearl)"
+                                                            stroke="#78350f" stroke-width="0.3" />
+                                                        <circle cx="66" cy="64.8" r="1.2" fill="url(#royalPearl)"
+                                                            stroke="#78350f" stroke-width="0.3" />
+                                                    </g>
+
+                                                    <!-- Layer 6: Sparkle Highlights -->
+                                                    <g fill="#ffffff">
+                                                        <path
+                                                            d="M 40,4.5 Q 40,7.5 43,7.5 Q 40,7.5 40,10.5 Q 40,7.5 37,7.5 Q 40,7.5 40,4.5 Z"
+                                                            opacity="0.95" />
+                                                        <path
+                                                            d="M 43,60.5 Q 43,62 44.5,62 Q 43,62 43,63.5 Q 43,62 41.5,62 Q 43,62 43,60.5 Z"
+                                                            opacity="0.85" />
+                                                        <path
+                                                            d="M 25.5,31.5 Q 25.5,33 27,33 Q 25.5,33 25.5,34.5 Q 25.5,33 24,33 Q 25.5,33 25.5,31.5 Z"
+                                                            opacity="0.8" />
+                                                    </g>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <div class="crown-badge-pill">
+                                            <i class="bi bi-crown-fill text-warning me-1"></i>GOLD TROPHY
+                                        </div>
+                                        <div class="crown-subtitle-tag">
+                                            Maha Puraskar • Grand Champion
+                                        </div>
+                                        <div class="crown-bottom-stars" aria-hidden="true">
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill mx-1 star-center"></i>
+                                            <i class="bi bi-star-fill"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
                         <!-- ==========================================
-                        CARD 1: Best Puja (Crimson Header)
+                        CARD 1: Best Theme (Crimson Header)
                         ========================================== -->
-                        <div class="col-12 col-md-6 col-lg-4">
-                            <div class="award-card" data-category="Best Puja" data-header-color="crimson">
+                        <div class="col-12 col-sm-6 col-lg-3">
+                            <div class="award-card" data-category="Best Theme (শ্ৰেষ্ঠ থিম)"
+                                data-header-color="crimson">
+                                <!-- Top Prize Ribbon Badge -->
+                                <div class="award-top-prize-ribbon">
+                                    <i class="bi bi-stars text-warning me-1"></i>
+                                    <span>₹1,00,000 + TROPHY</span>
+                                    <i class="bi bi-stars text-warning ms-1"></i>
+                                </div>
+
                                 <!-- Header -->
                                 <div class="award-card-header header-crimson">
                                     <span class="award-header-icon">
@@ -298,7 +800,10 @@
                                                 d="M19 4H17V3C17 2.45 16.55 2 16 2H8C7.45 2 7 2.45 7 3V4H5C3.9 4 3 4.9 3 6V8C3 10.55 4.92 12.63 7.39 12.94C8.14 14.15 9.42 15 11 15.34V18H8C7.45 18 7 18.45 7 19C7 19.55 7.45 20 8 20H16C16.55 20 17 19.55 17 19C17 18.45 16.55 18 16 18H13V15.34C14.58 15 15.86 14.15 16.61 12.94C19.08 12.63 21 10.55 21 8V6C21 4.9 20.1 4 19 4ZM5 8V6H7V10.1C5.84 9.65 5 8.92 5 8ZM19 8C19 8.92 18.16 9.65 17 10.1V6H19V8Z" />
                                         </svg>
                                     </span>
-                                    <h3 class="award-header-title">Best Puja</h3>
+                                    <div class="award-header-title-wrap">
+                                        <h3 class="award-header-title">Best Theme (শ্ৰেষ্ঠ থিম)</h3>
+                                        <div class="award-header-subtitle">Concept & Artistry</div>
+                                    </div>
                                 </div>
 
                                 <!-- Body with 3 Medals -->
@@ -308,7 +813,7 @@
                                         <!-- 1. Winner (Gold) -->
                                         <div class="col-4">
                                             <div class="medal-unit" data-rank="1st Place (Winner)"
-                                                data-category="Best Puja">
+                                                data-category="Best Theme (শ্ৰেষ্ঠ থিম)">
                                                 <div class="medal-wrapper">
                                                     <!-- Scalloped Gold Medal SVG -->
                                                     <svg width="52" height="58" viewBox="0 0 70 80" fill="none"
@@ -350,7 +855,7 @@
                                         <!-- 2. Runner Up (Silver) -->
                                         <div class="col-4">
                                             <div class="medal-unit" data-rank="Runner Up (2nd Place)"
-                                                data-category="Best Puja">
+                                                data-category="Best Theme (শ্ৰেষ্ঠ থিম)">
                                                 <div class="medal-wrapper">
                                                     <!-- Scalloped Silver Medal SVG -->
                                                     <svg width="52" height="58" viewBox="0 0 70 80" fill="none"
@@ -389,7 +894,7 @@
                                         <!-- 3. Second Runner Up (Bronze) -->
                                         <div class="col-4">
                                             <div class="medal-unit" data-rank="Second Runner Up (3rd Place)"
-                                                data-category="Best Puja">
+                                                data-category="Best Theme (শ্ৰেষ্ঠ থিম)">
                                                 <div class="medal-wrapper">
                                                     <!-- Scalloped Bronze Medal SVG -->
                                                     <svg width="52" height="58" viewBox="0 0 70 80" fill="none"
@@ -426,20 +931,172 @@
                                         </div>
 
                                     </div>
+                                    <!-- Category Focus Strip -->
+                                    <div class="award-card-prize-footer">
+                                        <i class="bi bi-palette-fill text-danger me-1"></i>
+                                        <span>Creativity &amp; Concept</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- ==========================================
-                        CARD 2: Best Pratima (Black Header)
+                        CARD 2: Best Pandal (Black Header)
                         ========================================== -->
-                        <div class="col-12 col-md-6 col-lg-4">
-                            <div class="award-card" data-category="Best Pratima" data-header-color="dark">
+                        <div class="col-12 col-sm-6 col-lg-3">
+                            <div class="award-card" data-category="Best Pandal (শ্ৰেষ্ঠ মণ্ডপ)"
+                                data-header-color="dark">
+                                <!-- Top Prize Ribbon Badge -->
+                                <div class="award-top-prize-ribbon award-top-prize-ribbon-dark">
+                                    <i class="bi bi-stars text-warning me-1"></i>
+                                    <span>₹1,00,000 + TROPHY</span>
+                                    <i class="bi bi-stars text-warning ms-1"></i>
+                                </div>
+
                                 <!-- Header -->
                                 <div class="award-card-header header-dark">
                                     <span class="award-header-icon">
+                                        <!-- Pandal / Mandap Architecture SVG -->
+                                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M12 2L13.8 5.2H10.2L12 2Z" fill="#fbbf24" />
+                                            <circle cx="12" cy="2" r="0.9" fill="#ffffff" />
+                                            <path
+                                                d="M5 10.5C5 6.8 8.1 5.2 12 5.2C15.9 5.2 19 6.8 19 10.5L20 12.5H4L5 10.5Z"
+                                                fill="#ffffff" />
+                                            <path
+                                                d="M6 12.5V20.5H8.8V15C8.8 13.8 10 12.8 12 12.8C14 12.8 15.2 13.8 15.2 15V20.5H18V12.5"
+                                                fill="#ffffff" fill-opacity="0.9" />
+                                            <path d="M10 20.5V16C10 15 10.9 14.2 12 14.2C13.1 14.2 14 15 14 16V20.5H10Z"
+                                                fill="#fbbf24" />
+                                            <path d="M3 20.5H21V22H3V20.5Z" fill="#ffffff" />
+                                        </svg>
+                                    </span>
+                                    <div class="award-header-title-wrap">
+                                        <h3 class="award-header-title">Best Pandal (শ্ৰেষ্ঠ মণ্ডপ)</h3>
+                                        <div class="award-header-subtitle">Architecture & Decor</div>
+                                    </div>
+                                </div>
+
+                                <!-- Body with 3 Medals -->
+                                <div class="award-card-body">
+                                    <div class="row g-1 text-center">
+
+                                        <!-- 1. Winner (Gold) -->
+                                        <div class="col-4">
+                                            <div class="medal-unit" data-rank="1st Place (Winner)"
+                                                data-category="Best Pandal (শ্ৰেষ্ঠ মণ্ডপ)">
+                                                <div class="medal-wrapper">
+                                                    <svg width="52" height="58" viewBox="0 0 70 80" fill="none"
+                                                        xmlns="http://www.w3.org/2000/svg">
+                                                        <polygon points="26,45 20,78 32,71 36,52" fill="#d97706" />
+                                                        <polygon points="44,45 50,78 38,71 34,52" fill="#b45309" />
+                                                        <g transform="translate(35, 34)">
+                                                            <circle cx="0" cy="0" r="28" fill="#f59e0b" />
+                                                            <path
+                                                                d="M0 -30 L4 -26 L9 -30 L11 -24 L17 -26 L17 -20 L23 -20 L21 -14 L27 -12 L23 -7 L28 -3 L23 2 L26 7 L20 11 L22 17 L15 19 L15 25 L8 25 L6 30 L0 28 L-6 30 L-8 25 L-15 25 L-15 19 L-22 17 L-20 11 L-26 7 L-23 2 L-28 -3 L-23 -7 L-27 -12 L-21 -14 L-23 -20 L-17 -20 L-17 -26 L-11 -24 L-9 -30 L-4 -26 Z"
+                                                                fill="#fbbf24" />
+                                                            <circle cx="0" cy="0" r="22" fill="url(#goldGrad)"
+                                                                stroke="#d97706" stroke-width="1.8" />
+                                                            <circle cx="0" cy="0" r="18" fill="none" stroke="#fef08a"
+                                                                stroke-width="1.2" stroke-dasharray="2 1.5" />
+                                                            <text x="0" y="7" font-family="'Outfit', sans-serif"
+                                                                font-size="20" font-weight="900" fill="#78350f"
+                                                                text-anchor="middle">1</text>
+                                                        </g>
+                                                    </svg>
+                                                </div>
+                                                <div class="award-position-title">Winner</div>
+
+                                            </div>
+                                        </div>
+
+                                        <!-- 2. Runner Up (Silver) -->
+                                        <div class="col-4">
+                                            <div class="medal-unit" data-rank="Runner Up (2nd Place)"
+                                                data-category="Best Pandal (শ্ৰেষ্ঠ মণ্ডপ)">
+                                                <div class="medal-wrapper">
+                                                    <svg width="52" height="58" viewBox="0 0 70 80" fill="none"
+                                                        xmlns="http://www.w3.org/2000/svg">
+                                                        <polygon points="26,45 20,78 32,71 36,52" fill="#94a3b8" />
+                                                        <polygon points="44,45 50,78 38,71 34,52" fill="#64748b" />
+                                                        <g transform="translate(35, 34)">
+                                                            <circle cx="0" cy="0" r="28" fill="#cbd5e1" />
+                                                            <path
+                                                                d="M0 -30 L4 -26 L9 -30 L11 -24 L17 -26 L17 -20 L23 -20 L21 -14 L27 -12 L23 -7 L28 -3 L23 2 L26 7 L20 11 L22 17 L15 19 L15 25 L8 25 L6 30 L0 28 L-6 30 L-8 25 L-15 25 L-15 19 L-22 17 L-20 11 L-26 7 L-23 2 L-28 -3 L-23 -7 L-27 -12 L-21 -14 L-23 -20 L-17 -20 L-17 -26 L-11 -24 L-9 -30 L-4 -26 Z"
+                                                                fill="#e2e8f0" />
+                                                            <circle cx="0" cy="0" r="22" fill="url(#silverGrad)"
+                                                                stroke="#64748b" stroke-width="1.8" />
+                                                            <circle cx="0" cy="0" r="18" fill="none" stroke="#ffffff"
+                                                                stroke-width="1.2" stroke-dasharray="2 1.5" />
+                                                            <text x="0" y="7" font-family="'Outfit', sans-serif"
+                                                                font-size="20" font-weight="900" fill="#334155"
+                                                                text-anchor="middle">2</text>
+                                                        </g>
+                                                    </svg>
+                                                </div>
+                                                <div class="award-position-title">Runner Up</div>
+
+                                            </div>
+                                        </div>
+
+                                        <!-- 3. Second Runner Up (Bronze) -->
+                                        <div class="col-4">
+                                            <div class="medal-unit" data-rank="Second Runner Up (3rd Place)"
+                                                data-category="Best Pandal (শ্ৰেষ্ঠ মণ্ডপ)">
+                                                <div class="medal-wrapper">
+                                                    <svg width="52" height="58" viewBox="0 0 70 80" fill="none"
+                                                        xmlns="http://www.w3.org/2000/svg">
+                                                        <polygon points="26,45 20,78 32,71 36,52" fill="#c2410c" />
+                                                        <polygon points="44,45 50,78 38,71 34,52" fill="#9a3412" />
+                                                        <g transform="translate(35, 34)">
+                                                            <circle cx="0" cy="0" r="28" fill="#ea580c" />
+                                                            <path
+                                                                d="M0 -30 L4 -26 L9 -30 L11 -24 L17 -26 L17 -20 L23 -20 L21 -14 L27 -12 L23 -7 L28 -3 L23 2 L26 7 L20 11 L22 17 L15 19 L15 25 L8 25 L6 30 L0 28 L-6 30 L-8 25 L-15 25 L-15 19 L-22 17 L-20 11 L-26 7 L-23 2 L-28 -3 L-23 -7 L-27 -12 L-21 -14 L-23 -20 L-17 -20 L-17 -26 L-11 -24 L-9 -30 L-4 -26 Z"
+                                                                fill="#fdba74" />
+                                                            <circle cx="0" cy="0" r="22" fill="url(#bronzeGrad)"
+                                                                stroke="#9a3412" stroke-width="1.8" />
+                                                            <circle cx="0" cy="0" r="18" fill="none" stroke="#ffedd5"
+                                                                stroke-width="1.2" stroke-dasharray="2 1.5" />
+                                                            <text x="0" y="7" font-family="'Outfit', sans-serif"
+                                                                font-size="20" font-weight="900" fill="#431407"
+                                                                text-anchor="middle">3</text>
+                                                        </g>
+                                                    </svg>
+                                                </div>
+                                                <div class="award-position-title">Second Runner Up</div>
+
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <!-- Category Focus Strip -->
+                                    <div class="award-card-prize-footer award-card-prize-footer-dark">
+                                        <i class="bi bi-buildings-fill  me-1"></i>
+                                        <span>Architecture &amp; Structure</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ==========================================
+                        CARD 3: Best Idol (Crimson Header)
+                        ========================================== -->
+                        <div class="col-12 col-sm-6 col-lg-3">
+                            <div class="award-card" data-category="Best Idol (শ্ৰেষ্ঠ প্ৰতিমা)"
+                                data-header-color="crimson">
+                                <!-- Top Prize Ribbon Badge -->
+                                <div class="award-top-prize-ribbon">
+                                    <i class="bi bi-stars text-warning me-1"></i>
+                                    <span>₹1,00,000 + TROPHY</span>
+                                    <i class="bi bi-stars text-warning ms-1"></i>
+                                </div>
+
+                                <!-- Header -->
+                                <div class="award-card-header header-crimson">
+                                    <span class="award-header-icon">
                                         <!-- Durga Pratima Icon SVG -->
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
                                             xmlns="http://www.w3.org/2000/svg">
                                             <!-- Crown / Mukut -->
                                             <path
@@ -459,7 +1116,10 @@
                                             <path d="M7 21 C9 20 15 20 17 21 L18 22.5 L6 22.5 Z" fill="#ffffff" />
                                         </svg>
                                     </span>
-                                    <h3 class="award-header-title">Best Pratima</h3>
+                                    <div class="award-header-title-wrap">
+                                        <h3 class="award-header-title">Best Idol (শ্ৰেষ্ঠ প্ৰতিমা)</h3>
+                                        <div class="award-header-subtitle">Maa Durga Clay Art</div>
+                                    </div>
                                 </div>
 
                                 <!-- Body with 3 Medals -->
@@ -469,7 +1129,7 @@
                                         <!-- 1. Winner (Gold) -->
                                         <div class="col-4">
                                             <div class="medal-unit" data-rank="1st Place (Winner)"
-                                                data-category="Best Pratima">
+                                                data-category="Best Idol (শ্ৰেষ্ঠ প্ৰতিমা)">
                                                 <div class="medal-wrapper">
                                                     <svg width="52" height="58" viewBox="0 0 70 80" fill="none"
                                                         xmlns="http://www.w3.org/2000/svg">
@@ -498,7 +1158,7 @@
                                         <!-- 2. Runner Up (Silver) -->
                                         <div class="col-4">
                                             <div class="medal-unit" data-rank="Runner Up (2nd Place)"
-                                                data-category="Best Pratima">
+                                                data-category="Best Idol (শ্ৰেষ্ঠ প্ৰতিমা)">
                                                 <div class="medal-wrapper">
                                                     <svg width="52" height="58" viewBox="0 0 70 80" fill="none"
                                                         xmlns="http://www.w3.org/2000/svg">
@@ -527,7 +1187,7 @@
                                         <!-- 3. Second Runner Up (Bronze) -->
                                         <div class="col-4">
                                             <div class="medal-unit" data-rank="Second Runner Up (3rd Place)"
-                                                data-category="Best Pratima">
+                                                data-category="Best Idol (শ্ৰেষ্ঠ প্ৰতিমা)">
                                                 <div class="medal-wrapper">
                                                     <svg width="52" height="58" viewBox="0 0 70 80" fill="none"
                                                         xmlns="http://www.w3.org/2000/svg">
@@ -554,1128 +1214,69 @@
                                         </div>
 
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- ==========================================
-                        CARD 3: Best Lighting (Crimson Header)
-                        ========================================== -->
-                        <div class="col-12 col-md-6 col-lg-4">
-                            <div class="award-card" data-category="Best Lighting" data-header-color="crimson">
-                                <!-- Header -->
-                                <div class="award-card-header header-crimson">
-                                    <span class="award-header-icon">
-                                        <!-- Sunburst / Illumination Icon SVG -->
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                            xmlns="http://www.w3.org/2000/svg">
-                                            <!-- Central Sun Ring -->
-                                            <circle cx="12" cy="12" r="4.5" stroke="#ffffff" stroke-width="2.2"
-                                                fill="none" />
-                                            <!-- Radial Rays -->
-                                            <line x1="12" y1="2" x2="12" y2="4.5" stroke="#ffffff" stroke-width="2.2"
-                                                stroke-linecap="round" />
-                                            <line x1="12" y1="19.5" x2="12" y2="22" stroke="#ffffff" stroke-width="2.2"
-                                                stroke-linecap="round" />
-                                            <line x1="2" y1="12" x2="4.5" y2="12" stroke="#ffffff" stroke-width="2.2"
-                                                stroke-linecap="round" />
-                                            <line x1="19.5" y1="12" x2="22" y2="12" stroke="#ffffff" stroke-width="2.2"
-                                                stroke-linecap="round" />
-                                            <line x1="4.93" y1="4.93" x2="6.7" y2="6.7" stroke="#ffffff"
-                                                stroke-width="2" stroke-linecap="round" />
-                                            <line x1="17.3" y1="17.3" x2="19.07" y2="19.07" stroke="#ffffff"
-                                                stroke-width="2" stroke-linecap="round" />
-                                            <line x1="4.93" y1="19.07" x2="6.7" y2="17.3" stroke="#ffffff"
-                                                stroke-width="2" stroke-linecap="round" />
-                                            <line x1="17.3" y1="6.7" x2="19.07" y2="4.93" stroke="#ffffff"
-                                                stroke-width="2" stroke-linecap="round" />
-                                        </svg>
-                                    </span>
-                                    <h3 class="award-header-title">Best Lighting</h3>
-                                </div>
-
-                                <!-- Body with 3 Medals -->
-                                <div class="award-card-body">
-                                    <div class="row g-1 text-center">
-
-                                        <!-- 1. Winner (Gold) -->
-                                        <div class="col-4">
-                                            <div class="medal-unit" data-rank="1st Place (Winner)"
-                                                data-category="Best Lighting">
-                                                <div class="medal-wrapper">
-                                                    <svg width="52" height="58" viewBox="0 0 70 80" fill="none"
-                                                        xmlns="http://www.w3.org/2000/svg">
-                                                        <polygon points="26,45 20,78 32,71 36,52" fill="#d97706" />
-                                                        <polygon points="44,45 50,78 38,71 34,52" fill="#b45309" />
-                                                        <g transform="translate(35, 34)">
-                                                            <circle cx="0" cy="0" r="28" fill="#f59e0b" />
-                                                            <path
-                                                                d="M0 -30 L4 -26 L9 -30 L11 -24 L17 -26 L17 -20 L23 -20 L21 -14 L27 -12 L23 -7 L28 -3 L23 2 L26 7 L20 11 L22 17 L15 19 L15 25 L8 25 L6 30 L0 28 L-6 30 L-8 25 L-15 25 L-15 19 L-22 17 L-20 11 L-26 7 L-23 2 L-28 -3 L-23 -7 L-27 -12 L-21 -14 L-23 -20 L-17 -20 L-17 -26 L-11 -24 L-9 -30 L-4 -26 Z"
-                                                                fill="#fbbf24" />
-                                                            <circle cx="0" cy="0" r="22" fill="url(#goldGrad)"
-                                                                stroke="#d97706" stroke-width="1.8" />
-                                                            <circle cx="0" cy="0" r="18" fill="none" stroke="#fef08a"
-                                                                stroke-width="1.2" stroke-dasharray="2 1.5" />
-                                                            <text x="0" y="7" font-family="'Outfit', sans-serif"
-                                                                font-size="20" font-weight="900" fill="#78350f"
-                                                                text-anchor="middle">1</text>
-                                                        </g>
-                                                    </svg>
-                                                </div>
-                                                <div class="award-position-title">Winner</div>
-
-                                            </div>
-                                        </div>
-
-                                        <!-- 2. Runner Up (Silver) -->
-                                        <div class="col-4">
-                                            <div class="medal-unit" data-rank="Runner Up (2nd Place)"
-                                                data-category="Best Lighting">
-                                                <div class="medal-wrapper">
-                                                    <svg width="52" height="58" viewBox="0 0 70 80" fill="none"
-                                                        xmlns="http://www.w3.org/2000/svg">
-                                                        <polygon points="26,45 20,78 32,71 36,52" fill="#94a3b8" />
-                                                        <polygon points="44,45 50,78 38,71 34,52" fill="#64748b" />
-                                                        <g transform="translate(35, 34)">
-                                                            <circle cx="0" cy="0" r="28" fill="#cbd5e1" />
-                                                            <path
-                                                                d="M0 -30 L4 -26 L9 -30 L11 -24 L17 -26 L17 -20 L23 -20 L21 -14 L27 -12 L23 -7 L28 -3 L23 2 L26 7 L20 11 L22 17 L15 19 L15 25 L8 25 L6 30 L0 28 L-6 30 L-8 25 L-15 25 L-15 19 L-22 17 L-20 11 L-26 7 L-23 2 L-28 -3 L-23 -7 L-27 -12 L-21 -14 L-23 -20 L-17 -20 L-17 -26 L-11 -24 L-9 -30 L-4 -26 Z"
-                                                                fill="#e2e8f0" />
-                                                            <circle cx="0" cy="0" r="22" fill="url(#silverGrad)"
-                                                                stroke="#64748b" stroke-width="1.8" />
-                                                            <circle cx="0" cy="0" r="18" fill="none" stroke="#ffffff"
-                                                                stroke-width="1.2" stroke-dasharray="2 1.5" />
-                                                            <text x="0" y="7" font-family="'Outfit', sans-serif"
-                                                                font-size="20" font-weight="900" fill="#334155"
-                                                                text-anchor="middle">2</text>
-                                                        </g>
-                                                    </svg>
-                                                </div>
-                                                <div class="award-position-title">Runner Up</div>
-
-                                            </div>
-                                        </div>
-
-                                        <!-- 3. Second Runner Up (Bronze) -->
-                                        <div class="col-4">
-                                            <div class="medal-unit" data-rank="Second Runner Up (3rd Place)"
-                                                data-category="Best Lighting">
-                                                <div class="medal-wrapper">
-                                                    <svg width="52" height="58" viewBox="0 0 70 80" fill="none"
-                                                        xmlns="http://www.w3.org/2000/svg">
-                                                        <polygon points="26,45 20,78 32,71 36,52" fill="#c2410c" />
-                                                        <polygon points="44,45 50,78 38,71 34,52" fill="#9a3412" />
-                                                        <g transform="translate(35, 34)">
-                                                            <circle cx="0" cy="0" r="28" fill="#ea580c" />
-                                                            <path
-                                                                d="M0 -30 L4 -26 L9 -30 L11 -24 L17 -26 L17 -20 L23 -20 L21 -14 L27 -12 L23 -7 L28 -3 L23 2 L26 7 L20 11 L22 17 L15 19 L15 25 L8 25 L6 30 L0 28 L-6 30 L-8 25 L-15 25 L-15 19 L-22 17 L-20 11 L-26 7 L-23 2 L-28 -3 L-23 -7 L-27 -12 L-21 -14 L-23 -20 L-17 -20 L-17 -26 L-11 -24 L-9 -30 L-4 -26 Z"
-                                                                fill="#fdba74" />
-                                                            <circle cx="0" cy="0" r="22" fill="url(#bronzeGrad)"
-                                                                stroke="#9a3412" stroke-width="1.8" />
-                                                            <circle cx="0" cy="0" r="18" fill="none" stroke="#ffedd5"
-                                                                stroke-width="1.2" stroke-dasharray="2 1.5" />
-                                                            <text x="0" y="7" font-family="'Outfit', sans-serif"
-                                                                font-size="20" font-weight="900" fill="#431407"
-                                                                text-anchor="middle">3</text>
-                                                        </g>
-                                                    </svg>
-                                                </div>
-                                                <div class="award-position-title">Second Runner Up</div>
-
-                                            </div>
-                                        </div>
-
+                                    <!-- Category Focus Strip -->
+                                    <div class="award-card-prize-footer">
+                                        <i class="bi bi-flower1 text-danger me-1"></i>
+                                        <span>Traditional Clay Art</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
+
                     </div>
                 </div>
 
             </div>
-            <div class="container">
-                <div class="d-flex flex-column align-items-center mb-4 text-center pujas-header-box">
-                    <span class="pujas-badge-tag mb-2">
-                        <i class="bi bi-trophy-fill text-warning me-1"></i> SHARAD SAMMAN VOTING HUB 2026
-                    </span>
-                    <h2 class="fw-bold mb-2 pujas-header-title">Vote for the Best — Sharad Samman 2026</h2>
-                    <p class="pujas-header-subtitle mb-3">Explore the shortlisted entries and cast your vote in each
-                        category</p>
-                    <div class="pujas-nav-tabs-wrapper mt-2">
-                        <a href="#cat-best-puja" class="pujas-nav-btn nav-btn-puja">
-                            <i class="bi bi-trophy-fill text-warning me-1"></i> 1. Best Puja
-                        </a>
-                        <a href="#cat-best-pratima" class="pujas-nav-btn nav-btn-pratima">
-                            <i class="bi bi-flower1 me-1" style="color: #0bf5ed;"></i> 2. Best Pratima
-                        </a>
-                        <a href="#cat-best-lighting" class="pujas-nav-btn nav-btn-lighting">
-                            <i class="bi bi-lightbulb-fill text-warning me-1"></i> 3. Best Lighting
-                        </a>
-                    </div>
-                </div>
 
-
-
-                <!-- Award Details Modal -->
-                <div class="modal fade" id="awardDetailModal" tabindex="-1" aria-labelledby="awardDetailModalLabel"
-                    aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content border-0 shadow-lg" style="border-radius: 14px; overflow: hidden;">
-                            <div class="custom-modal-header d-flex justify-content-between align-items-center">
-                                <h5 class="modal-title fw-bold" id="awardDetailModalLabel">
-                                    <i class="bi bi-award-fill me-2 text-warning"></i>
-                                    <span id="modalCategoryTitle">Best Puja</span>
-                                </h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                    aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body p-4 bg-white text-center">
-                                <div id="modalMedalPreview" class="mb-3 d-inline-block"></div>
-                                <h4 class="fw-bold mb-1" id="modalRankText" style="color: #7c0b15;">Winner TBA</h4>
-                                <p class="text-muted small mb-3" id="modalStatusDesc">The official winner for this
-                                    category
-                                    will be announced live on Dashami evening following jury assessments and public
-                                    voting.
-                                </p>
-
-                                <div class="text-start p-3 rounded-3"
-                                    style="background-color: #fdfaf5; border: 1px dashed #dfc6aa;">
-                                    <div class="fw-bold small text-uppercase mb-2 text-secondary">Key Judging
-                                        Criteria:
-                                    </div>
-                                    <div id="modalCriteriaTags">
-                                        <span class="criteria-tag">Theme & Creativity</span>
-                                        <span class="criteria-tag">Eco-friendly Decor</span>
-                                        <span class="criteria-tag">Crowd Safety & Discipline</span>
-                                        <span class="criteria-tag">Public Voting Score</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="modal-footer justify-content-center bg-light border-0 py-3">
-                                <button type="button" class="btn btn-secondary px-4 rounded-pill"
-                                    data-bs-dismiss="modal">Close</button>
-                                <button type="button" class="btn text-white px-4 rounded-pill"
-                                    style="background-color: #a5131d;" id="modalVoteActionBtn">
-                                    <i class="bi bi-hand-thumbs-up-fill me-1"></i> Cast Your Vote
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- End of Embedded Awards Box -->
-                <!-- CATEGORY 1: BEST PUJA -->
-                <div class="category-section-block cat-puja-theme">
-                    <div class="category-title-wrapper cat-header-puja" id="cat-best-puja">
-                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="category-icon-box">
-                                    <i class="bi bi-trophy-fill"></i>
-                                </div>
-                                <div>
-                                    <span class="category-eyebrow text-danger"><i class="bi bi-award-fill me-1"></i>
-                                        CATEGORY 01 • FLAGSHIP</span>
-                                    <h3 class="category-title-text">Best Puja</h3>
-                                    <div class="category-subtitle-text">Nominated Pandals • Sharad Samman 2026</div>
-                                </div>
-                            </div>
-                            <span class="category-badge-pill pill-puja">
-                                <i class="bi bi-fire me-1"></i> Flagship Award
-                            </span>
-                        </div>
-                    </div>
-
-                    <div class="row g-4">
-                        <!-- Card 1 -->
-                        <div class="col-md-4">
-                            <div class="vote-card h-100 p-2 p-md-3">
-                                <div class="position-relative mb-3">
-                                    <img src="https://images.unsplash.com/photo-1728921957375-877340feaf6a?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0"
-                                        alt="Thana Chariali Puja" class="img-fluid rounded-3 w-100"
-                                        style="height: 200px; object-fit: cover;">
-                                </div>
-                                <h5 class="fw-bold mb-1">Thana Chariali Sarbajanin</h5>
-                                <p class="text-muted small mb-3"><i class="bi bi-geo-alt-fill text-danger me-1"></i>
-                                    Thana
-                                    Chariali, Dibrugarh</p>
-                                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
-                                    <div>
-                                        <small class="text-muted d-block">Current Count</small>
-                                        <span class="fw-bold fs-6 text-danger" id="count-pandal-1">4,812
-                                            votes</span>
-                                    </div>
-                                    <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn"
-                                        data-pandal="Thana Chariali Sarbajanin">
-                                        <i class="bi bi-hand-thumbs-up me-1"></i> Vote
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Card 2 -->
-                        <div class="col-md-4">
-                            <div class="vote-card h-100 p-2 p-md-3">
-                                <div class="position-relative mb-3">
-                                    <img src="https://images.unsplash.com/photo-1728493118702-febd0b9a0fab?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0"
-                                        alt="Graham Bazar Puja" class="img-fluid rounded-3 w-100"
-                                        style="height: 200px; object-fit: cover;">
-                                </div>
-                                <h5 class="fw-bold mb-1">Graham Bazar Sarbajanin</h5>
-                                <p class="text-muted small mb-3"><i class="bi bi-geo-alt-fill text-danger me-1"></i>
-                                    Graham
-                                    Bazar, Dibrugarh</p>
-                                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
-                                    <div>
-                                        <small class="text-muted d-block">Current Count</small>
-                                        <span class="fw-bold fs-6 text-danger" id="count-pandal-2">3,940
-                                            votes</span>
-                                    </div>
-                                    <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn"
-                                        data-pandal="Graham Bazar Sarbajanin">
-                                        <i class="bi bi-hand-thumbs-up me-1"></i> Vote
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Card 3 -->
-                        <div class="col-md-4">
-                            <div class="vote-card h-100 p-2 p-md-3">
-                                <div class="position-relative mb-3">
-                                    <img src="https://images.unsplash.com/photo-1728921957375-877340feaf6a?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0"
-                                        alt="New Market Puja" class="img-fluid rounded-3 w-100"
-                                        style="height: 200px; object-fit: cover;">
-                                </div>
-                                <h5 class="fw-bold mb-1">New Market Durga Puja</h5>
-                                <p class="text-muted small mb-3"><i class="bi bi-geo-alt-fill text-danger me-1"></i>
-                                    New
-                                    Market Road, Dibrugarh</p>
-                                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
-                                    <div>
-                                        <small class="text-muted d-block">Current Count</small>
-                                        <span class="fw-bold fs-6 text-danger" id="count-pandal-3">5,537
-                                            votes</span>
-                                    </div>
-                                    <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn"
-                                        data-pandal="New Market Durga Puja">
-                                        <i class="bi bi-hand-thumbs-up me-1"></i> Vote
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Card 4 -->
-                        <div class="col-md-4">
-                            <div class="vote-card h-100 p-2 p-md-3">
-                                <div class="position-relative mb-3">
-                                    <img src="https://images.unsplash.com/photo-1728921957375-877340feaf6a?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0"
-                                        alt="Thana Chariali Puja" class="img-fluid rounded-3 w-100"
-                                        style="height: 200px; object-fit: cover;">
-                                </div>
-                                <h5 class="fw-bold mb-1">Thana Chariali Sarbajanin</h5>
-                                <p class="text-muted small mb-3"><i class="bi bi-geo-alt-fill text-danger me-1"></i>
-                                    Thana
-                                    Chariali, Dibrugarh</p>
-                                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
-                                    <div>
-                                        <small class="text-muted d-block">Current Count</small>
-                                        <span class="fw-bold fs-6 text-danger" id="count-pandal-1">4,812
-                                            votes</span>
-                                    </div>
-                                    <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn"
-                                        data-pandal="Thana Chariali Sarbajanin">
-                                        <i class="bi bi-hand-thumbs-up me-1"></i> Vote
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Card 5 -->
-                        <div class="col-md-4">
-                            <div class="vote-card h-100 p-2 p-md-3">
-                                <div class="position-relative mb-3">
-                                    <img src="https://images.unsplash.com/photo-1728493118702-febd0b9a0fab?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0"
-                                        alt="Graham Bazar Puja" class="img-fluid rounded-3 w-100"
-                                        style="height: 200px; object-fit: cover;">
-                                </div>
-                                <h5 class="fw-bold mb-1">Graham Bazar Sarbajanin</h5>
-                                <p class="text-muted small mb-3"><i class="bi bi-geo-alt-fill text-danger me-1"></i>
-                                    Graham
-                                    Bazar, Dibrugarh</p>
-                                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
-                                    <div>
-                                        <small class="text-muted d-block">Current Count</small>
-                                        <span class="fw-bold fs-6 text-danger" id="count-pandal-2">3,940
-                                            votes</span>
-                                    </div>
-                                    <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn"
-                                        data-pandal="Graham Bazar Sarbajanin">
-                                        <i class="bi bi-hand-thumbs-up me-1"></i> Vote
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Card 6 -->
-                        <div class="col-md-4">
-                            <div class="vote-card h-100 p-2 p-md-3">
-                                <div class="position-relative mb-3">
-                                    <img src="https://images.unsplash.com/photo-1728921957375-877340feaf6a?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0"
-                                        alt="New Market Puja" class="img-fluid rounded-3 w-100"
-                                        style="height: 200px; object-fit: cover;">
-                                </div>
-                                <h5 class="fw-bold mb-1">New Market Durga Puja</h5>
-                                <p class="text-muted small mb-3"><i class="bi bi-geo-alt-fill text-danger me-1"></i>
-                                    New
-                                    Market Road, Dibrugarh</p>
-                                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
-                                    <div>
-                                        <small class="text-muted d-block">Current Count</small>
-                                        <span class="fw-bold fs-6 text-danger" id="count-pandal-3">5,537
-                                            votes</span>
-                                    </div>
-                                    <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn"
-                                        data-pandal="New Market Durga Puja">
-                                        <i class="bi bi-hand-thumbs-up me-1"></i> Vote
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- CATEGORY SEGMENT DIVIDER -->
-                <div class="category-segment-divider" aria-hidden="true">
-                    <span class="category-segment-divider-icon"><i class="bi bi-star-fill"></i></span>
-                </div>
-
-                <!-- CATEGORY 2: BEST PRATIMA -->
-                <div class="category-section-block cat-pratima-theme">
-                    <div class="category-title-wrapper cat-header-pratima" id="cat-best-pratima">
-                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="category-icon-box"
-                                    style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
-                                    <i class="bi bi-flower1 text-warning"></i>
-                                </div>
-                                <div>
-                                    <span class="category-eyebrow text-primary"><i class="bi bi-palette-fill me-1"></i>
-                                        CATEGORY 02 • IDOL ARTISTRY</span>
-                                    <h3 class="category-title-text">Best Pratima</h3>
-                                    <div class="category-subtitle-text">Exquisite Clay Idol Artistry & Traditional
-                                        Craftsmanship</div>
-                                </div>
-                            </div>
-                            <span class="category-badge-pill pill-pratima">
-                                <i class="bi bi-palette-fill me-1"></i> Traditional Art
-                            </span>
-                        </div>
-                    </div>
-
-                    <div class="row g-4">
-                        <!-- Pratima Card 1 -->
-                        <div class="col-md-4">
-                            <div class="vote-card h-100 p-2 p-md-3">
-                                <div class="position-relative mb-3">
-                                    <img src="https://images.unsplash.com/photo-1728921957375-877340feaf6a?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0"
-                                        alt="Jalan Nagar Pratima" class="img-fluid rounded-3 w-100"
-                                        style="height: 200px; object-fit: cover;">
-                                </div>
-                                <h5 class="fw-bold mb-1">Jalan Nagar Sarbajanin Pratima</h5>
-                                <p class="text-muted small mb-3"><i class="bi bi-geo-alt-fill text-danger me-1"></i>
-                                    Jalan
-                                    Nagar, Dibrugarh</p>
-                                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
-                                    <div>
-                                        <small class="text-muted d-block">Current Count</small>
-                                        <span class="fw-bold fs-6 text-danger" id="count-pratima-1">3,420
-                                            votes</span>
-                                    </div>
-                                    <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn"
-                                        data-pandal="Jalan Nagar Sarbajanin Pratima">
-                                        <i class="bi bi-hand-thumbs-up me-1"></i> Vote
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Pratima Card 2 -->
-                        <div class="col-md-4">
-                            <div class="vote-card h-100 p-2 p-md-3">
-                                <div class="position-relative mb-3">
-                                    <img src="https://images.unsplash.com/photo-1756399220348-7964d338cb19?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                                        alt="Kadmani Pratima" class="img-fluid rounded-3 w-100"
-                                        style="height: 200px; object-fit: cover;">
-                                </div>
-                                <h5 class="fw-bold mb-1">Kadmani Sarbajanin Pratima</h5>
-                                <p class="text-muted small mb-3"><i class="bi bi-geo-alt-fill text-danger me-1"></i>
-                                    Kadmani, Dibrugarh</p>
-                                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
-                                    <div>
-                                        <small class="text-muted d-block">Current Count</small>
-                                        <span class="fw-bold fs-6 text-danger" id="count-pratima-2">4,115
-                                            votes</span>
-                                    </div>
-                                    <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn"
-                                        data-pandal="Kadmani Sarbajanin Pratima">
-                                        <i class="bi bi-hand-thumbs-up me-1"></i> Vote
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Pratima Card 3 -->
-                        <div class="col-md-4">
-                            <div class="vote-card h-100 p-2 p-md-3">
-                                <div class="position-relative mb-3">
-                                    <img src="https://images.unsplash.com/photo-1728493118702-febd0b9a0fab?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0"
-                                        alt="Graham Bazar Pratima" class="img-fluid rounded-3 w-100"
-                                        style="height: 200px; object-fit: cover;">
-                                </div>
-                                <h5 class="fw-bold mb-1">Graham Bazar Cultural Pratima</h5>
-                                <p class="text-muted small mb-3"><i class="bi bi-geo-alt-fill text-danger me-1"></i>
-                                    Graham
-                                    Bazar, Dibrugarh</p>
-                                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
-                                    <div>
-                                        <small class="text-muted d-block">Current Count</small>
-                                        <span class="fw-bold fs-6 text-danger" id="count-pratima-3">2,980
-                                            votes</span>
-                                    </div>
-                                    <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn"
-                                        data-pandal="Graham Bazar Cultural Pratima">
-                                        <i class="bi bi-hand-thumbs-up me-1"></i> Vote
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Pratima Card 4 -->
-                        <div class="col-md-4">
-                            <div class="vote-card h-100 p-2 p-md-3">
-                                <div class="position-relative mb-3">
-                                    <img src="https://images.unsplash.com/photo-1728921957375-877340feaf6a?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0"
-                                        alt="Jalan Nagar Pratima" class="img-fluid rounded-3 w-100"
-                                        style="height: 200px; object-fit: cover;">
-                                </div>
-                                <h5 class="fw-bold mb-1">Jalan Nagar Sarbajanin Pratima</h5>
-                                <p class="text-muted small mb-3"><i class="bi bi-geo-alt-fill text-danger me-1"></i>
-                                    Jalan
-                                    Nagar, Dibrugarh</p>
-                                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
-                                    <div>
-                                        <small class="text-muted d-block">Current Count</small>
-                                        <span class="fw-bold fs-6 text-danger" id="count-pratima-1">3,420
-                                            votes</span>
-                                    </div>
-                                    <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn"
-                                        data-pandal="Jalan Nagar Sarbajanin Pratima">
-                                        <i class="bi bi-hand-thumbs-up me-1"></i> Vote
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Pratima Card 5 -->
-                        <div class="col-md-4">
-                            <div class="vote-card h-100 p-2 p-md-3">
-                                <div class="position-relative mb-3">
-                                    <img src="https://images.unsplash.com/photo-1756399220348-7964d338cb19?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                                        alt="Kadmani Pratima" class="img-fluid rounded-3 w-100"
-                                        style="height: 200px; object-fit: cover;">
-                                </div>
-                                <h5 class="fw-bold mb-1">Kadmani Sarbajanin Pratima</h5>
-                                <p class="text-muted small mb-3"><i class="bi bi-geo-alt-fill text-danger me-1"></i>
-                                    Kadmani, Dibrugarh</p>
-                                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
-                                    <div>
-                                        <small class="text-muted d-block">Current Count</small>
-                                        <span class="fw-bold fs-6 text-danger" id="count-pratima-2">4,115
-                                            votes</span>
-                                    </div>
-                                    <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn"
-                                        data-pandal="Kadmani Sarbajanin Pratima">
-                                        <i class="bi bi-hand-thumbs-up me-1"></i> Vote
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Pratima Card 6 -->
-                        <div class="col-md-4">
-                            <div class="vote-card h-100 p-2 p-md-3">
-                                <div class="position-relative mb-3">
-                                    <img src="https://images.unsplash.com/photo-1728493118702-febd0b9a0fab?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0"
-                                        alt="Graham Bazar Pratima" class="img-fluid rounded-3 w-100"
-                                        style="height: 200px; object-fit: cover;">
-                                </div>
-                                <h5 class="fw-bold mb-1">Graham Bazar Cultural Pratima</h5>
-                                <p class="text-muted small mb-3"><i class="bi bi-geo-alt-fill text-danger me-1"></i>
-                                    Graham
-                                    Bazar, Dibrugarh</p>
-                                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
-                                    <div>
-                                        <small class="text-muted d-block">Current Count</small>
-                                        <span class="fw-bold fs-6 text-danger" id="count-pratima-3">2,980
-                                            votes</span>
-                                    </div>
-                                    <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn"
-                                        data-pandal="Graham Bazar Cultural Pratima">
-                                        <i class="bi bi-hand-thumbs-up me-1"></i> Vote
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- CATEGORY SEGMENT DIVIDER -->
-                <div class="category-segment-divider" aria-hidden="true">
-                    <span class="category-segment-divider-icon"><i class="bi bi-star-fill"></i></span>
-                </div>
-
-                <!-- CATEGORY 3: BEST LIGHTING -->
-                <div class="category-section-block cat-lighting-theme">
-                    <div class="category-title-wrapper cat-header-lighting" id="cat-best-lighting">
-                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="category-icon-box"
-                                    style="background: linear-gradient(135deg, #d97706 0%, #b45309 100%);">
-                                    <i class="bi bi-lightbulb-fill text-white"></i>
-                                </div>
-                                <div>
-                                    <span class="category-eyebrow text-warning"><i
-                                            class="bi bi-brightness-high-fill me-1"></i> CATEGORY 03 •
-                                        ILLUMINATION</span>
-                                    <h3 class="category-title-text">Best Lighting</h3>
-                                    <div class="category-subtitle-text">Grand Illuminations & Light Gate Displays
-                                    </div>
-                                </div>
-                            </div>
-                            <span class="category-badge-pill pill-lighting">
-                                <i class="bi bi-brightness-high-fill me-1"></i> Illumination Award
-                            </span>
-                        </div>
-                    </div>
-
-                    <div class="row g-4">
-                        <!-- Pratima Card 1 -->
-                        <div class="col-md-4">
-                            <div class="vote-card h-100 p-2 p-md-3">
-                                <div class="position-relative mb-3">
-                                    <img src="https://images.unsplash.com/photo-1728921957375-877340feaf6a?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0"
-                                        alt="Jalan Nagar Pratima" class="img-fluid rounded-3 w-100"
-                                        style="height: 200px; object-fit: cover;">
-                                </div>
-                                <h5 class="fw-bold mb-1">Jalan Nagar Sarbajanin Pratima</h5>
-                                <p class="text-muted small mb-3"><i class="bi bi-geo-alt-fill text-danger me-1"></i>
-                                    Jalan
-                                    Nagar, Dibrugarh</p>
-                                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
-                                    <div>
-                                        <small class="text-muted d-block">Current Count</small>
-                                        <span class="fw-bold fs-6 text-danger" id="count-pratima-1">3,420
-                                            votes</span>
-                                    </div>
-                                    <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn"
-                                        data-pandal="Jalan Nagar Sarbajanin Pratima">
-                                        <i class="bi bi-hand-thumbs-up me-1"></i> Vote
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Pratima Card 2 -->
-                        <div class="col-md-4">
-                            <div class="vote-card h-100 p-2 p-md-3">
-                                <div class="position-relative mb-3">
-                                    <img src="https://images.unsplash.com/photo-1756399220348-7964d338cb19?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                                        alt="Kadmani Pratima" class="img-fluid rounded-3 w-100"
-                                        style="height: 200px; object-fit: cover;">
-                                </div>
-                                <h5 class="fw-bold mb-1">Kadmani Sarbajanin Pratima</h5>
-                                <p class="text-muted small mb-3"><i class="bi bi-geo-alt-fill text-danger me-1"></i>
-                                    Kadmani, Dibrugarh</p>
-                                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
-                                    <div>
-                                        <small class="text-muted d-block">Current Count</small>
-                                        <span class="fw-bold fs-6 text-danger" id="count-pratima-2">4,115
-                                            votes</span>
-                                    </div>
-                                    <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn"
-                                        data-pandal="Kadmani Sarbajanin Pratima">
-                                        <i class="bi bi-hand-thumbs-up me-1"></i> Vote
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Pratima Card 3 -->
-                        <div class="col-md-4">
-                            <div class="vote-card h-100 p-2 p-md-3">
-                                <div class="position-relative mb-3">
-                                    <img src="https://images.unsplash.com/photo-1728493118702-febd0b9a0fab?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0"
-                                        alt="Graham Bazar Pratima" class="img-fluid rounded-3 w-100"
-                                        style="height: 200px; object-fit: cover;">
-                                </div>
-                                <h5 class="fw-bold mb-1">Graham Bazar Cultural Pratima</h5>
-                                <p class="text-muted small mb-3"><i class="bi bi-geo-alt-fill text-danger me-1"></i>
-                                    Graham
-                                    Bazar, Dibrugarh</p>
-                                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
-                                    <div>
-                                        <small class="text-muted d-block">Current Count</small>
-                                        <span class="fw-bold fs-6 text-danger" id="count-pratima-3">2,980
-                                            votes</span>
-                                    </div>
-                                    <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn"
-                                        data-pandal="Graham Bazar Cultural Pratima">
-                                        <i class="bi bi-hand-thumbs-up me-1"></i> Vote
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Pratima Card 4 -->
-                        <div class="col-md-4">
-                            <div class="vote-card h-100 p-2 p-md-3">
-                                <div class="position-relative mb-3">
-                                    <img src="https://images.unsplash.com/photo-1728921957375-877340feaf6a?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0"
-                                        alt="Jalan Nagar Pratima" class="img-fluid rounded-3 w-100"
-                                        style="height: 200px; object-fit: cover;">
-                                </div>
-                                <h5 class="fw-bold mb-1">Jalan Nagar Sarbajanin Pratima</h5>
-                                <p class="text-muted small mb-3"><i class="bi bi-geo-alt-fill text-danger me-1"></i>
-                                    Jalan
-                                    Nagar, Dibrugarh</p>
-                                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
-                                    <div>
-                                        <small class="text-muted d-block">Current Count</small>
-                                        <span class="fw-bold fs-6 text-danger" id="count-pratima-1">3,420
-                                            votes</span>
-                                    </div>
-                                    <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn"
-                                        data-pandal="Jalan Nagar Sarbajanin Pratima">
-                                        <i class="bi bi-hand-thumbs-up me-1"></i> Vote
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Pratima Card 5 -->
-                        <div class="col-md-4">
-                            <div class="vote-card h-100 p-2 p-md-3">
-                                <div class="position-relative mb-3">
-                                    <img src="https://images.unsplash.com/photo-1756399220348-7964d338cb19?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                                        alt="Kadmani Pratima" class="img-fluid rounded-3 w-100"
-                                        style="height: 200px; object-fit: cover;">
-                                </div>
-                                <h5 class="fw-bold mb-1">Kadmani Sarbajanin Pratima</h5>
-                                <p class="text-muted small mb-3"><i class="bi bi-geo-alt-fill text-danger me-1"></i>
-                                    Kadmani, Dibrugarh</p>
-                                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
-                                    <div>
-                                        <small class="text-muted d-block">Current Count</small>
-                                        <span class="fw-bold fs-6 text-danger" id="count-pratima-2">4,115
-                                            votes</span>
-                                    </div>
-                                    <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn"
-                                        data-pandal="Kadmani Sarbajanin Pratima">
-                                        <i class="bi bi-hand-thumbs-up me-1"></i> Vote
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Pratima Card 6 -->
-                        <div class="col-md-4">
-                            <div class="vote-card h-100 p-2 p-md-3">
-                                <div class="position-relative mb-3">
-                                    <img src="https://images.unsplash.com/photo-1728493118702-febd0b9a0fab?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0"
-                                        alt="Graham Bazar Pratima" class="img-fluid rounded-3 w-100"
-                                        style="height: 200px; object-fit: cover;">
-                                </div>
-                                <h5 class="fw-bold mb-1">Graham Bazar Cultural Pratima</h5>
-                                <p class="text-muted small mb-3"><i class="bi bi-geo-alt-fill text-danger me-1"></i>
-                                    Graham
-                                    Bazar, Dibrugarh</p>
-                                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
-                                    <div>
-                                        <small class="text-muted d-block">Current Count</small>
-                                        <span class="fw-bold fs-6 text-danger" id="count-pratima-3">2,980
-                                            votes</span>
-                                    </div>
-                                    <button class="btn btn-sm btn-outline-danger rounded-pill px-3 vote-trigger-btn"
-                                        data-pandal="Graham Bazar Cultural Pratima">
-                                        <i class="bi bi-hand-thumbs-up me-1"></i> Vote
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Explore All Pujas CTA Banner -->
-                <div class="mt-5 p-4 rounded-4 shadow-sm text-center text-md-start" style="background: linear-gradient(135deg, #fdf5ea 0%, #fae8d0 100%); border: 2px dashed #d4a373;">
-                    <div class="row align-items-center g-3">
-                        <div class="col-md-8">
-                            <span class="badge bg-danger text-white rounded-pill px-3 py-1 mb-2 fw-semibold">
-                                <i class="bi bi-grid-3x3-gap-fill me-1"></i> Full Directory
-                            </span>
-                            <h4 class="fw-bold mb-1" style="color: #8c0c16;">Explore All 36+ Dibrugarh Durga Pujas</h4>
-                            <p class="text-muted small mb-0">Search all pandals with real-time auto-suggestions, lazy loading directory, and live community voting.</p>
-                        </div>
-                        <div class="col-md-4 text-center text-md-end">
-                            <a href="allpujas.html" class="btn btn-vote-pill px-4 py-2 text-decoration-none">
-                                <span>Browse All Pujas</span>
-                                <span class="vote-icon-badge">
-                                    <i class="bi bi-arrow-right"></i>
-                                </span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
         </section>
 
         <!-- Official Awards Announced / Winners Showcase Section -->
         <section class="awards-announced-section py-5" id="awards-announced">
             <div class="container py-3">
-                <!-- Section Header Box -->
-                <div class="awards-announced-header-box text-center mb-5">
-                    <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold text-uppercase mb-3 shadow-sm">
+                <!-- Section Header Box (Clickable redirect to allpujas.html) -->
+                <a href="allpujas.html" class="awards-announced-header-box text-center  d-block text-decoration-none"
+                    title="Click to view all Dibrugarh Durga Pujas">
+                    <!-- Top Corner Click Indicator Badge -->
+                    <div class="awards-click-corner-badge" aria-hidden="true">
+                        <span>View All Pujas</span>
+                        <i class="bi bi-arrow-up-right-circle-fill ms-1"></i>
+                    </div>
+
+                    <span
+                        class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold text-uppercase mb-3 shadow-sm">
                         <i class="bi bi-trophy-fill me-1"></i> OFFICIAL ANNOUNCEMENT • SHARAD SAMMAN 2026
                     </span>
-                    <h2 class="display-6 fw-bold mb-2 text-white">🏆 Sharad Samman 2026 — Official Award Winners</h2>
+                    <h2 class="display-6 fw-bold mb-2 text-white">
+                        🏆 Sharad Samman 2026 — Official Award Winners
+                        <i class="bi bi-arrow-right-circle-fill text-warning ms-1 click-arrow-icon"
+                            aria-hidden="true"></i>
+                    </h2>
                     <p class="lead text-white-50 mx-auto mb-4" style="max-width: 780px; font-size: 1.05rem;">
-                        Public voting and official jury assessments have concluded! Celebrating the crowned champions of Dibrugarh's finest pandals, idols, and lightings.
+                        Public voting and official jury assessments have concluded! Celebrating the crowned champions of
+                        Dibrugarh's finest pandals, idols, and lightings.
                     </p>
 
                     <!-- Key Stats Bar -->
-                    <div class="d-flex flex-wrap justify-content-center gap-3 pt-2 border-top border-warning border-opacity-25">
+                    <div
+                        class="d-flex flex-wrap justify-content-center gap-3 pt-2 border-top border-warning border-opacity-25">
                         <div class="px-3 py-1 rounded-pill bg-white bg-opacity-10 text-white small">
-                            <i class="bi bi-check-circle-fill text-warning me-1"></i> <strong>48,920+</strong> Verified Votes Cast
+                            <i class="bi bi-check-circle-fill text-warning me-1"></i> <strong>48,920+</strong> Verified
+                            Votes Cast
                         </div>
                         <div class="px-3 py-1 rounded-pill bg-white bg-opacity-10 text-white small">
-                            <i class="bi bi-award-fill text-warning me-1"></i> <strong>3 Flagship</strong> Award Categories
+                            <i class="bi bi-award-fill text-warning me-1"></i> <strong>3 Flagship</strong> Award
+                            Categories
                         </div>
                         <div class="px-3 py-1 rounded-pill bg-white bg-opacity-10 text-white small">
                             <i class="bi bi-shield-check text-warning me-1"></i> <strong>Jury Certified</strong> Results
                         </div>
                     </div>
-                </div>
 
-                <!-- CATEGORY 1: BEST PUJA WINNERS -->
-                <div class="mb-5">
-                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4 pb-2 border-bottom border-danger border-opacity-25">
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="badge bg-danger text-white rounded-pill px-3 py-2 fs-6">
-                                <i class="bi bi-trophy-fill me-1"></i> CATEGORY 01
-                            </span>
-                            <h3 class="fw-bold mb-0 text-dark">Best Puja — Announced Winners</h3>
-                        </div>
-                        <span class="text-muted small"><i class="bi bi-star-fill text-warning me-1"></i> Grand Flagship Title</span>
-                    </div>
 
-                    <div class="row g-4 justify-content-center">
-                        <!-- 1st Place Gold Winner -->
-                        <div class="col-12 col-md-6 col-lg-4">
-                            <div class="winner-podium-card winner-gold h-100">
-                                <span class="winner-rank-badge badge-gold">
-                                    <i class="bi bi-crown-fill me-1"></i> 1st Place • Winner
-                                </span>
-                                <div class="winner-img-wrap">
-                                    <img src="https://images.unsplash.com/photo-1728921957375-877340feaf6a?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0" alt="New Market Durga Puja">
-                                    <div class="winner-img-overlay d-flex justify-content-between align-items-end">
-                                        <span class="winner-vote-pill text-warning">
-                                            <i class="bi bi-fire me-1"></i> 5,537 Votes
-                                        </span>
-                                        <span class="badge bg-warning text-dark fw-bold">GOLD MEDAL</span>
-                                    </div>
-                                </div>
-                                <div class="p-3 text-center">
-                                    <div class="mb-2">
-                                        <div class="winner-trophy-ring ring-gold mx-auto">
-                                            <i class="bi bi-trophy-fill"></i>
-                                        </div>
-                                    </div>
-                                    <h4 class="fw-bold mb-1 text-dark">New Market Durga Puja</h4>
-                                    <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill text-danger me-1"></i> New Market Road, Dibrugarh</p>
-                                    <div class="p-2 rounded bg-warning bg-opacity-10 text-dark small fw-medium">
-                                        <i class="bi bi-award-fill text-warning me-1"></i> Winner of Best Puja 2026 for Exceptional Architecture & Theme Excellence.
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                </a>
 
-                        <!-- 2nd Place Silver Runner-up -->
-                        <div class="col-12 col-md-6 col-lg-4">
-                            <div class="winner-podium-card winner-silver h-100">
-                                <span class="winner-rank-badge badge-silver">
-                                    <i class="bi bi-award-fill me-1"></i> 2nd Place • Runner-Up
-                                </span>
-                                <div class="winner-img-wrap">
-                                    <img src="https://images.unsplash.com/photo-1728493118702-febd0b9a0fab?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0" alt="Thana Chariali Sarbajanin">
-                                    <div class="winner-img-overlay d-flex justify-content-between align-items-end">
-                                        <span class="winner-vote-pill text-light">
-                                            <i class="bi bi-hand-thumbs-up me-1"></i> 4,812 Votes
-                                        </span>
-                                        <span class="badge bg-secondary text-white fw-bold">SILVER MEDAL</span>
-                                    </div>
-                                </div>
-                                <div class="p-3 text-center">
-                                    <div class="mb-2">
-                                        <div class="winner-trophy-ring ring-silver mx-auto">
-                                            <i class="bi bi-award"></i>
-                                        </div>
-                                    </div>
-                                    <h4 class="fw-bold mb-1 text-dark">Thana Chariali Sarbajanin</h4>
-                                    <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill text-danger me-1"></i> Thana Chariali, Dibrugarh</p>
-                                    <div class="p-2 rounded bg-light text-muted small fw-medium">
-                                        <i class="bi bi-check-circle-fill text-secondary me-1"></i> Runner-Up for Outstanding Heritage Concept & Crowd Safety.
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
 
-                        <!-- 3rd Place Bronze Runner-up -->
-                        <div class="col-12 col-md-6 col-lg-4">
-                            <div class="winner-podium-card winner-bronze h-100">
-                                <span class="winner-rank-badge badge-bronze">
-                                    <i class="bi bi-shield-fill me-1"></i> 3rd Place • 2nd Runner-Up
-                                </span>
-                                <div class="winner-img-wrap">
-                                    <img src="https://images.unsplash.com/photo-1728921957375-877340feaf6a?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0" alt="Graham Bazar Sarbajanin">
-                                    <div class="winner-img-overlay d-flex justify-content-between align-items-end">
-                                        <span class="winner-vote-pill text-light">
-                                            <i class="bi bi-hand-thumbs-up me-1"></i> 3,940 Votes
-                                        </span>
-                                        <span class="badge bg-danger bg-opacity-75 text-white fw-bold">BRONZE MEDAL</span>
-                                    </div>
-                                </div>
-                                <div class="p-3 text-center">
-                                    <div class="mb-2">
-                                        <div class="winner-trophy-ring ring-bronze mx-auto">
-                                            <i class="bi bi-star"></i>
-                                        </div>
-                                    </div>
-                                    <h4 class="fw-bold mb-1 text-dark">Graham Bazar Sarbajanin</h4>
-                                    <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill text-danger me-1"></i> Graham Bazar, Dibrugarh</p>
-                                    <div class="p-2 rounded bg-light text-muted small fw-medium">
-                                        <i class="bi bi-check-circle-fill text-danger me-1"></i> 2nd Runner-Up for Traditional Ambiance & Community Harmony.
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- CATEGORY 2: BEST PRATIMA WINNERS -->
-                <div class="mb-5">
-                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4 pb-2 border-bottom border-primary border-opacity-25">
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="badge bg-dark text-white rounded-pill px-3 py-2 fs-6">
-                                <i class="bi bi-flower1 text-warning me-1"></i> CATEGORY 02
-                            </span>
-                            <h3 class="fw-bold mb-0 text-dark">Best Pratima — Idol Artistry Winners</h3>
-                        </div>
-                        <span class="text-muted small"><i class="bi bi-palette-fill me-1 text-primary"></i> Clay Idol Craftsmanship</span>
-                    </div>
-
-                    <div class="row g-4 justify-content-center">
-                        <!-- 1st Place Gold Winner -->
-                        <div class="col-12 col-md-6 col-lg-4">
-                            <div class="winner-podium-card winner-gold h-100">
-                                <span class="winner-rank-badge badge-gold">
-                                    <i class="bi bi-crown-fill me-1"></i> 1st Place • Winner
-                                </span>
-                                <div class="winner-img-wrap">
-                                    <img src="https://images.unsplash.com/photo-1756399220348-7964d338cb19?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0" alt="Kadmani Sarbajanin Pratima">
-                                    <div class="winner-img-overlay d-flex justify-content-between align-items-end">
-                                        <span class="winner-vote-pill text-warning">
-                                            <i class="bi bi-fire me-1"></i> 4,115 Votes
-                                        </span>
-                                        <span class="badge bg-warning text-dark fw-bold">GOLD MEDAL</span>
-                                    </div>
-                                </div>
-                                <div class="p-3 text-center">
-                                    <div class="mb-2">
-                                        <div class="winner-trophy-ring ring-gold mx-auto">
-                                            <i class="bi bi-flower1"></i>
-                                        </div>
-                                    </div>
-                                    <h4 class="fw-bold mb-1 text-dark">Kadmani Sarbajanin Pratima</h4>
-                                    <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill text-danger me-1"></i> Kadmani, Dibrugarh</p>
-                                    <div class="p-2 rounded bg-warning bg-opacity-10 text-dark small fw-medium">
-                                        <i class="bi bi-award-fill text-warning me-1"></i> Crowned Best Idol for Divine Expressions & Master Clay Sculpting.
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 2nd Place Silver Runner-up -->
-                        <div class="col-12 col-md-6 col-lg-4">
-                            <div class="winner-podium-card winner-silver h-100">
-                                <span class="winner-rank-badge badge-silver">
-                                    <i class="bi bi-award-fill me-1"></i> 2nd Place • Runner-Up
-                                </span>
-                                <div class="winner-img-wrap">
-                                    <img src="https://images.unsplash.com/photo-1728921957375-877340feaf6a?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0" alt="Jalan Nagar Sarbajanin Pratima">
-                                    <div class="winner-img-overlay d-flex justify-content-between align-items-end">
-                                        <span class="winner-vote-pill text-light">
-                                            <i class="bi bi-hand-thumbs-up me-1"></i> 3,420 Votes
-                                        </span>
-                                        <span class="badge bg-secondary text-white fw-bold">SILVER MEDAL</span>
-                                    </div>
-                                </div>
-                                <div class="p-3 text-center">
-                                    <div class="mb-2">
-                                        <div class="winner-trophy-ring ring-silver mx-auto">
-                                            <i class="bi bi-palette"></i>
-                                        </div>
-                                    </div>
-                                    <h4 class="fw-bold mb-1 text-dark">Jalan Nagar Sarbajanin Pratima</h4>
-                                    <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill text-danger me-1"></i> Jalan Nagar, Dibrugarh</p>
-                                    <div class="p-2 rounded bg-light text-muted small fw-medium">
-                                        <i class="bi bi-check-circle-fill text-secondary me-1"></i> Runner-Up for Traditional Ornamentation & Aesthetic Finishes.
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 3rd Place Bronze Runner-up -->
-                        <div class="col-12 col-md-6 col-lg-4">
-                            <div class="winner-podium-card winner-bronze h-100">
-                                <span class="winner-rank-badge badge-bronze">
-                                    <i class="bi bi-shield-fill me-1"></i> 3rd Place • 2nd Runner-Up
-                                </span>
-                                <div class="winner-img-wrap">
-                                    <img src="https://images.unsplash.com/photo-1728493118702-febd0b9a0fab?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0" alt="Graham Bazar Cultural Pratima">
-                                    <div class="winner-img-overlay d-flex justify-content-between align-items-end">
-                                        <span class="winner-vote-pill text-light">
-                                            <i class="bi bi-hand-thumbs-up me-1"></i> 2,980 Votes
-                                        </span>
-                                        <span class="badge bg-danger bg-opacity-75 text-white fw-bold">BRONZE MEDAL</span>
-                                    </div>
-                                </div>
-                                <div class="p-3 text-center">
-                                    <div class="mb-2">
-                                        <div class="winner-trophy-ring ring-bronze mx-auto">
-                                            <i class="bi bi-brush"></i>
-                                        </div>
-                                    </div>
-                                    <h4 class="fw-bold mb-1 text-dark">Graham Bazar Cultural Pratima</h4>
-                                    <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill text-danger me-1"></i> Graham Bazar, Dibrugarh</p>
-                                    <div class="p-2 rounded bg-light text-muted small fw-medium">
-                                        <i class="bi bi-check-circle-fill text-danger me-1"></i> 2nd Runner-Up for Eco-Friendly Natural Clay Dyes.
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- CATEGORY 3: BEST LIGHTING WINNERS -->
-                <div>
-                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4 pb-2 border-bottom border-warning border-opacity-50">
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="badge bg-warning text-dark rounded-pill px-3 py-2 fs-6">
-                                <i class="bi bi-lightbulb-fill me-1"></i> CATEGORY 03
-                            </span>
-                            <h3 class="fw-bold mb-0 text-dark">Best Lighting — Illumination Winners</h3>
-                        </div>
-                        <span class="text-muted small"><i class="bi bi-brightness-high-fill text-warning me-1"></i> Grand Illumination Gates</span>
-                    </div>
-
-                    <div class="row g-4 justify-content-center">
-                        <!-- 1st Place Gold Winner -->
-                        <div class="col-12 col-md-6 col-lg-4">
-                            <div class="winner-podium-card winner-gold h-100">
-                                <span class="winner-rank-badge badge-gold">
-                                    <i class="bi bi-crown-fill me-1"></i> 1st Place • Winner
-                                </span>
-                                <div class="winner-img-wrap">
-                                    <img src="https://images.unsplash.com/photo-1728921957375-877340feaf6a?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0" alt="Thana Chariali Illumination">
-                                    <div class="winner-img-overlay d-flex justify-content-between align-items-end">
-                                        <span class="winner-vote-pill text-warning">
-                                            <i class="bi bi-fire me-1"></i> 5,120 Votes
-                                        </span>
-                                        <span class="badge bg-warning text-dark fw-bold">GOLD MEDAL</span>
-                                    </div>
-                                </div>
-                                <div class="p-3 text-center">
-                                    <div class="mb-2">
-                                        <div class="winner-trophy-ring ring-gold mx-auto">
-                                            <i class="bi bi-lightbulb-fill"></i>
-                                        </div>
-                                    </div>
-                                    <h4 class="fw-bold mb-1 text-dark">Thana Chariali Sarbajanin</h4>
-                                    <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill text-danger me-1"></i> Thana Chariali, Dibrugarh</p>
-                                    <div class="p-2 rounded bg-warning bg-opacity-10 text-dark small fw-medium">
-                                        <i class="bi bi-award-fill text-warning me-1"></i> Awarded Gold for 3D Dynamic LED Light Gates & Chandelier Displays.
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 2nd Place Silver Runner-up -->
-                        <div class="col-12 col-md-6 col-lg-4">
-                            <div class="winner-podium-card winner-silver h-100">
-                                <span class="winner-rank-badge badge-silver">
-                                    <i class="bi bi-award-fill me-1"></i> 2nd Place • Runner-Up
-                                </span>
-                                <div class="winner-img-wrap">
-                                    <img src="https://images.unsplash.com/photo-1728493118702-febd0b9a0fab?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0" alt="New Market Illumination">
-                                    <div class="winner-img-overlay d-flex justify-content-between align-items-end">
-                                        <span class="winner-vote-pill text-light">
-                                            <i class="bi bi-hand-thumbs-up me-1"></i> 4,680 Votes
-                                        </span>
-                                        <span class="badge bg-secondary text-white fw-bold">SILVER MEDAL</span>
-                                    </div>
-                                </div>
-                                <div class="p-3 text-center">
-                                    <div class="mb-2">
-                                        <div class="winner-trophy-ring ring-silver mx-auto">
-                                            <i class="bi bi-brightness-high"></i>
-                                        </div>
-                                    </div>
-                                    <h4 class="fw-bold mb-1 text-dark">New Market Durga Puja</h4>
-                                    <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill text-danger me-1"></i> New Market Road, Dibrugarh</p>
-                                    <div class="p-2 rounded bg-light text-muted small fw-medium">
-                                        <i class="bi bi-check-circle-fill text-secondary me-1"></i> Runner-Up for Synchronized Street Illumination.
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 3rd Place Bronze Runner-up -->
-                        <div class="col-12 col-md-6 col-lg-4">
-                            <div class="winner-podium-card winner-bronze h-100">
-                                <span class="winner-rank-badge badge-bronze">
-                                    <i class="bi bi-shield-fill me-1"></i> 3rd Place • 2nd Runner-Up
-                                </span>
-                                <div class="winner-img-wrap">
-                                    <img src="https://images.unsplash.com/photo-1756399220348-7964d338cb19?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0" alt="Kadmani Illumination">
-                                    <div class="winner-img-overlay d-flex justify-content-between align-items-end">
-                                        <span class="winner-vote-pill text-light">
-                                            <i class="bi bi-hand-thumbs-up me-1"></i> 3,850 Votes
-                                        </span>
-                                        <span class="badge bg-danger bg-opacity-75 text-white fw-bold">BRONZE MEDAL</span>
-                                    </div>
-                                </div>
-                                <div class="p-3 text-center">
-                                    <div class="mb-2">
-                                        <div class="winner-trophy-ring ring-bronze mx-auto">
-                                            <i class="bi bi-sun"></i>
-                                        </div>
-                                    </div>
-                                    <h4 class="fw-bold mb-1 text-dark">Kadmani Sarbajanin Pratima</h4>
-                                    <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill text-danger me-1"></i> Kadmani, Dibrugarh</p>
-                                    <div class="p-2 rounded bg-light text-muted small fw-medium">
-                                        <i class="bi bi-check-circle-fill text-danger me-1"></i> 2nd Runner-Up for Eco-Solar Powered Illumination Arches.
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
             </div>
         </section>
@@ -2069,6 +1670,53 @@
                 </div>
             </div>
         </section>
+
+        <!-- Marketing Promotional Banner Section (Auto-Rotating Carousel) -->
+        <section class="marketing-banner-section py-4" id="promo-banner">
+            <div class="container">
+                <div class="marketing-banner-wrapper rounded-3 overflow-hidden shadow-sm position-relative">
+                    <div id="marketingBannerCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel"
+                        data-bs-interval="4500" data-bs-pause="hover" data-bs-touch="true">
+                        <!-- Carousel Indicators -->
+                        <div class="carousel-indicators marketing-carousel-indicators mb-2">
+                            <button type="button" data-bs-target="#marketingBannerCarousel" data-bs-slide-to="0"
+                                class="active" aria-current="true" aria-label="Banner Ad 1"></button>
+                            <button type="button" data-bs-target="#marketingBannerCarousel" data-bs-slide-to="1"
+                                aria-label="Banner Ad 2"></button>
+                        </div>
+
+                        <!-- Carousel Slides -->
+                        <div class="carousel-inner">
+                            <!-- Banner Ad Slide 1 -->
+                            <div class="carousel-item active" data-bs-interval="4500">
+                                <picture>
+                                    <!-- Mobile Banner (< 768px) -->
+                                    <source media="(max-width: 767.98px)"
+                                        srcset="https://d324x08swjodnj.cloudfront.net/assets/images/marketting-banners/October2026/HPXIaAyrTpWKhkNEIAua.png">
+                                    <!-- Desktop / Web Banner (>= 768px) -->
+                                    <img src="https://d324x08swjodnj.cloudfront.net/assets/images/marketting-banners/October2026/KSd3k3rQlfnqHJ8qN4V1.png"
+                                        alt="Durgo Utsav Promotional Banner 1"
+                                        class="img-fluid w-100 d-block marketing-banner-img" fetchpriority="high">
+                                </picture>
+                            </div>
+
+                            <!-- Banner Ad Slide 2 (Ready for incoming ad banners) -->
+                            <div class="carousel-item" data-bs-interval="4500">
+                                <picture>
+                                    <!-- Mobile Banner (< 768px) -->
+                                    <source media="(max-width: 767.98px)" srcset="images/ad-mob.png">
+                                    <!-- Desktop / Web Banner (>= 768px) -->
+                                    <img src="images/ad-web.png" alt="Durgo Utsav Promotional Banner 2"
+                                        class="img-fluid w-100 d-block marketing-banner-img" loading="lazy">
+                                </picture>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </section>
     </main>
 
     <footer class="site-footer" id="siteFooter">
@@ -2121,9 +1769,9 @@
                     <ul class="footer-nav">
                         <li><a href="#home" class="nav-link-item active" data-page="Home">Home</a></li>
                         <li class="nav-sep">|</li>
-                        <li><a href="#pujas" class="nav-link-item" data-page="Pujas">Pujas</a></li>
-                        <li class="nav-sep">|</li>
                         <li><a href="allpujas.html" class="nav-link-item">All Pujas</a></li>
+                        <li class="nav-sep">|</li>
+                        <li><a href="vote.html" class="nav-link-item">Vote</a></li>
                         <li class="nav-sep">|</li>
                         <li><a href="#gallery" class="nav-link-item" data-page="Gallery">Gallery</a></li>
                         <li class="nav-sep">|</li>

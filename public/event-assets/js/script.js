@@ -17,30 +17,27 @@ $(document).ready(function () {
     // ==========================================================================
     var pendingVoteData = { mobile: '', participantId: '', awardId: '', eventId: '' };
 
-    $('.vote-trigger-btn').on('click', function () {
-        var pandalName = $(this).attr('data-pandal');
-        var participantId = $(this).attr('data-participant-id') || $(this).attr('data-puja-id');
-        var awardId = $(this).attr('data-award-id') || '';
+    $(document).on('click', '.vote-trigger-btn', function (e) {
+        e.preventDefault();
+        var pandalName = $(this).attr('data-pandal') || '';
+        var participantId = $(this).attr('data-participant-id') || $(this).attr('data-puja-id') || '';
+        var participantSlug = $(this).attr('data-slug') || '';
 
-        pendingVoteData.participantId = participantId;
-        pendingVoteData.awardId = awardId;
+        try {
+            localStorage.setItem('selected_pandal', pandalName);
+        } catch (err) {}
 
-        if (participantId) {
-            $('#pandalSelect').val(participantId);
+        var baseUrl = (window.voteBaseUrl || '/vote').replace(/\/+$/, '');
+        var voteUrl = baseUrl;
+        if (participantSlug) {
+            voteUrl += '/' + encodeURIComponent(participantSlug);
         } else if (pandalName) {
-            var $opt = $('#pandalSelect option[data-name="' + pandalName + '"]');
-            if ($opt.length) {
-                $('#pandalSelect').val($opt.val());
-            }
+            var slugFallback = pandalName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+            voteUrl += slugFallback ? '/' + encodeURIComponent(slugFallback) : '';
+        } else if (participantId) {
+            voteUrl += '/' + encodeURIComponent(participantId);
         }
-
-        if (awardId) {
-            $('#awardSelect').val(awardId);
-        }
-
-        $('#alreadyVotedAlert').addClass('d-none');
-        var voteModal = new bootstrap.Modal(document.getElementById('voteModal'));
-        voteModal.show();
+        window.location.href = voteUrl;
     });
 
     // Step 1: Submit Mobile Number to trigger real OTP or show Already Voted alert

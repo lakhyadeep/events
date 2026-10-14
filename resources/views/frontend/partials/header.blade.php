@@ -19,29 +19,30 @@
                     <ul class="navbar-nav mx-auto custom-nav my-3 my-lg-0">
                         @php
                             $isAllPujasPage = request()->routeIs('all-pujas') || request()->routeIs('events.all-pujas');
+                            $isVotePage = request()->routeIs('vote') || request()->routeIs('events.vote');
+                            $isVoteSuccessPage = request()->routeIs('vote-success') || request()->routeIs('events.vote-success');
+                            $isHomePage = ! $isAllPujasPage && ! $isVotePage && ! $isVoteSuccessPage;
                             $homeUrl = isset($event) && $event->slug ? route('events.show', $event->slug) : route('home');
                             $allPujasUrl = isset($event) && $event->slug ? route('events.all-pujas', $event->slug) : route('all-pujas');
+                            $voteUrl = isset($event) && $event->slug ? route('events.vote', $event->slug) : route('vote');
                         @endphp
                         <li class="nav-item">
-                            <a class="nav-link {{ !$isAllPujasPage ? 'active' : '' }}" data-target="home" href="{{ $isAllPujasPage ? $homeUrl . '#home' : '#home' }}">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" data-target="pujas" href="{{ $isAllPujasPage ? $homeUrl . '#pujas' : '#pujas' }}">Pujas</a>
+                            <a class="nav-link {{ $isHomePage ? 'active' : '' }}" data-target="home" href="{{ $isHomePage ? '#home' : $homeUrl . '#home' }}">Home</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {{ $isAllPujasPage ? 'active' : '' }}" href="{{ $allPujasUrl }}">All Pujas</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" data-target="awards-announced" href="{{ $isAllPujasPage ? $homeUrl . '#awards-announced' : '#awards-announced' }}">Winners</a>
+                            <a class="nav-link" data-target="awards-announced" href="{{ $isHomePage ? '#awards-announced' : $homeUrl . '#awards-announced' }}">Winners</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" data-target="gallery" href="{{ $isAllPujasPage ? $homeUrl . '#gallery' : '#gallery' }}">Gallery</a>
+                            <a class="nav-link" data-target="gallery" href="{{ $isHomePage ? '#gallery' : $homeUrl . '#gallery' }}">Gallery</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" data-target="events" href="{{ $isAllPujasPage ? $homeUrl . '#events' : '#events' }}">Events</a>
+                            <a class="nav-link" data-target="events" href="{{ $isHomePage ? '#events' : $homeUrl . '#events' }}">Events</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" data-target="about" href="{{ $isAllPujasPage ? $homeUrl . '#about' : '#about' }}">About</a>
+                            <a class="nav-link" data-target="about" href="{{ $isHomePage ? '#about' : $homeUrl . '#about' }}">About</a>
                         </li>
                     </ul>
 
@@ -51,16 +52,30 @@
                     @endphp
                     <div class="d-flex align-items-center mt-3 mt-lg-0">
                         @if ($isVotingOpen)
-                            <button class="btn btn-vote-pill w-100 w-lg-auto" id="btnVoteModal" type="button"
-                                data-bs-toggle="modal" data-bs-target="#voteModal">
-                                <span>Vote Now</span>
-                                <span class="vote-icon-badge">
-                                    <i class="bi bi-hand-index-thumb-fill"></i>
-                                </span>
-                            </button>
+                            @if ($isHomePage)
+                                <a href="{{ $allPujasUrl }}" class="btn btn-vote-pill w-100 w-lg-auto text-decoration-none" id="btnVoteModal">
+                                    <span>Vote Now</span>
+                                    <span class="vote-icon-badge">
+                                        <i class="bi bi-hand-index-thumb-fill"></i>
+                                    </span>
+                                </a>
+                            @elseif ($isVotePage)
+                                <a href="#voting-form-section" class="btn btn-vote-pill w-100 w-lg-auto text-decoration-none" id="btnVoteModalNav">
+                                    <span>Vote Now</span>
+                                    <span class="vote-icon-badge">
+                                        <i class="bi bi-hand-index-thumb-fill"></i>
+                                    </span>
+                                </a>
+                            @else
+                                <a href="{{ $voteUrl }}" class="btn btn-vote-pill w-100 w-lg-auto text-decoration-none" id="btnVoteModalNav">
+                                    <span>Vote Now</span>
+                                    <span class="vote-icon-badge">
+                                        <i class="bi bi-hand-index-thumb-fill"></i>
+                                    </span>
+                                </a>
+                            @endif
                         @else
-                            <button class="btn btn-secondary rounded-pill w-100 w-lg-auto opacity-75" id="btnVoteModalClosed" type="button"
-                                data-bs-toggle="modal" data-bs-target="#voteModal">
+                            <button class="btn btn-secondary rounded-pill w-100 w-lg-auto opacity-75" id="btnVoteModalClosed" type="button" disabled>
                                 <span>Voting Closed</span>
                                 <span class="badge bg-dark rounded-pill ms-2">
                                     <i class="bi bi-lock-fill"></i>

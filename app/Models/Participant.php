@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class Participant extends Model
 {
@@ -73,6 +74,13 @@ class Participant extends Model
                 $participant->locality = Locality::find($participant->locality_id)?->name ?? $participant->locality;
             }
         });
+    }
+
+    public function slug(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => Str::slug($this->display_name ?: $this->name)
+        );
     }
 
     public function primaryImageUrl(): Attribute
