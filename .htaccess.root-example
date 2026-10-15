@@ -1,25 +1,17 @@
-# ----------------------------------------------------------------------
-# Root .htaccess for Shared Hosting Subdirectory Deployments
-# Placed in the project root: /event-demo/.htaccess
-# ----------------------------------------------------------------------
+DirectoryIndex public/index.php index.php
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /event-demo/
 
-    # 1. Security: Block direct access to sensitive files and folders
+    # 1. Protect sensitive Laravel core files & folders
     RewriteRule ^\.env - [F,L,NC]
     RewriteRule \.(sqlite|sqlite3|db)$ - [F,L,NC]
     RewriteRule ^composer\.(json|lock) - [F,L,NC]
     RewriteRule ^package(-lock)?\.json - [F,L,NC]
-    RewriteRule ^(app|bootstrap|config|database|resources|routes|storage|tests|vendor)/ - [F,L,NC]
+    RewriteRule ^(app|bootstrap|config|database|resources|routes|tests|vendor)/ - [F,L,NC]
     RewriteRule ^artisan - [F,L,NC]
 
-    # 2. Serve existing files directly from public directory if requested
-    RewriteCond %{DOCUMENT_ROOT}/event-demo/public/$1 -f
+    # 2. Rewrite all requests to public/
+    RewriteCond %{REQUEST_URI} !^/public/
     RewriteRule ^(.*)$ public/$1 [L]
-
-    # 3. Route all other requests directly to public/index.php
-    RewriteCond %{REQUEST_URI} !^/event-demo/public/index\.php$
-    RewriteRule ^(.*)$ public/index.php [L]
 </IfModule>
