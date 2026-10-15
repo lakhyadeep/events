@@ -196,6 +196,9 @@
                                             @else
                                                 <span class="badge bg-warning text-dark rounded-pill px-3 py-1 fw-bold" id="previewPandalVotes" style="display: none;"></span>
                                             @endif
+                                            @if ($selectedParticipant)
+                                                <x-gmap-button :participant="$selectedParticipant" :location="$locString" />
+                                            @endif
                                         </div>
                                     </div>
                                 </div>

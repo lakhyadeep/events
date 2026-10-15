@@ -140,8 +140,9 @@
                                 </div>
 
                                 @if (!empty($puja['location']))
-                                    <p class="text-muted small mb-2">
-                                        <i class="bi bi-geo-alt-fill text-danger me-1"></i> {{ $puja['location'] }}
+                                    <p class="text-muted small mb-2 d-flex flex-wrap align-items-center justify-content-between gap-2">
+                                        <span><i class="bi bi-geo-alt-fill text-danger me-1"></i> {{ $puja['location'] }}</span>
+                                        <x-gmap-button :map-url="$puja['google_map_url'] ?? null" :name="$puja['name']" :location="$puja['location']" />
                                     </p>
                                 @endif
 
