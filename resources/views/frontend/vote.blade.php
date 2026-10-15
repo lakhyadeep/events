@@ -7,8 +7,8 @@
         ? "Cast your vote for {$pandalTitle} in " . ($event->display_name ?: $event->name) . ". Vote for theme, pandal, idol, or overall best."
         : ($event->meta_description ?: ("Cast your vote for the People's Favorite Award in " . ($event->display_name ?: $event->name) . ". Select your favorite puja committee and vote for theme, pandal, idol, or overall best."));
     $canonicalUrl = $selectedParticipant && $selectedParticipant->slug
-        ? route('vote.participant', ['participant' => $selectedParticipant->slug])
-        : url('/vote');
+        ? route('events.vote', ['event' => $event->slug, 'participant' => $selectedParticipant->slug])
+        : url('/'.$event->slug.'/vote');
 @endphp
 <x-layouts.microsite
     :event="$event"
@@ -39,7 +39,8 @@
             window.currentEventName = @json($event->display_name ?: $event->name);
             window.selectedParticipantId = {{ $selectedParticipant?->id ?? 'null' }};
             window.selectedParticipantSlug = @json($selectedParticipant?->slug ?? null);
-            window.voteBaseUrl = @json(url('/vote'));
+            window.voteBaseUrl = @json(url('/'.$event->slug.'/vote'));
+            window.voteSuccessUrl = @json(url('/'.$event->slug.'/vote-success'));
             window.otpConfig = @json($otpConfig ?? ['length' => 4, 'resendCooldown' => 60, 'expiryMinutes' => 5]);
         </script>
 
@@ -162,7 +163,7 @@
                                                 <span class="selected-choice-badge">
                                                     <i class="bi bi-patch-check-fill text-danger me-1"></i> Nominated Choice
                                                 </span>
-                                                <a href="{{ route('all-pujas') }}" class="btn btn-sm btn-outline-danger rounded-pill px-2 py-0" style="font-size: 0.75rem;">
+                                                <a href="{{ route('events.all-pujas', ['event' => $event->slug]) }}" class="btn btn-sm btn-outline-danger rounded-pill px-2 py-0" style="font-size: 0.75rem;">
                                                     Change
                                                 </a>
                                             </div>
@@ -194,6 +195,9 @@
                                                 </span>
                                             @else
                                                 <span class="badge bg-warning text-dark rounded-pill px-3 py-1 fw-bold" id="previewPandalVotes" style="display: none;"></span>
+                                            @endif
+                                            @if ($selectedParticipant)
+                                                <x-gmap-button :participant="$selectedParticipant" :location="$locString" />
                                             @endif
                                         </div>
                                     </div>

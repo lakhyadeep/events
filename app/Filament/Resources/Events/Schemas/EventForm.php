@@ -46,7 +46,7 @@ class EventForm
                             TextInput::make('slug')
                                 ->label('URL Slug')
                                 ->placeholder('e.g. sharod-samman-2026')
-                                ->helperText('Defines public URL: /events/{slug}')
+                                ->helperText('Defines public URL: /{slug}')
                                 ->required()
                                 ->unique(ignoreRecord: true)
                                 ->maxLength(191),

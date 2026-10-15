@@ -1,7 +1,7 @@
 <x-layouts.microsite :event="$event"
     :meta-title="($event->meta_title ?: 'All Pujas Directory — ' . ($event->display_name ?? 'Dibrugarh Durgo Utsav 2026'))"
     :meta-description="$event->meta_description ?: 'Explore the complete directory of registered Sarbajanin Durga Pujas across Dibrugarh with interactive search, auto-suggestions, and live voting.'"
-    :og-image="$event->og_image ?? null" :canonical-url="route('all-pujas')" :use-all-pujas-script="true">
+    :og-image="$event->og_image ?? null" :canonical-url="route('events.all-pujas', ['event' => $event->slug])" :use-all-pujas-script="true">
     <!-- Top Navigation Header -->
     @include('frontend.partials.header')
 
@@ -140,8 +140,9 @@
                                 </div>
 
                                 @if (!empty($puja['location']))
-                                    <p class="text-muted small mb-2">
-                                        <i class="bi bi-geo-alt-fill text-danger me-1"></i> {{ $puja['location'] }}
+                                    <p class="text-muted small mb-2 d-flex flex-wrap align-items-center justify-content-between gap-2">
+                                        <span><i class="bi bi-geo-alt-fill text-danger me-1"></i> {{ $puja['location'] }}</span>
+                                        <x-gmap-button :map-url="$puja['google_map_url'] ?? null" :name="$puja['name']" :location="$puja['location']" />
                                     </p>
                                 @endif
 

@@ -45,7 +45,7 @@
     <section class="awards-announced-section py-5" id="awards-announced">
         <div class="container py-3">
             <!-- Section Header Box (Clickable redirect to All Pujas) -->
-            <a href="{{ route('all-pujas') }}"
+            <a href="{{ isset($event) && $event->slug ? route('events.all-pujas', ['event' => $event->slug]) : route('home') }}"
                 class="awards-announced-header-box text-center d-block text-decoration-none mb-5"
                 title="Click to view all Dibrugarh Durga Pujas">
                 <!-- Top Corner Click Indicator Badge -->
@@ -124,15 +124,15 @@
                                         <div class="winner-img-wrap h-100">
                                             <img src="{{ $pImg }}" alt="{{ $pPart?->display_name ?: $pPart?->name }}">
                                             <!-- <span class="winner-rank-badge badge-gold shadow-sm">
-                                                                                                                        <i class="bi bi-stars text-danger me-1"></i> {{ $pRankLabel ?: '' }}
-                                                                                                                    </span> -->
+                                                                                                                                <i class="bi bi-stars text-danger me-1"></i> {{ $pRankLabel ?: '' }}
+                                                                                                                            </span> -->
                                             <div class="winner-img-overlay d-flex justify-content-between align-items-end">
                                                 <!-- <span class="winner-vote-pill text-warning">
-                                                                                                                                                    <i class="bi bi-patch-check-fill me-1"></i> Jury Certified
-                                                                                                                                                </span> -->
+                                                                                                                                                            <i class="bi bi-patch-check-fill me-1"></i> Jury Certified
+                                                                                                                                                        </span> -->
                                                 <!-- <span class="badge bg-warning text-dark fw-bold">
-                                                                                                                                                    <i class="bi bi-trophy-fill me-1"></i>
-                                                                                                                                                </span> -->
+                                                                                                                                                            <i class="bi bi-trophy-fill me-1"></i>
+                                                                                                                                                        </span> -->
                                             </div>
                                         </div>
                                     </div>
@@ -181,16 +181,16 @@
                                                 </div>
                                                 <div>
                                                     <!-- <div class="crown-badge-pill mb-1 d-inline-flex align-items-center">
-                                                                                                                                                                                                    <i class="bi bi-stars text-warning me-1"></i>MAHA PURASKAR •
-                                                                                                                                                                                                    GRAND CHAMPION
-                                                                                                                                                                                                </div> -->
+                                                                                                                                                                                                            <i class="bi bi-stars text-warning me-1"></i>MAHA PURASKAR •
+                                                                                                                                                                                                            GRAND CHAMPION
+                                                                                                                                                                                                        </div> -->
                                                     <h4 class="fw-bold mb-1 text-dark"
                                                         style="font-size: clamp(1.25rem, 2.5vw, 1.5rem);">
                                                         {{ $pPart?->display_name ?: $pPart?->name }}
                                                     </h4>
-                                                    <p class="text-muted small mb-0">
-                                                        <i class="bi bi-geo-alt-fill text-danger me-1"></i>
-                                                        {{ $pLocation }}
+                                                    <p class="text-muted small mb-0 d-flex flex-wrap align-items-center gap-2">
+                                                        <span><i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ $pLocation }}</span>
+                                                        <x-gmap-button :participant="$pPart" :location="$pLocation" />
                                                     </p>
                                                 </div>
                                             </div>
@@ -312,9 +312,9 @@
                                         <img src="{{ $resolveImg($gPart) }}" alt="{{ $gPart?->display_name ?: $gPart?->name }}">
                                         <div class="winner-img-overlay d-flex justify-content-between align-items-end">
                                             <!-- <span class="winner-vote-pill text-warning">
-                                                                                                                                    <i class="bi bi-fire me-1"></i>
-                                                                                                                                    {{ $gPart?->votes_count ? number_format($gPart->votes_count) . ' Votes' : 'Champion' }}
-                                                                                                                                </span> -->
+                                                                                                                                                <i class="bi bi-fire me-1"></i>
+                                                                                                                                                {{ $gPart?->votes_count ? number_format($gPart->votes_count) . ' Votes' : 'Champion' }}
+                                                                                                                                            </span> -->
                                             <!-- <span class="badge bg-warning text-dark fw-bold">GOLD MEDAL</span> -->
                                         </div>
                                     </div>
@@ -325,8 +325,9 @@
                                             </div>
                                         </div>
                                         <h4 class="fw-bold mb-1 text-dark">{{ $gPart?->display_name ?: $gPart?->name }}</h4>
-                                        <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill text-danger me-1"></i>
-                                            {{ $resolveLoc($gPart) }}
+                                        <p class="text-muted small mb-2 d-flex flex-wrap align-items-center justify-content-center gap-2">
+                                            <span><i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ $resolveLoc($gPart) }}</span>
+                                            <x-gmap-button :participant="$gPart" :location="$resolveLoc($gPart)" />
                                         </p>
                                         <div class="p-2 rounded bg-warning bg-opacity-10 text-dark small fw-medium">
                                             <i class="bi bi-award-fill text-warning me-1"></i>
@@ -355,9 +356,9 @@
                                             alt="{{ $sPart?->display_name ?: $sPart?->name }}">
                                         <div class="winner-img-overlay d-flex justify-content-between align-items-end">
                                             <!-- <span class="winner-vote-pill text-light">
-                                                                                                                        <i class="bi bi-hand-thumbs-up me-1"></i>
-                                                                                                                        {{ $sPart?->votes_count ? number_format($sPart->votes_count) . ' Votes' : 'Runner-Up' }}
-                                                                                                                    </span> -->
+                                                                                                                                    <i class="bi bi-hand-thumbs-up me-1"></i>
+                                                                                                                                    {{ $sPart?->votes_count ? number_format($sPart->votes_count) . ' Votes' : 'Runner-Up' }}
+                                                                                                                                </span> -->
                                             <!-- <span class="badge bg-secondary text-white fw-bold">SILVER MEDAL</span> -->
                                         </div>
                                     </div>
@@ -366,14 +367,14 @@
                                             <div class="winner-trophy-ring ring-silver mx-auto">
                                                 <i class="bi {{ $ringIconSilver }}"></i>
                                             </div>
-                                        </div>
-                                        <h4 class="fw-bold mb-1 text-dark">{{ $sPart?->display_name ?: $sPart?->name }}</h4>
-                                        <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill text-danger me-1"></i>
-                                            {{ $resolveLoc($sPart) }}
+                                                                  <h4 class="fw-bold mb-1 text-dark">{{ $sPart?->display_name ?: $sPart?->name }}</h4>
+                                        <p class="text-muted small mb-2 d-flex flex-wrap align-items-center justify-content-center gap-2">
+                                            <span><i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ $resolveLoc($sPart) }}</span>
+                                            <x-gmap-button :participant="$sPart" :location="$resolveLoc($sPart)" />
                                         </p>
                                         <div class="p-2 rounded bg-light text-muted small fw-medium">
-                                            <i class="bi bi-check-circle-fill text-secondary me-1"></i>
-                                            {{ $sPart?->puja_theme ? 'Theme: ' . $sPart->puja_theme : ' ' }}
+                                             <i class="bi bi-check-circle-fill text-secondary me-1"></i>
+                                             {{ $sPart?->puja_theme ? 'Theme: ' . $sPart->puja_theme : ' ' }}
                                         </div>
                                     </div>
                                 </div>
@@ -398,9 +399,9 @@
                                             alt="{{ $bPart?->display_name ?: $bPart?->name }}">
                                         <div class="winner-img-overlay d-flex justify-content-between align-items-end">
                                             <!-- <span class="winner-vote-pill text-light">
-                                                                                                <i class="bi bi-hand-thumbs-up me-1"></i>
-                                                                                                {{ $bPart?->votes_count ? number_format($bPart->votes_count) . ' Votes' : '2nd Runner-Up' }}
-                                                                                            </span> -->
+                                                                                                            <i class="bi bi-hand-thumbs-up me-1"></i>
+                                                                                                            {{ $bPart?->votes_count ? number_format($bPart->votes_count) . ' Votes' : '2nd Runner-Up' }}
+                                                                                                        </span> -->
                                             <!-- <span class="badge bg-danger bg-opacity-75 text-white fw-bold">BRONZE MEDAL</span> -->
                                         </div>
                                     </div>
@@ -411,8 +412,9 @@
                                             </div>
                                         </div>
                                         <h4 class="fw-bold mb-1 text-dark">{{ $bPart?->display_name ?: $bPart?->name }}</h4>
-                                        <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill text-danger me-1"></i>
-                                            {{ $resolveLoc($bPart) }}
+                                        <p class="text-muted small mb-2 d-flex flex-wrap align-items-center justify-content-center gap-2">
+                                            <span><i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ $resolveLoc($bPart) }}</span>
+                                            <x-gmap-button :participant="$bPart" :location="$resolveLoc($bPart)" />
                                         </p>
                                         <div class="p-2 rounded bg-light text-muted small fw-medium">
 
@@ -458,8 +460,9 @@
                                             </div>
                                         </div>
                                         <h4 class="fw-bold mb-1 text-dark">{{ $rPart?->display_name ?: $rPart?->name }}</h4>
-                                        <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill text-danger me-1"></i>
-                                            {{ $resolveLoc($rPart) }}
+                                        <p class="text-muted small mb-2 d-flex flex-wrap align-items-center justify-content-center gap-2">
+                                            <span><i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ $resolveLoc($rPart) }}</span>
+                                            <x-gmap-button :participant="$rPart" :location="$resolveLoc($rPart)" />
                                         </p>
                                         <div class="p-2 rounded bg-light text-muted small fw-medium">
 

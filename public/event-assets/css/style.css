@@ -675,7 +675,7 @@ body {
 /* Embedded Awards Box inside Vote Section with slightly darker background */
 .awards-embedded-box {
     background: rgba(18, 2, 5, 0.55);
-    border-bottom: none;
+    border-bottom: 1px solid rgba(255, 204, 0, 0.22);
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
     backdrop-filter: blur(10px);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -1162,7 +1162,6 @@ body {
     background: radial-gradient(circle at 50% 0%, #680912 0%, #450308 45%, #240104 100%);
     box-shadow: inset 0 12px 36px rgba(0, 0, 0, 0.45);
     overflow: hidden;
-    border-bottom: 2px solid rgba(255, 204, 0, 0.5);
 }
 
 .pujas-header-box .pujas-badge-tag {
@@ -2661,7 +2660,7 @@ footer.site-footer {
 .awards-announced-section {
     background: linear-gradient(180deg, #fdf8f2 0%, #fbf1e4 50%, #f7e8d5 100%);
     position: relative;
-    border-top: none;
+    border-top: 3px solid rgba(183, 13, 24, 0.15);
     border-bottom: 3px solid rgba(183, 13, 24, 0.15);
     overflow: hidden;
 }
@@ -3038,6 +3037,69 @@ footer.site-footer {
     color: #ffffff;
     border: 2px solid #ffffff;
 }
+
+/* ==========================================================================
+   GOOGLE MAPS NAVIGATION / DIRECTIONS LINK BADGE
+   ========================================================================== */
+.puja-gmap-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 9px;
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 50px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #374151;
+    text-decoration: none !important;
+    line-height: 1.2;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    vertical-align: middle;
+    user-select: none;
+}
+
+.puja-gmap-btn:hover {
+    background: #ffffff;
+    color: #1a73e8;
+    border-color: #4285f4;
+    box-shadow: 0 3px 10px rgba(66, 133, 244, 0.22);
+    transform: translateY(-1px);
+}
+
+.puja-gmap-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 3px rgba(66, 133, 244, 0.15);
+}
+
+.puja-gmap-btn .gmap-icon {
+    flex-shrink: 0;
+    width: 12px;
+    height: 17px;
+    transition: transform 0.2s ease;
+}
+
+.puja-gmap-btn:hover .gmap-icon {
+    transform: scale(1.12);
+}
+
+.puja-gmap-btn .gmap-text {
+    font-size: 0.72rem;
+    letter-spacing: 0.2px;
+}
+
+.puja-gmap-btn .gmap-arrow {
+    font-size: 0.65rem;
+    color: #9ca3af;
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.puja-gmap-btn:hover .gmap-arrow {
+    color: #1a73e8;
+    transform: translate(1px, -1px);
+}
+
 
 /* ==========================================================================
    9. ALL PUJAS DIRECTORY, SEARCH, AUTOSUGGEST & LAZY LOADING

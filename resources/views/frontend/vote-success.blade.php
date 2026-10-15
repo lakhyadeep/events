@@ -4,8 +4,8 @@
         ? "Vote Confirmed for {$confirmedTitle} — People's Favorite Award | " . ($event->display_name ?: $event->name)
         : ($event->meta_title ?: ("Vote Confirmed — People's Favorite Award | " . ($event->display_name ?: $event->name)));
     $canonicalUrl = $selectedParticipant && $selectedParticipant->slug
-        ? route('vote-success.participant', ['participant' => $selectedParticipant->slug])
-        : route('all-pujas');
+        ? route('events.vote-success', ['event' => $event->slug, 'participant' => $selectedParticipant->slug])
+        : route('events.all-pujas', ['event' => $event->slug]);
 @endphp
 <x-layouts.microsite
     :event="$event"
@@ -137,7 +137,7 @@
                         @php
                             $sharePandalName = $confirmedTitle ?: 'my favorite Durga Puja';
                             $shareEventName = $event->display_name ?: $event->name;
-                            $shareAllPujasUrl = route('all-pujas');
+                            $shareAllPujasUrl = route('events.all-pujas', ['event' => $event->slug]);
                             $defaultShareMessage = "🎉 I just voted for *{$sharePandalName}* in {$shareEventName}! 🏆\n\nCast your vote for your favorite puja and claim an exclusive *FLAT 20% OFF* Salon Voucher from *TONI&GUY Dibrugarh*!\n\n👉 Vote for all pujas here:\n{$shareAllPujasUrl}";
                             $defaultWhatsappLink = 'https://wa.me/?text=' . rawurlencode($defaultShareMessage);
                         @endphp
@@ -150,13 +150,13 @@
                         </a>
 
                         <!-- Explore All Pujas -->
-                        <a href="{{ route('all-pujas') }}"
+                        <a href="{{ route('events.all-pujas', ['event' => $event->slug]) }}"
                             class="btn btn-outline-danger rounded-pill px-3 py-3 fw-semibold w-100 w-sm-auto">
                             <i class="bi bi-compass me-1"></i> Explore All Pujas
                         </a>
 
                         <!-- Return to Home -->
-                        <a href="{{ route('home') }}"
+                        <a href="{{ route('events.show', ['event' => $event->slug]) }}"
                             class="btn btn-outline-secondary rounded-pill px-3 py-3 w-100 w-sm-auto">
                             <i class="bi bi-house me-1"></i> Home
                         </a>

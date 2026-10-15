@@ -328,12 +328,12 @@ class VotingFlowTest extends TestCase
         ])->assertStatus(422)->assertJson(['message' => 'Voting is currently closed for this event.']);
 
         // Frontend views show closed state
-        $homeResponse = $this->get('/events/'.$event->slug);
+        $homeResponse = $this->get('/'.$event->slug);
         $homeResponse->assertStatus(200);
         $homeResponse->assertSee('Voting Closed');
         $homeResponse->assertSee('Voting is Closed');
 
-        $directoryResponse = $this->get('/events/'.$event->slug.'/all-pujas');
+        $directoryResponse = $this->get('/'.$event->slug.'/all-pujas');
         $directoryResponse->assertStatus(200);
         $directoryResponse->assertSee('Voting is currently closed for this event.');
     }
@@ -363,7 +363,7 @@ class VotingFlowTest extends TestCase
         ])->assertStatus(422)->assertJson(['message' => 'Voting has officially concluded for this event.']);
 
         // Frontend views show closed state
-        $homeResponse = $this->get('/events/'.$event->slug);
+        $homeResponse = $this->get('/'.$event->slug);
         $homeResponse->assertStatus(200);
         $homeResponse->assertSee('Voting Closed');
         $homeResponse->assertSee('Voting has officially concluded for this event.');
@@ -386,7 +386,7 @@ class VotingFlowTest extends TestCase
         ])->assertStatus(200)->assertJson(['success' => true]);
 
         // Home view renders vote now and does not render countdown clock
-        $homeResponse = $this->get('/events/'.$event->slug);
+        $homeResponse = $this->get('/'.$event->slug);
         $homeResponse->assertStatus(200);
         $homeResponse->assertDontSee('votingCountdownClock');
         $homeResponse->assertSee('Vote Now');
@@ -407,7 +407,7 @@ class VotingFlowTest extends TestCase
             'event_id' => $event->id,
         ])->assertStatus(422)->assertJson(['message' => 'Special notice: Voting is closed for maintenance.']);
 
-        $homeResponse = $this->get('/events/'.$event->slug);
+        $homeResponse = $this->get('/'.$event->slug);
         $homeResponse->assertStatus(200);
         $homeResponse->assertSee('Special notice: Voting is closed for maintenance.');
     }
@@ -429,12 +429,12 @@ class VotingFlowTest extends TestCase
             'mobile_number' => '9876543211',
         ]);
 
-        $directoryResponse = $this->followingRedirects()->get('/events/'.$event->slug.'/all-pujas');
+        $directoryResponse = $this->get('/'.$event->slug.'/all-pujas');
         $directoryResponse->assertStatus(200);
         $directoryResponse->assertSee('count-puja-'.$participant->id);
         $directoryResponse->assertSee('2 votes');
 
-        $voteResponse = $this->followingRedirects()->get('/vote/'.$participant->slug);
+        $voteResponse = $this->get('/'.$event->slug.'/vote/'.$participant->slug);
         $voteResponse->assertStatus(200);
         $voteResponse->assertSee('id="previewPandalVotes"', false);
         $voteResponse->assertSee('2 votes');
@@ -486,7 +486,7 @@ class VotingFlowTest extends TestCase
 
         $participant = $this->createParticipant($event);
 
-        $response = $this->followingRedirects()->get('/vote/'.$participant->slug);
+        $response = $this->get('/'.$event->slug.'/vote/'.$participant->slug);
 
         $response->assertStatus(200);
         $response->assertSee('name="award_id"', false);

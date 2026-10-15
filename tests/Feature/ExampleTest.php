@@ -17,7 +17,7 @@ class ExampleTest extends TestCase
     {
         $this->seed(DemoEventSeeder::class);
 
-        $response = $this->get('/');
+        $response = $this->followingRedirects()->get('/');
 
         $response->assertStatus(200);
     }

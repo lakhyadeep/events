@@ -54,12 +54,12 @@
             <!-- Center: Navigation Links -->
             <div class="col-12 col-lg-6 text-center">
                 @php
-                    $isAllPujasPage = request()->routeIs('all-pujas') || request()->routeIs('events.all-pujas');
-                    $isVotePage = request()->routeIs('vote.participant');
-                    $isVoteSuccessPage = request()->routeIs('vote-success') || request()->routeIs('vote-success.participant') || request()->routeIs('events.vote-success') || request()->routeIs('events.vote-success.participant');
+                    $isAllPujasPage = request()->routeIs('events.all-pujas');
+                    $isVotePage = request()->routeIs('events.vote');
+                    $isVoteSuccessPage = request()->routeIs('events.vote-success');
                     $isHomePage = ! $isAllPujasPage && ! $isVotePage && ! $isVoteSuccessPage;
-                    $homeUrl = route('home');
-                    $allPujasUrl = route('all-pujas');
+                    $homeUrl = isset($event) && $event->slug ? route('events.show', ['event' => $event->slug]) : route('home');
+                    $allPujasUrl = isset($event) && $event->slug ? route('events.all-pujas', ['event' => $event->slug]) : route('home');
                 @endphp
                 <ul class="footer-nav">
                     <li><a href="{{ $isHomePage ? '#home' : $homeUrl . '#home' }}" class="nav-link-item {{ $isHomePage ? 'active' : '' }}" data-page="Home">Home</a></li>
