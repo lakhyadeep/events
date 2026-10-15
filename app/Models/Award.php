@@ -22,12 +22,14 @@ class Award extends Model
         'year',
         'sort_order',
         'is_active',
+        'is_voting_allowed',
     ];
 
     protected function casts(): array
     {
         return [
             'is_active' => 'boolean',
+            'is_voting_allowed' => 'boolean',
             'year' => 'integer',
             'sort_order' => 'integer',
         ];
@@ -43,8 +45,18 @@ class Award extends Model
         return $this->hasMany(Winner::class);
     }
 
+    public function votes(): HasMany
+    {
+        return $this->hasMany(Vote::class);
+    }
+
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);
+    }
+
+    public function scopeVotingAllowed(Builder $query): Builder
+    {
+        return $query->where('is_active', true)->where('is_voting_allowed', true);
     }
 }

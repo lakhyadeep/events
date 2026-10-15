@@ -20,10 +20,12 @@ class WinnersTable
                 TextColumn::make('rank_order')
                     ->label('Rank')
                     ->badge()
+                    ->placeholder('Winner (No Rank)')
                     ->color(fn ($state): string => match ($state instanceof WinnerRank ? $state->value : (string) $state) {
                         '1st' => 'warning',
                         '2nd' => 'gray',
                         '3rd' => 'info',
+                        null, '' => 'gray',
                         default => 'success',
                     })
                     ->sortable(),

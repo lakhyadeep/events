@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Services\Otp\OtpManager;
+use App\Services\Otp\OtpService;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Forms\Components\FileUpload;
@@ -24,6 +26,9 @@ class AppServiceProvider extends ServiceProvider
                     : base_path($publicPath)
             );
         }
+
+        $this->app->singleton(OtpManager::class, fn () => new OtpManager);
+        $this->app->singleton(OtpService::class, fn ($app) => new OtpService($app->make(OtpManager::class)));
     }
 
     /**

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class Participant extends Model
 {
@@ -28,6 +29,7 @@ class Participant extends Model
         'locality',
         'address',
         'landmark',
+        'google_map_url',
         'key_contact_1_name',
         'key_contact_1_phone',
         'key_contact_2_name',
@@ -66,13 +68,20 @@ class Participant extends Model
     {
         static::saving(function (Participant $participant) {
             // Keep legacy zone & locality text columns in sync if relation IDs are set
-            if ($participant->zone_id && empty($participant->zone)) {
+            if ($participant->zone_id && ($participant->isDirty('zone_id') || empty($participant->zone))) {
                 $participant->zone = Zone::find($participant->zone_id)?->name ?? $participant->zone;
             }
-            if ($participant->locality_id && empty($participant->locality)) {
+            if ($participant->locality_id && ($participant->isDirty('locality_id') || empty($participant->locality))) {
                 $participant->locality = Locality::find($participant->locality_id)?->name ?? $participant->locality;
             }
         });
+    }
+
+    public function slug(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => Str::slug($this->display_name ?: $this->name)
+        );
     }
 
     public function primaryImageUrl(): Attribute
@@ -177,5 +186,10 @@ class Participant extends Model
             $q->where('zone', $zone)
                 ->orWhereHas('zone', fn ($sub) => $sub->where('name', $zone)->orWhere('slug', $zone));
         });
+    }
+
+    public function votes(): HasMany
+    {
+        return $this->hasMany(Vote::class);
     }
 }

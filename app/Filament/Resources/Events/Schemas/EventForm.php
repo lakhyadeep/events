@@ -80,9 +80,10 @@ class EventForm
                                 ->maxLength(191),
                             FileUpload::make('og_image')
                                 ->label('Open Graph (OG) Share Image')
+                                ->disk('public')
                                 ->image()
-                                ->maxSize(3072)
-                                ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                                ->maxSize(10240)
+                                ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/jpg'])
                                 ->directory('events/og'),
                             Textarea::make('meta_description')
                                 ->label('Meta Description')
@@ -116,7 +117,8 @@ class EventForm
                                 ->helperText('Allow candidate signups'),
                             Toggle::make('is_voting_active')
                                 ->label('Voting Active')
-                                ->helperText('Show Vote Now button'),
+                                ->helperText('Show Vote Now button')
+                                ->live(),
                             Toggle::make('is_awards_active')
                                 ->label('Awards Active')
                                 ->helperText('Reveal winners podium'),

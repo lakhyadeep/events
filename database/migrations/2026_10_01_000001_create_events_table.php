@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->boolean('is_registration_active')->default(false);
             $table->boolean('is_voting_active')->default(false);
+            $table->string('voting_mode')->default('participant');
             $table->boolean('is_awards_active')->default(false);
             $table->boolean('is_timeline_active')->default(true);
             $table->string('tagline')->nullable();

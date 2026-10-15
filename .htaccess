@@ -1,0 +1,17 @@
+DirectoryIndex public/index.php index.php
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # 1. Protect sensitive Laravel core files & folders
+    RewriteRule ^\.env - [F,L,NC]
+    RewriteRule \.(sqlite|sqlite3|db)$ - [F,L,NC]
+    RewriteRule ^composer\.(json|lock) - [F,L,NC]
+    RewriteRule ^package(-lock)?\.json - [F,L,NC]
+    RewriteRule ^(app|bootstrap|config|database|resources|routes|tests|vendor)/ - [F,L,NC]
+    RewriteRule ^artisan - [F,L,NC]
+
+    # 2. Rewrite all requests to public/
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>

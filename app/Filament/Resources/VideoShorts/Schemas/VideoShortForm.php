@@ -53,9 +53,10 @@ class VideoShortForm
                             FileUpload::make('thumbnail_image')
                                 ->label('Custom 9:16 Cover Poster (Optional)')
                                 ->helperText('If not provided, the platform default thumbnail will be displayed')
+                                ->disk('public')
                                 ->image()
-                                ->maxSize(3072)
-                                ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                                ->maxSize(10240)
+                                ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/jpg'])
                                 ->directory('shorts/thumbnails'),
                         ]),
                 ])->columnSpan(['default' => 1, 'lg' => 2]),

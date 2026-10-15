@@ -13,15 +13,174 @@ use App\Models\VideoShort;
 use App\Models\Winner;
 use App\Models\Zone;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
-class DemoEventSeeder extends Seeder    
+class DemoEventSeeder extends Seeder
 {
+    /**
+     * Ensure a media file exists on the public storage disk, copying from local fallback or downloading.
+     * Automatically optimizes and compresses the image for lightweight web delivery.
+     */
+    protected function ensureUploadedMedia(string $diskPath, ?string $fallbackLocalPath = null, ?string $fallbackUrl = null): string
+    {
+        // If file already exists and is not oversized (<= 350KB), keep it
+        try {
+            if (Storage::disk('public')->exists($diskPath) && Storage::disk('public')->size($diskPath) <= 350000) {
+                return $diskPath;
+            }
+        } catch (\Throwable $e) {
+            // fall through
+        }
+
+        // Remove legacy oversized file if present
+        try {
+            if (Storage::disk('public')->exists($diskPath)) {
+                Storage::disk('public')->delete($diskPath);
+            }
+        } catch (\Throwable $e) {
+            // fall through
+        }
+
+        $rawContent = null;
+
+        // 1. If a local file path is given and exists, read it
+        if ($fallbackLocalPath && file_exists($fallbackLocalPath)) {
+            $rawContent = file_get_contents($fallbackLocalPath);
+        }
+
+        // 2. If a fallback URL is given, try downloading it if no local file was available
+        if ((! $rawContent) && $fallbackUrl && (str_starts_with($fallbackUrl, 'http://') || str_starts_with($fallbackUrl, 'https://'))) {
+            try {
+                $response = Http::timeout(5)->get($fallbackUrl);
+                if ($response->successful() && strlen($response->body()) > 500) {
+                    $rawContent = $response->body();
+                }
+            } catch (\Throwable $e) {
+                // fall through to default asset
+            }
+        }
+
+        // 3. Fallback to bundled sample pandal asset (guaranteed ~95KB)
+        if (! $rawContent) {
+            $defaultLocal = public_path('event-assets/images/sample-pandal.jpg');
+            if (file_exists($defaultLocal)) {
+                $rawContent = file_get_contents($defaultLocal);
+            }
+        }
+
+        if ($rawContent) {
+            $optimizedContent = $this->optimizeImageContent($rawContent, $diskPath);
+            Storage::disk('public')->put($diskPath, $optimizedContent);
+        }
+
+        return $diskPath;
+    }
+
+    /**
+     * Optimize image content to reduce file size and resolution for fast frontend delivery.
+     */
+    protected function optimizeImageContent(string $rawContent, string $diskPath): string
+    {
+        if (! extension_loaded('gd') || strlen($rawContent) < 100) {
+            return $rawContent;
+        }
+
+        $src = @imagecreatefromstring($rawContent);
+        if (! $src) {
+            return $rawContent;
+        }
+
+        $origW = imagesx($src);
+        $origH = imagesy($src);
+
+        if ($origW <= 0 || $origH <= 0) {
+            imagedestroy($src);
+
+            return $rawContent;
+        }
+
+        $isPng = str_ends_with(strtolower($diskPath), '.png');
+        $maxW = 1200;
+        $maxH = 1200;
+
+        if (str_contains($diskPath, 'participants/')) {
+            $maxW = 800;
+            $maxH = 800;
+        } elseif (str_contains($diskPath, 'banners/desktop/')) {
+            $maxW = 1600;
+            $maxH = 700;
+        } elseif (str_contains($diskPath, 'banners/mobile/')) {
+            $maxW = 800;
+            $maxH = 1000;
+        } elseif (str_contains($diskPath, 'shorts/')) {
+            $maxW = 450;
+            $maxH = 800;
+        } elseif (str_contains($diskPath, 'sponsors/')) {
+            $maxW = 400;
+            $maxH = 200;
+        } elseif (str_contains($diskPath, 'events/og/')) {
+            $maxW = 800;
+            $maxH = 800;
+        }
+
+        $ratio = min($maxW / $origW, $maxH / $origH, 1.0);
+        $newW = (int) max(1, round($origW * $ratio));
+        $newH = (int) max(1, round($origH * $ratio));
+
+        $dst = imagecreatetruecolor($newW, $newH);
+
+        if ($isPng) {
+            imagealphablending($dst, false);
+            imagesavealpha($dst, true);
+            $transparent = imagecolorallocatealpha($dst, 0, 0, 0, 127);
+            imagefilledrectangle($dst, 0, 0, $newW, $newH, $transparent);
+            imagecopyresampled($dst, $src, 0, 0, 0, 0, $newW, $newH, $origW, $origH);
+
+            ob_start();
+            imagepng($dst, null, 8);
+            $output = ob_get_clean();
+        } else {
+            $white = imagecolorallocate($dst, 255, 255, 255);
+            imagefilledrectangle($dst, 0, 0, $newW, $newH, $white);
+            imagecopyresampled($dst, $src, 0, 0, 0, 0, $newW, $newH, $origW, $origH);
+
+            ob_start();
+            imagejpeg($dst, null, 80);
+            $output = ob_get_clean();
+        }
+
+        imagedestroy($src);
+        imagedestroy($dst);
+
+        return ($output !== false && strlen($output) > 100) ? $output : $rawContent;
+    }
+
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
+        // 0. Ensure public storage subdirectories and purge legacy bloated files (> 350KB)
+        Storage::disk('public')->makeDirectory('events/og');
+        Storage::disk('public')->makeDirectory('banners/desktop');
+        Storage::disk('public')->makeDirectory('banners/mobile');
+        Storage::disk('public')->makeDirectory('sponsors/logos');
+        Storage::disk('public')->makeDirectory('participants/primary');
+        Storage::disk('public')->makeDirectory('participants/gallery');
+        Storage::disk('public')->makeDirectory('shorts/thumbnails');
+
+        try {
+            foreach (Storage::disk('public')->allFiles() as $file) {
+                if (Storage::disk('public')->size($file) > 350000) {
+                    Storage::disk('public')->delete($file);
+                }
+            }
+        } catch (\Throwable $e) {
+            // Ignore if directory scan fails
+        }
+
         // 1. Create Flagship Event
         $event = Event::updateOrCreate(
             ['slug' => 'sharod-samman-2026'],
@@ -40,7 +199,7 @@ class DemoEventSeeder extends Seeder
                 'closure_message' => 'Voting and registration for Dib 24x7 Sharod Samman 2026 have formally concluded. Thank you to all participating committees and citizens of Upper Assam!',
                 'countdown_datetime' => '2026-10-18 19:00:00',
                 'terms_and_conditions' => '<p>1. Only officially registered community clubs and Puja committees in Dibrugarh and Upper Assam are eligible.<br>2. All submissions must adhere to district administration, fire safety, and electrical regulations.<br>3. Public voting results are tabulated under independent audit observation.<br>4. Decisions of the grand jury and organizing committee are final and binding.</p>',
-                'og_image' => 'https://images.unsplash.com/photo-1567157577867-05ccb1388e66?auto=format&fit=crop&w=1200&q=80',
+                'og_image' => $this->ensureUploadedMedia('events/og/sharod-samman-2026.png', public_path('event-assets/images/logo-award2026.png')),
                 'meta_title' => 'Dib 24x7 Sharod Samman 2026 | Dibrugarh Grand Festival Microsite',
                 'meta_description' => 'Explore the finest pandals in Dibrugarh, vote for your favorite club, and watch live event shorts on Dib 24x7 Sharod Samman 2026.',
                 'contact_email' => 'events@dib24x7.com',
@@ -57,7 +216,7 @@ class DemoEventSeeder extends Seeder
                 'display_name' => 'Fortune',
                 'sponsor_type' => 'presenting_partner',
                 'sponsor_tag' => 'Title Presenting Partner',
-                'logo' => 'https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?auto=format&fit=crop&w=300&q=80',
+                'logo' => $this->ensureUploadedMedia('sponsors/logos/fortune.jpg', public_path('event-assets/images/logo-jsb.jpg')),
                 'landing_url' => 'https://dib24x7.com/fortune',
                 'slot_order' => 1,
             ],
@@ -66,7 +225,7 @@ class DemoEventSeeder extends Seeder
                 'display_name' => 'Senco Gold',
                 'sponsor_type' => 'associate_sponsor',
                 'sponsor_tag' => 'Associate Sponsor 1',
-                'logo' => 'https://images.unsplash.com/photo-1516876437184-593fda40c7ce?auto=format&fit=crop&w=300&q=80',
+                'logo' => $this->ensureUploadedMedia('sponsors/logos/senco-gold.jpg', public_path('event-assets/images/logo-tasty.jpg')),
                 'landing_url' => 'https://dib24x7.com/senco',
                 'slot_order' => 1,
             ],
@@ -75,7 +234,7 @@ class DemoEventSeeder extends Seeder
                 'display_name' => 'Asian Paints',
                 'sponsor_type' => 'associate_sponsor',
                 'sponsor_tag' => 'Associate Sponsor 2',
-                'logo' => 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=300&q=80',
+                'logo' => $this->ensureUploadedMedia('sponsors/logos/asian-paints.jpg', public_path('event-assets/images/logo-tg.jpg')),
                 'landing_url' => 'https://dib24x7.com/asianpaints',
                 'slot_order' => 2,
             ],
@@ -84,7 +243,7 @@ class DemoEventSeeder extends Seeder
                 'display_name' => 'Boroline',
                 'sponsor_type' => 'associate_sponsor',
                 'sponsor_tag' => 'Associate Sponsor 3',
-                'logo' => 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=300&q=80',
+                'logo' => $this->ensureUploadedMedia('sponsors/logos/boroline.png', public_path('event-assets/images/logo-dp.png')),
                 'landing_url' => 'https://dib24x7.com/boroline',
                 'slot_order' => 3,
             ],
@@ -93,7 +252,7 @@ class DemoEventSeeder extends Seeder
                 'display_name' => 'Tata Tea Gold',
                 'sponsor_type' => 'associate_sponsor',
                 'sponsor_tag' => 'Associate Sponsor 4',
-                'logo' => 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=300&q=80',
+                'logo' => $this->ensureUploadedMedia('sponsors/logos/tata-tea-gold.png', public_path('event-assets/images/logo-cc.png')),
                 'landing_url' => 'https://dib24x7.com/tatatea',
                 'slot_order' => 4,
             ],
@@ -102,7 +261,7 @@ class DemoEventSeeder extends Seeder
                 'display_name' => 'Kalyan Jewellers',
                 'sponsor_type' => 'associate_sponsor',
                 'sponsor_tag' => 'Associate Sponsor 5',
-                'logo' => 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80',
+                'logo' => $this->ensureUploadedMedia('sponsors/logos/kalyan-jewellers.png', public_path('event-assets/images/logo-kinley.png')),
                 'landing_url' => 'https://dib24x7.com/kalyan',
                 'slot_order' => 5,
             ],
@@ -119,15 +278,15 @@ class DemoEventSeeder extends Seeder
         $bannersData = [
             [
                 'title' => 'The Grand Celebration of Art & Devotion in Dibrugarh',
-                'image_desktop' => 'https://images.unsplash.com/photo-1601972599720-36938d4ecd31?auto=format&fit=crop&w=1920&q=80',
-                'image_mobile' => 'https://images.unsplash.com/photo-1601972599720-36938d4ecd31?auto=format&fit=crop&w=768&q=80',
+                'image_desktop' => $this->ensureUploadedMedia('banners/desktop/01M3XCHZ62T8A8JRQHRFYA5ZT4.jpg', public_path('event-assets/images/hero-banner.jpg')),
+                'image_mobile' => $this->ensureUploadedMedia('banners/mobile/01M3XCHZ6ECNP9DCHD2VE277Z1.jpg', public_path('event-assets/images/hero-mobile.jpg')),
                 'cta_link' => '#participants',
                 'sort_order' => 1,
             ],
             [
                 'title' => 'Cast Your Vote for People\'s Choice Award 2026',
-                'image_desktop' => 'https://images.unsplash.com/photo-1567157577867-05ccb1388e66?auto=format&fit=crop&w=1920&q=80',
-                'image_mobile' => 'https://images.unsplash.com/photo-1567157577867-05ccb1388e66?auto=format&fit=crop&w=768&q=80',
+                'image_desktop' => $this->ensureUploadedMedia('banners/desktop/01M4NE7K48VSWX80WAAK2AZSQT.jpg', public_path('event-assets/images/hero-banner.jpg')),
+                'image_mobile' => $this->ensureUploadedMedia('banners/mobile/01M4NE7K4MS2WD49JPGA0MX8F4.jpg', public_path('event-assets/images/hero-mobile.jpg')),
                 'cta_link' => '#vote',
                 'sort_order' => 2,
             ],
@@ -230,136 +389,188 @@ class DemoEventSeeder extends Seeder
         }
 
         // 6. Participants / Contenders (Dibrugarh Puja Committees)
-        $participantsData = [
-            [
-                'name' => 'Chowkidinghee Sarbajanin Durga Puja Committee',
-                'display_name' => 'Chowkidinghee Sarbajanin Durga Puja Committee',
-                'mobile_number' => '9435011223',
-                'zone' => 'Central Dibrugarh',
-                'locality' => 'Chowkidinghee',
-                'landmark' => 'Near Chowkidinghee Playground',
-                'short_introduction' => 'Renowned for colossal pandal architecture, eco-friendly themes, and mesmerizing cultural evenings in the heart of Dibrugarh.',
-                'primary_display_image' => 'https://images.unsplash.com/photo-1567157577867-05ccb1388e66?auto=format&fit=crop&w=800&q=80',
-                'image_1' => 'https://images.unsplash.com/photo-1601972599720-36938d4ecd31?auto=format&fit=crop&w=800&q=80',
-                'is_shortlisted' => true,
-                'is_puja_contest' => true,
-                'first_year_of_puja' => 1958,
-                'puja_theme' => 'Heritage of Assam: Muga & Cane Craftsmanship',
-                'idol_artist' => 'Nuruddin Ahmed',
-                'theme_artist' => 'Pranab Baruah',
-                'light_designer' => 'Maa Electric, Chowkidinghee',
-                'sound_designer' => 'Brahmaputra Acoustics',
-                'concept_note_image' => 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=800&q=80',
-                'key_contact_1_name' => 'Ranjit Phukan',
-                'key_contact_1_phone' => '9435011223',
-            ],
-            [
-                'name' => 'Graham Bazar Sarbajanin Durga Puja Samiti',
-                'display_name' => 'Graham Bazar Sarbajanin Durga Puja Samiti',
-                'mobile_number' => '9435122334',
-                'zone' => 'Central Dibrugarh',
-                'locality' => 'Graham Bazar',
-                'landmark' => 'Near Graham Bazar Girls High School',
-                'short_introduction' => 'One of the oldest traditional celebrations in the Tea City, celebrated for exquisite classical idol craftsmanship and heritage rituals.',
-                'primary_display_image' => 'https://images.unsplash.com/photo-1601972599720-36938d4ecd31?auto=format&fit=crop&w=800&q=80',
-                'image_1' => 'https://images.unsplash.com/photo-1567157577867-05ccb1388e66?auto=format&fit=crop&w=800&q=80',
-                'is_shortlisted' => true,
-                'is_puja_contest' => true,
-                'first_year_of_puja' => 1942,
-                'puja_theme' => 'Temple Architecture of Kamakhya',
-                'idol_artist' => 'Gauranga Pal',
-                'theme_artist' => 'Biren Singha',
-                'light_designer' => 'Roy Electric Works',
-                'key_contact_1_name' => 'Anirban Dutta',
-                'key_contact_1_phone' => '9435122334',
-            ],
-            [
-                'name' => 'Amolapatty Sarbajanin Durga Puja',
-                'display_name' => 'Amolapatty Sarbajanin Durga Puja',
-                'mobile_number' => '9435233445',
-                'zone' => 'East Dibrugarh',
-                'locality' => 'Amolapatty',
-                'landmark' => 'Near Amolapatty Natya Mandir',
-                'short_introduction' => 'Known for artistic illumination, spiritual serenity, and deeply engaging community cultural programs on Mancotta Road.',
-                'primary_display_image' => 'https://images.unsplash.com/photo-1516876437184-593fda40c7ce?auto=format&fit=crop&w=800&q=80',
-                'image_1' => 'https://images.unsplash.com/photo-1567157577867-05ccb1388e66?auto=format&fit=crop&w=800&q=80',
-                'is_shortlisted' => true,
-                'is_puja_contest' => true,
-                'first_year_of_puja' => 1964,
-                'puja_theme' => 'Echoes of the Brahmaputra',
-                'idol_artist' => 'Dhiren Pal',
-                'theme_artist' => 'Mridul Bordoloi',
-                'light_designer' => 'Chandan Illuminations',
-                'sound_designer' => 'Bhupen Hazarika Cultural Wing',
-                'key_contact_1_name' => 'Sanjay Gohain',
-                'key_contact_1_phone' => '9435233445',
-            ],
-            [
-                'name' => 'Naliapool Sarbajanin Durga Puja',
-                'display_name' => 'Naliapool Sarbajanin Durga Puja',
-                'mobile_number' => '9435344556',
-                'zone' => 'West Dibrugarh',
-                'locality' => 'Naliapool',
-                'landmark' => 'Near Railway Colony Field',
-                'short_introduction' => 'Famed across Upper Assam for pioneering creative themes, light spectacles, and welcoming hundreds of thousands of devotees.',
-                'primary_display_image' => 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=800&q=80',
-                'is_shortlisted' => true,
-                'is_puja_contest' => true,
-                'first_year_of_puja' => 1952,
-                'puja_theme' => 'The Palace of Golden Tea Blossoms',
-                'idol_artist' => 'Sanatan Pal',
-                'light_designer' => 'Assam Light House',
-                'key_contact_1_name' => 'Bikash Debnath',
-                'key_contact_1_phone' => '9435344556',
-            ],
-            [
-                'name' => 'Boiragimoth Sarbajanin Durga Puja Samiti',
-                'display_name' => 'Boiragimoth Sarbajanin Durga Puja Samiti',
-                'mobile_number' => '9435455667',
-                'zone' => 'South Dibrugarh',
-                'locality' => 'Boiragimoth',
-                'landmark' => 'Near Boiragimoth Namghar',
-                'short_introduction' => 'Celebrated for its warm neighborhood spirit, folk-themed traditional decorations, and exemplary crowd safety.',
-                'primary_display_image' => 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=800&q=80',
-                'is_shortlisted' => false,
-                'is_puja_contest' => true,
-                'first_year_of_puja' => 1971,
-                'puja_theme' => 'Xophura: Folk Art of Majuli & Upper Assam',
-                'idol_artist' => 'Ratan Chitrakar',
-                'theme_artist' => 'Jiten Hazarika',
-                'key_contact_1_name' => 'Pradip Saikia',
-                'key_contact_1_phone' => '9435455667',
-            ],
-            [
-                'name' => 'Santipara Sarbajanin Durga Puja',
-                'display_name' => 'Santipara Sarbajanin Durga Puja',
-                'mobile_number' => '9435566778',
-                'zone' => 'West Dibrugarh',
-                'locality' => 'Santipara',
-                'landmark' => 'Near Santipara Rail Gate',
-                'short_introduction' => 'Emphasizing social harmony, green eco-materials, and unity across communities in Dibrugarh.',
-                'primary_display_image' => 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=800&q=80',
-                'is_shortlisted' => true,
-                'is_puja_contest' => true,
-                'first_year_of_puja' => 1968,
-                'puja_theme' => 'Shakti: Conservation of Assam Flora & Fauna',
-                'idol_artist' => 'Tarun Paul',
-                'theme_artist' => 'Subhashish Das',
-                'key_contact_1_name' => 'Dipak Bhattacharjee',
-                'key_contact_1_phone' => '9435566778',
-            ],
-        ];
+        $pujasJsonPath = storage_path('mapped_participants.json');
+        if (file_exists($pujasJsonPath)) {
+            $participantsData = json_decode(file_get_contents($pujasJsonPath), true) ?: [];
+        } else {
+            $participantsData = [];
+        }
+
+        if (empty($participantsData)) {
+            $participantsData = [
+                [
+                    'name' => 'Thana Chariali Sarbajanin',
+                    'display_name' => 'Thana Chariali Sarbajanin',
+                    'mobile_number' => '9435677889',
+                    'zone' => 'Central Dibrugarh',
+                    'locality' => 'Thana Chariali',
+                    'landmark' => 'Near Thana Chariali Traffic Point',
+                    'short_introduction' => 'Renowned for classical craftsmanship, magnificent illuminations, and community heritage in central Dibrugarh.',
+                    'primary_display_image' => 'https://images.unsplash.com/photo-1728921957375-877340feaf6a?auto=format&fit=crop&w=800&q=80',
+                    'image_1' => 'https://images.unsplash.com/photo-1756399220348-7964d338cb19?auto=format&fit=crop&w=800&q=80',
+                    'is_shortlisted' => true,
+                    'is_puja_contest' => true,
+                    'first_year_of_puja' => 1950,
+                    'puja_theme' => 'Aalokmaya Brahmaputra',
+                    'idol_artist' => 'Gopal Paul',
+                    'theme_artist' => 'Bhabesh Das',
+                    'light_designer' => 'Brahmaputra Lights',
+                    'key_contact_1_name' => 'Manoj Sharma',
+                    'key_contact_1_phone' => '9435677889',
+                ],
+                [
+                    'name' => 'Chowkidinghee Sarbajanin Durga Puja Committee',
+                    'display_name' => 'Chowkidinghee Sarbajanin Durga Puja Committee',
+                    'mobile_number' => '9435011223',
+                    'zone' => 'Central Dibrugarh',
+                    'locality' => 'Chowkidinghee',
+                    'landmark' => 'Near Chowkidinghee Playground',
+                    'short_introduction' => 'Renowned for colossal pandal architecture, eco-friendly themes, and mesmerizing cultural evenings in the heart of Dibrugarh.',
+                    'primary_display_image' => 'https://images.unsplash.com/photo-1567157577867-05ccb1388e66?auto=format&fit=crop&w=800&q=80',
+                    'image_1' => 'https://images.unsplash.com/photo-1601972599720-36938d4ecd31?auto=format&fit=crop&w=800&q=80',
+                    'is_shortlisted' => true,
+                    'is_puja_contest' => true,
+                    'first_year_of_puja' => 1958,
+                    'puja_theme' => 'Heritage of Assam: Muga & Cane Craftsmanship',
+                    'idol_artist' => 'Nuruddin Ahmed',
+                    'theme_artist' => 'Pranab Baruah',
+                    'light_designer' => 'Maa Electric, Chowkidinghee',
+                    'sound_designer' => 'Brahmaputra Acoustics',
+                    'concept_note_image' => 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=800&q=80',
+                    'key_contact_1_name' => 'Ranjit Phukan',
+                    'key_contact_1_phone' => '9435011223',
+                ],
+                [
+                    'name' => 'Graham Bazar Sarbajanin Durga Puja Samiti',
+                    'display_name' => 'Graham Bazar Sarbajanin Durga Puja Samiti',
+                    'mobile_number' => '9435122334',
+                    'zone' => 'Central Dibrugarh',
+                    'locality' => 'Graham Bazar',
+                    'landmark' => 'Near Graham Bazar Girls High School',
+                    'short_introduction' => 'One of the oldest traditional celebrations in the Tea City, celebrated for exquisite classical idol craftsmanship and heritage rituals.',
+                    'primary_display_image' => 'https://images.unsplash.com/photo-1601972599720-36938d4ecd31?auto=format&fit=crop&w=800&q=80',
+                    'image_1' => 'https://images.unsplash.com/photo-1567157577867-05ccb1388e66?auto=format&fit=crop&w=800&q=80',
+                    'is_shortlisted' => true,
+                    'is_puja_contest' => true,
+                    'first_year_of_puja' => 1942,
+                    'puja_theme' => 'Temple Architecture of Kamakhya',
+                    'idol_artist' => 'Gauranga Pal',
+                    'theme_artist' => 'Biren Singha',
+                    'light_designer' => 'Roy Electric Works',
+                    'key_contact_1_name' => 'Anirban Dutta',
+                    'key_contact_1_phone' => '9435122334',
+                ],
+                [
+                    'name' => 'Amolapatty Sarbajanin Durga Puja',
+                    'display_name' => 'Amolapatty Sarbajanin Durga Puja',
+                    'mobile_number' => '9435233445',
+                    'zone' => 'East Dibrugarh',
+                    'locality' => 'Amolapatty',
+                    'landmark' => 'Near Amolapatty Natya Mandir',
+                    'short_introduction' => 'Known for artistic illumination, spiritual serenity, and deeply engaging community cultural programs on Mancotta Road.',
+                    'primary_display_image' => 'https://images.unsplash.com/photo-1516876437184-593fda40c7ce?auto=format&fit=crop&w=800&q=80',
+                    'image_1' => 'https://images.unsplash.com/photo-1567157577867-05ccb1388e66?auto=format&fit=crop&w=800&q=80',
+                    'is_shortlisted' => true,
+                    'is_puja_contest' => true,
+                    'first_year_of_puja' => 1964,
+                    'puja_theme' => 'Echoes of the Brahmaputra',
+                    'idol_artist' => 'Dhiren Pal',
+                    'theme_artist' => 'Mridul Bordoloi',
+                    'light_designer' => 'Chandan Illuminations',
+                    'sound_designer' => 'Bhupen Hazarika Cultural Wing',
+                    'key_contact_1_name' => 'Sanjay Gohain',
+                    'key_contact_1_phone' => '9435233445',
+                ],
+                [
+                    'name' => 'Naliapool Sarbajanin Durga Puja',
+                    'display_name' => 'Naliapool Sarbajanin Durga Puja',
+                    'mobile_number' => '9435344556',
+                    'zone' => 'West Dibrugarh',
+                    'locality' => 'Naliapool',
+                    'landmark' => 'Near Railway Colony Field',
+                    'short_introduction' => 'Famed across Upper Assam for pioneering creative themes, light spectacles, and welcoming hundreds of thousands of devotees.',
+                    'primary_display_image' => 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=800&q=80',
+                    'is_shortlisted' => true,
+                    'is_puja_contest' => true,
+                    'first_year_of_puja' => 1952,
+                    'puja_theme' => 'The Palace of Golden Tea Blossoms',
+                    'idol_artist' => 'Sanatan Pal',
+                    'light_designer' => 'Assam Light House',
+                    'key_contact_1_name' => 'Bikash Debnath',
+                    'key_contact_1_phone' => '9435344556',
+                ],
+                [
+                    'name' => 'Boiragimoth Sarbajanin Durga Puja Samiti',
+                    'display_name' => 'Boiragimoth Sarbajanin Durga Puja Samiti',
+                    'mobile_number' => '9435455667',
+                    'zone' => 'South Dibrugarh',
+                    'locality' => 'Boiragimoth',
+                    'landmark' => 'Near Boiragimoth Namghar',
+                    'short_introduction' => 'Celebrated for its warm neighborhood spirit, folk-themed traditional decorations, and exemplary crowd safety.',
+                    'primary_display_image' => 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=800&q=80',
+                    'is_shortlisted' => false,
+                    'is_puja_contest' => true,
+                    'first_year_of_puja' => 1971,
+                    'puja_theme' => 'Xophura: Folk Art of Majuli & Upper Assam',
+                    'idol_artist' => 'Ratan Chitrakar',
+                    'theme_artist' => 'Jiten Hazarika',
+                    'key_contact_1_name' => 'Pradip Saikia',
+                    'key_contact_1_phone' => '9435455667',
+                ],
+                [
+                    'name' => 'Santipara Sarbajanin Durga Puja',
+                    'display_name' => 'Santipara Sarbajanin Durga Puja',
+                    'mobile_number' => '9435566778',
+                    'zone' => 'West Dibrugarh',
+                    'locality' => 'Santipara',
+                    'landmark' => 'Near Santipara Rail Gate',
+                    'short_introduction' => 'Emphasizing social harmony, green eco-materials, and unity across communities in Dibrugarh.',
+                    'primary_display_image' => 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=800&q=80',
+                    'is_shortlisted' => true,
+                    'is_puja_contest' => true,
+                    'first_year_of_puja' => 1968,
+                    'puja_theme' => 'Shakti: Conservation of Assam Flora & Fauna',
+                    'idol_artist' => 'Tarun Paul',
+                    'theme_artist' => 'Subhashish Das',
+                    'key_contact_1_name' => 'Dipak Bhattacharjee',
+                    'key_contact_1_phone' => '9435566778',
+                ],
+            ];
+        }
 
         $createdParticipants = [];
         foreach ($participantsData as $p) {
-            $zModel = $zoneCache[$p['zone']] ?? null;
+            $zModel = $zoneCache[$p['zone']] ?? Zone::firstOrCreate(
+                ['name' => $p['zone']],
+                ['slug' => Str::slug($p['zone']), 'sort_order' => 10, 'is_active' => true]
+            );
+            $zoneCache[$p['zone']] = $zModel;
+
             $lModel = $localityCache[$p['zone'].'::'.$p['locality']] ?? null;
-            if (! $lModel && $zModel && ! empty($p['locality'])) {
+            if (! $lModel && ! empty($p['locality'])) {
                 $lModel = Locality::firstOrCreate(
                     ['zone_id' => $zModel->id, 'name' => $p['locality']],
                     ['slug' => Str::slug($p['locality'])]
                 );
+                $localityCache[$p['zone'].'::'.$p['locality']] = $lModel;
             }
+
+            $slug = Str::slug($p['name']);
+            $primaryImg = $this->ensureUploadedMedia(
+                'participants/primary/'.$slug.'.jpg',
+                public_path('event-assets/images/sample-pandal.jpg'),
+                $p['primary_display_image'] ?? null
+            );
+            $galleryImg = $this->ensureUploadedMedia(
+                'participants/gallery/'.$slug.'-1.jpg',
+                public_path('event-assets/images/sample-pratima.jpg'),
+                $p['image_1'] ?? null
+            );
+            $lightingImg = $this->ensureUploadedMedia(
+                'participants/gallery/'.$slug.'-2.jpg',
+                public_path('event-assets/images/sample-lighting.jpg'),
+                $p['image_2'] ?? null
+            );
 
             $createdParticipants[] = Participant::updateOrCreate(
                 ['event_id' => $event->id, 'name' => $p['name']],
@@ -368,6 +579,10 @@ class DemoEventSeeder extends Seeder
                     'locality_id' => $lModel?->id,
                     'year' => 2026,
                     'registration_status' => 'approved',
+                    'primary_display_image' => $primaryImg,
+                    'image_1' => $galleryImg,
+                    'image_2' => $lightingImg,
+                    'image_3' => $galleryImg,
                 ])
             );
         }
@@ -421,7 +636,7 @@ class DemoEventSeeder extends Seeder
                 'video_url' => 'https://www.youtube.com/shorts/dQw4w9WgXcQ',
                 'video_id' => 'dQw4w9WgXcQ',
                 'caption' => 'Master artisans crafting bamboo and cane wonders at Chowkidinghee.',
-                'thumbnail_image' => 'https://images.unsplash.com/photo-1567157577867-05ccb1388e66?auto=format&fit=crop&w=400&q=80',
+                'thumbnail_image' => $this->ensureUploadedMedia('shorts/thumbnails/short-1.jpg', public_path('event-assets/images/hero-mobile.jpg')),
                 'sort_order' => 1,
             ],
             [
@@ -430,7 +645,7 @@ class DemoEventSeeder extends Seeder
                 'video_url' => 'https://www.youtube.com/shorts/jNQXAC9IVRw',
                 'video_id' => 'jNQXAC9IVRw',
                 'caption' => 'Over 100,000 LEDs creating an aquatic wonderland in West Dibrugarh.',
-                'thumbnail_image' => 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=400&q=80',
+                'thumbnail_image' => $this->ensureUploadedMedia('shorts/thumbnails/short-2.jpg', public_path('event-assets/images/hero-mobile.jpg')),
                 'sort_order' => 2,
             ],
             [
@@ -439,7 +654,7 @@ class DemoEventSeeder extends Seeder
                 'video_url' => 'https://www.youtube.com/shorts/3JZ_D3ELwOQ',
                 'video_id' => '3JZ_D3ELwOQ',
                 'caption' => 'Exclusive walkthrough of traditional idol craftsmanship and cultural exhibitions.',
-                'thumbnail_image' => 'https://images.unsplash.com/photo-1516876437184-593fda40c7ce?auto=format&fit=crop&w=400&q=80',
+                'thumbnail_image' => $this->ensureUploadedMedia('shorts/thumbnails/short-3.jpg', public_path('event-assets/images/hero-mobile.jpg')),
                 'sort_order' => 3,
             ],
         ];

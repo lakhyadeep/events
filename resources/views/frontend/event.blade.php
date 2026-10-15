@@ -1,66 +1,52 @@
-<x-layouts.microsite
-    :meta-title="$event->meta_title ?: $event->display_name"
-    :meta-description="$event->meta_description ?: $event->tagline"
-    :og-image="$event->og_image"
->
-    <!-- Top Masthead: Dib 24x7 + Event + Presenting Partner + 5 Associate Sponsors -->
-    <x-masthead
-        :event="$event"
-        :presenting-partner="$presentingPartner"
-        :associate-sponsors="$associateSponsors"
-    />
+<x-layouts.microsite :event="$event" :meta-title="$event->meta_title ?: 'Dibrugarh 24x7 - Festive Awards & Navigation'"
+    :meta-description="$event->meta_description ?: 'Dibrugarh Durgo Utsav 2026'" :og-image="$event->og_image"
+    :canonical-url="request()->routeIs('home') || ($event->status === 'active') ? route('home') : route('events.show', $event->slug)">
+    <!-- Top Navigation Header -->
+    @include('frontend.partials.header')
 
-    <!-- Sticky Main Navigation Bar with 'Vote Now' CTA -->
-    <x-navbar :event="$event" />
+    <main>
+        <!-- Festive Awards Hero Section -->
+        @include('frontend.partials.hero')
 
-    <!-- Above-The-Fold (ATF) Banner Carousel (Desktop & Mobile Responsive) -->
-    <x-banner-carousel :banners="$event->banners" />
 
-    <!-- Live Countdown Ticker & Editorial Overview -->
-    <x-countdown :event="$event" />
+        @include('frontend.partials.about')
 
-    <!-- Participants / Candidates Showcase Section -->
-    <section id="participants" class="py-14 sm:py-20 bg-zinc-950 text-white relative">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
-                <div>
-                    <span class="text-xs uppercase font-extrabold tracking-widest text-amber-500 block mb-1">
-                        CANDIDATE DIRECTORY
-                    </span>
-                    <h2 class="text-2xl sm:text-4xl font-black tracking-tight text-white">
-                        Participants Showcase
-                    </h2>
-                </div>
-                <p class="text-xs text-zinc-400 max-w-sm">
-                    Filter by Kolkata zones, explore pandal concept themes, and discover master idol sculptors.
-                </p>
-            </div>
 
-            <!-- Livewire 4 Reactive Showcase Component -->
-            <livewire:frontend.participants-showcase :event-id="$event->id" />
-        </div>
-    </section>
+        @include('frontend.partials.sponsors')
 
-    <!-- Reactive Lightbox Modal for Candidate Details & Puja Attributes -->
-    <livewire:frontend.candidate-detail-modal />
 
-    <!-- Event Video Shorts (Vertical 9:16 Carousel) -->
-    <x-video-shorts :shorts="$event->videoShorts" />
+        @include('frontend.partials.awards')
 
-    <!-- Awards Matrix & Winners Podium -->
-    <x-awards-winners
-        :event="$event"
-        :awards="$event->awards"
-        :winners="$publishedWinners"
-    />
 
-    <!-- Event Timeline & Milestones Tracker -->
-    <x-timeline
-        :event="$event"
-        :items="$event->timelineItems"
-    />
+        @include('frontend.partials.explore-all-puja')
 
-    <!-- Terms and Conditions Accordion & Network Footer -->
-    <x-terms-footer :event="$event" />
+
+        @include('frontend.partials.new')
+
+
+
+        @include('frontend.partials.awards-announced')
+
+
+        @include('frontend.partials.gallery')
+
+
+
+        @include('frontend.partials.timeline')
+
+
+        @include('frontend.partials.terms')
+
+        <!-- Marketing Promotional Banner -->
+        @include('frontend.partials.marketing-banner')
+
+
+    </main>
+
+    <!-- Site Footer & Social Links -->
+    @include('frontend.partials.footer')
+
+    <!-- Interactive Lightbox & Voting Modals -->
+    @include('frontend.partials.modals')
 
 </x-layouts.microsite>

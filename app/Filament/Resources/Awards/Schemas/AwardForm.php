@@ -35,7 +35,7 @@ class AwardForm
                             TextInput::make('category')
                                 ->label('Category Group')
                                 ->placeholder('e.g. Grand Championship, Art & Sculpture, Lighting')
-                                ->required()
+                                ->nullable()
                                 ->maxLength(191),
                             TextInput::make('prize_money_or_award')
                                 ->label('Prize Package / Trophy')
@@ -71,6 +71,10 @@ class AwardForm
                             Toggle::make('is_active')
                                 ->label('Active Award Category')
                                 ->helperText('Visible in public awards matrix')
+                                ->default(true),
+                            Toggle::make('is_voting_allowed')
+                                ->label('Allow Public Voting')
+                                ->helperText('Enable public polling for this category on the voting ballot')
                                 ->default(true),
                         ]),
                 ])->columnSpan(['default' => 1, 'lg' => 1]),

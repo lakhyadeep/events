@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('display_name');
             $table->text('description')->nullable();
-            $table->string('category')->index();
+            $table->string('category')->nullable()->index();
             $table->string('prize_money_or_award')->nullable();
             $table->year('year')->index();
             $table->integer('sort_order')->default(0);

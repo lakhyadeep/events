@@ -5,10 +5,25 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 // Public Flagship Event Microsite
+
+Route::get('/welcome', function () {
+    return view('welcome');
+})->name('welcome');
+
 Route::get('/', [EventMicrositeController::class, 'show'])->name('home');
 
 // Specific Event by Slug
 Route::get('/events/{slug}', [EventMicrositeController::class, 'show'])->name('events.show');
+
+// All Pujas Directory
+Route::get('/all-pujas', [EventMicrositeController::class, 'allPujas'])->name('all-pujas');
+Route::get('/events/{slug}/all-pujas', [EventMicrositeController::class, 'allPujas'])->name('events.all-pujas');
+
+// Dedicated Voting Flow (Accessible strictly via SEO slug)
+Route::get('/vote/{participant}', [EventMicrositeController::class, 'vote'])->name('vote.participant');
+
+// Vote Confirmed & Voucher Success Flow
+Route::get('/vote-success/{participant}', [EventMicrositeController::class, 'voteSuccess'])->name('vote-success.participant');
 
 // Admin Utility: Create storage symbolic link via authenticated session
 Route::get('/admin-tools/storage-link', function () {

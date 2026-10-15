@@ -48,7 +48,9 @@ class WinnerForm
                             Select::make('rank_order')
                                 ->label('Award Rank / Position')
                                 ->options(WinnerRank::options())
-                                ->required(),
+                                ->nullable()
+                                ->placeholder('No Rank / Category Winner')
+                                ->helperText('Optional: Leave blank if this category awards no ranks/positions'),
                             TextInput::make('year')
                                 ->label('Award Year')
                                 ->required()

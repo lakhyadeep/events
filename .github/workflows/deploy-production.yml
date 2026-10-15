@@ -1,0 +1,235 @@
+name: Deploy to Production (dibrugarh24x7.in)
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_tests:
+        description: 'Run automated tests before deploying'
+        required: true
+        type: boolean
+        default: true
+      run_migrations:
+        description: 'Run database migrations (php artisan migrate --force)'
+        required: true
+        type: boolean
+        default: true
+      backup_sqlite:
+        description: 'Backup SQLite database before deploying'
+        required: true
+        type: boolean
+        default: true
+
+concurrency:
+  group: production-deployment
+  cancel-in-progress: false
+
+jobs:
+  test:
+    name: Test & Validate Suite
+    runs-on: ubuntu-latest
+    if: inputs.run_tests == true
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, bcmath, fileinfo, curl, zip
+          coverage: none
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Cache Composer Dependencies
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install Composer Dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Install NPM Dependencies & Build Assets
+        run: |
+          npm ci
+          npm run build
+
+      - name: Prepare Test Environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Run PHPUnit Test Suite
+        run: php artisan test --compact
+
+  deploy:
+    name: Deploy to Production Server
+    runs-on: ubuntu-latest
+    needs: [test]
+    if: always() && (needs.test.result == 'success' || needs.test.result == 'skipped')
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, bcmath, fileinfo, curl, zip
+          coverage: none
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Cache Production Composer Dependencies
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-prod-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-prod-
+
+      - name: Install Production PHP Dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress --no-dev --optimize-autoloader
+
+      - name: Install Dependencies & Build Frontend Assets
+        run: |
+          npm ci
+          npm run build
+
+      - name: Verify Compiled Vite Assets
+        run: |
+          if [ ! -d "public/build" ] || [ ! -f "public/build/manifest.json" ]; then
+            echo "ERROR: Compiled Vite build assets or manifest.json not found in public/build!"
+            exit 1
+          fi
+          echo "Vite build manifest confirmed:"
+          ls -la public/build
+
+      - name: Configure SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.PROD_SSH_KEY }}" | tr -d '\r' > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          ssh-keyscan -p ${{ secrets.PROD_SSH_PORT || 22 }} -H "${{ secrets.PROD_SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      - name: Deploy Code & Execute Production Optimizations
+        env:
+          SSH_HOST: ${{ secrets.PROD_SSH_HOST }}
+          SSH_USER: ${{ secrets.PROD_SSH_USER }}
+          SSH_PORT: ${{ secrets.PROD_SSH_PORT || 22 }}
+          DEPLOY_PATH: ${{ secrets.PROD_DEPLOY_PATH }}
+          CUSTOM_PHP_BIN: ${{ secrets.PROD_PHP_BIN }}
+          RUN_MIGRATIONS: ${{ inputs.run_migrations == true }}
+          BACKUP_SQLITE: ${{ inputs.backup_sqlite == true }}
+        run: |
+          SSH_CMD="ssh -p $SSH_PORT -i ~/.ssh/id_deploy -o StrictHostKeyChecking=accept-new -o ConnectTimeout=15"
+
+          echo "===> Step 1: Detecting PHP 8.3 binary on server..."
+          PHP_DETECT_CMD='
+            export TERM=dumb
+            if [ -n "'"$CUSTOM_PHP_BIN"'" ] && command -v "'"$CUSTOM_PHP_BIN"'" >/dev/null 2>&1; then
+              echo "'"$CUSTOM_PHP_BIN"'"
+            else
+              for candidate in "/usr/local/bin/ea-php83" "/opt/cpanel/ea-php83/root/usr/bin/php" "ea-php83" "php83" "php8.3" "/usr/bin/php8.3" "/usr/bin/php83" "php"; do
+                if command -v "$candidate" >/dev/null 2>&1; then
+                  echo "$candidate"
+                  exit 0
+                fi
+              done
+              echo "php"
+            fi
+          '
+          PHP_BIN=$($SSH_CMD "$SSH_USER@$SSH_HOST" "$PHP_DETECT_CMD" | tr -d '\r' | tail -n 1)
+          echo "Using Remote PHP binary: $PHP_BIN"
+
+          echo "===> Step 2: Putting application into maintenance mode..."
+          $SSH_CMD "$SSH_USER@$SSH_HOST" "export TERM=dumb; if [ -d $DEPLOY_PATH ] && [ -f $DEPLOY_PATH/artisan ]; then cd $DEPLOY_PATH && $PHP_BIN artisan down --render='errors::503' || true; fi" || true
+
+          if [ "$BACKUP_SQLITE" = "true" ]; then
+            echo "===> Step 3: Backing up SQLite database..."
+            $SSH_CMD "$SSH_USER@$SSH_HOST" "export TERM=dumb; if [ -f $DEPLOY_PATH/database/database.sqlite ]; then
+              mkdir -p $DEPLOY_PATH/storage/backups
+              cp $DEPLOY_PATH/database/database.sqlite $DEPLOY_PATH/storage/backups/database_\$(date +%Y%m%d_%H%M%S).sqlite
+              echo 'Backup created in storage/backups/'
+            fi" || true
+          fi
+
+          echo "===> Step 4: Streaming complete codebase, vendor, and compiled assets to $DEPLOY_PATH..."
+          tar --exclude='.git' \
+              --exclude='node_modules' \
+              --exclude='.env' \
+              --exclude='storage/*.sqlite' \
+              --exclude='storage/backups' \
+              -czf - . | $SSH_CMD "$SSH_USER@$SSH_HOST" "mkdir -p $DEPLOY_PATH && tar -xzf - -C $DEPLOY_PATH"
+
+          echo "===> Step 5: Configuring environment, caches, permissions, and database on server..."
+          $SSH_CMD "$SSH_USER@$SSH_HOST" "export TERM=dumb; cd $DEPLOY_PATH && {
+            if [ ! -f .env ]; then
+              echo 'Setting up initial .env...'
+              if [ -f .env.production.example ]; then
+                cp .env.production.example .env
+              else
+                cp .env.example .env
+              fi
+            fi
+
+            if [ ! -f .htaccess ] && [ -f .htaccess.root-example ]; then
+              echo 'Setting up root .htaccess...'
+              cp .htaccess.root-example .htaccess
+            fi
+
+            if ! grep -q '^APP_KEY=base64:' .env; then
+              echo 'Generating application key...'
+              $PHP_BIN artisan key:generate --force || true
+            fi
+
+            echo 'Ensuring directories and file permissions...'
+            mkdir -p storage/framework/{sessions,views,cache} storage/logs storage/backups bootstrap/cache
+            touch database/database.sqlite 2>/dev/null || true
+            chmod -R 775 storage bootstrap/cache 2>/dev/null || true
+
+            echo 'Creating storage symlink...'
+            $PHP_BIN artisan storage:link || true
+
+            if [ '$RUN_MIGRATIONS' = 'true' ]; then
+              echo 'Running database migrations...'
+              $PHP_BIN artisan migrate --force
+            fi
+
+            echo 'Optimizing configuration and caches...'
+            $PHP_BIN artisan optimize:clear
+            $PHP_BIN artisan config:cache
+            $PHP_BIN artisan route:cache
+            $PHP_BIN artisan view:cache
+            $PHP_BIN artisan event:cache
+            $PHP_BIN artisan filament:optimize || true
+
+            echo 'Restarting queue workers...'
+            $PHP_BIN artisan queue:restart || true
+
+            echo 'Bringing application back online...'
+            $PHP_BIN artisan up
+          }"
+
+      - name: Health Check (Smoke Test)
+        run: |
+          echo "===> Step 6: Verifying production endpoint..."
+          sleep 3
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -L --max-time 15 "https://dibrugarh24x7.in/up" || true)
+          echo "Health check HTTP status: $HTTP_STATUS"
+          if [ "$HTTP_STATUS" -eq 200 ] || [ "$HTTP_STATUS" -eq 301 ] || [ "$HTTP_STATUS" -eq 302 ]; then
+            echo "✅ Production deployment completed successfully and responding healthy!"
+          else
+            echo "⚠️ Health check returned status $HTTP_STATUS (DNS or SSL may still be propagating)."
+          fi

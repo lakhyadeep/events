@@ -3,6 +3,9 @@
 namespace App\Filament\Resources\Participants\Schemas;
 
 use App\Enums\RegistrationStatus;
+use App\Models\Locality;
+use App\Models\Zone;
+use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -10,7 +13,9 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Illuminate\Support\HtmlString;
 
 class ParticipantForm
 {
@@ -52,29 +57,33 @@ class ParticipantForm
                         ->schema([
                             FileUpload::make('primary_display_image')
                                 ->label('Primary Showcase Photo (Featured Cover)')
+                                ->disk('public')
                                 ->image()
-                                ->maxSize(5120)
-                                ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                                ->maxSize(10240)
+                                ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/jpg'])
                                 ->directory('participants/primary')
                                 ->columnSpanFull()
                                 ->required(),
                             FileUpload::make('image_1')
                                 ->label('Gallery Photo 1 (Pandal Exterior / Theme)')
+                                ->disk('public')
                                 ->image()
-                                ->maxSize(5120)
-                                ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                                ->maxSize(10240)
+                                ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/jpg'])
                                 ->directory('participants/gallery'),
                             FileUpload::make('image_2')
                                 ->label('Gallery Photo 2 (Idol / Sculpting Detail)')
+                                ->disk('public')
                                 ->image()
-                                ->maxSize(5120)
-                                ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                                ->maxSize(10240)
+                                ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/jpg'])
                                 ->directory('participants/gallery'),
                             FileUpload::make('image_3')
                                 ->label('Gallery Photo 3 (Lighting / Atmosphere)')
+                                ->disk('public')
                                 ->image()
-                                ->maxSize(5120)
-                                ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                                ->maxSize(10240)
+                                ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/jpg'])
                                 ->directory('participants/gallery'),
                         ]),
 
@@ -113,9 +122,10 @@ class ParticipantForm
                                 ->maxLength(191),
                             FileUpload::make('concept_note_image')
                                 ->label('Concept Note / Architectural Blueprint')
+                                ->disk('public')
                                 ->image()
-                                ->maxSize(5120)
-                                ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                                ->maxSize(10240)
+                                ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/jpg'])
                                 ->directory('participants/concept_notes')
                                 ->columnSpanFull(),
                         ]),
@@ -152,20 +162,20 @@ class ParticipantForm
                         ->schema([
                             Select::make('zone_id')
                                 ->label('Geographic Zone')
-                                ->relationship('zone', 'name')
+                                ->options(fn () => Zone::query()->pluck('name', 'id'))
                                 ->searchable()
                                 ->preload()
                                 ->live()
+                                ->afterStateUpdated(fn ($set) => $set('locality_id', null))
                                 ->required(),
                             Select::make('locality_id')
                                 ->label('Locality / Neighborhood')
-                                ->relationship(
-                                    name: 'locality',
-                                    titleAttribute: 'name',
-                                    modifyQueryUsing: fn ($query, $get) => $query->when(
+                                ->options(fn ($get) => Locality::query()
+                                    ->when(
                                         $get('zone_id'),
-                                        fn ($q, $zoneId) => $q->where('zone_id', $zoneId)
+                                        fn ($query, $zoneId) => $query->where('zone_id', $zoneId)
                                     )
+                                    ->pluck('name', 'id')
                                 )
                                 ->searchable()
                                 ->preload(),
@@ -173,6 +183,28 @@ class ParticipantForm
                                 ->label('Prominent Landmark')
                                 ->placeholder('e.g. Near Lake Market')
                                 ->maxLength(191),
+                            TextInput::make('google_map_url')
+                                ->label('Google Map Link')
+                                ->placeholder('https://maps.app.goo.gl/... or https://maps.google.com/?q=...')
+                                ->url()
+                                ->prefixIcon('heroicon-m-map-pin')
+                                ->live(onBlur: true)
+                                ->suffixAction(
+                                    Action::make('openGoogleMap')
+                                        ->icon('heroicon-m-arrow-top-right-on-square')
+                                        ->tooltip('Open Google Maps in new tab')
+                                        ->url(fn (?string $state): ?string => filled($state) ? $state : null, shouldOpenInNewTab: true)
+                                        ->visible(fn (?string $state): bool => filled($state))
+                                )
+                                ->helperText(function (Get $get) {
+                                    $url = $get('google_map_url');
+                                    if (filled($url)) {
+                                        return new HtmlString('<a href="'.e($url).'" target="_blank" rel="noopener noreferrer" class="text-primary-600 dark:text-primary-400 underline font-medium inline-flex items-center gap-1">Open map link in new tab &nearr;</a>');
+                                    }
+
+                                    return null;
+                                })
+                                ->maxLength(2048),
                             TextInput::make('mobile_number')
                                 ->label('Official Helpline Mobile')
                                 ->placeholder('e.g. 9830011223')

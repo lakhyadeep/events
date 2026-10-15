@@ -41,7 +41,24 @@ class VideoShort extends Model
     public function thumbnailImageUrl(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->resolveMediaUrl($this->thumbnail_image)
+            get: function (): ?string {
+                if ($resolved = $this->resolveMediaUrl($this->thumbnail_image)) {
+                    return $resolved;
+                }
+
+                $id = $this->video_id;
+                if (! $id && ! empty($this->video_url)) {
+                    if (preg_match('/(?:shorts\/|youtu\.be\/|v=|\/embed\/|\/v\/)([\w\-]{11})/', $this->video_url, $matches)) {
+                        $id = $matches[1];
+                    }
+                }
+
+                if ($id) {
+                    return "https://img.youtube.com/vi/{$id}/hqdefault.jpg";
+                }
+
+                return null;
+            }
         );
     }
 
@@ -60,15 +77,19 @@ class VideoShort extends Model
      */
     public function getEmbedUrlAttribute(): string
     {
-        if ($this->video_id) {
-            return "https://www.youtube.com/embed/{$this->video_id}?autoplay=1";
+        $id = $this->video_id;
+        if (! $id && ! empty($this->video_url)) {
+            if (preg_match('/(?:shorts\/|youtu\.be\/|v=|\/embed\/|\/v\/)([\w\-]{11})/', $this->video_url, $matches)) {
+                $id = $matches[1];
+            } elseif (preg_match('/(?:shorts\/|youtu\.be\/|v=)([\w\-]+)/', $this->video_url, $matches)) {
+                $id = $matches[1];
+            }
         }
 
-        // Parse youtube shorts URL if video_id is not pre-populated
-        if (preg_match('/(?:shorts\/|youtu\.be\/|v=)([\w\-]+)/', $this->video_url, $matches)) {
-            return "https://www.youtube.com/embed/{$matches[1]}?autoplay=1";
+        if ($id) {
+            return "https://www.youtube-nocookie.com/embed/{$id}?autoplay=1&enablejsapi=1&rel=0&playsinline=1&modestbranding=1&loop=1&playlist={$id}";
         }
 
-        return $this->video_url;
+        return $this->video_url ?? '';
     }
 }
