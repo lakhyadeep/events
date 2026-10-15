@@ -1,9 +1,6 @@
 name: Deploy to UAT
 
 on:
-  push:
-    branches:
-      - develop
   workflow_dispatch:
     inputs:
       run_tests:
@@ -20,7 +17,7 @@ jobs:
   test:
     name: Run Automated Tests
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || inputs.run_tests == true
+    if: inputs.run_tests == true
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
