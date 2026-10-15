@@ -16,9 +16,9 @@ class EventMicrositeController extends Controller
     /**
      * Display the event microsite.
      */
-    public function show(?string $slug = null): View
+    public function show(Event $event): View
     {
-        $query = Event::with([
+        $event->loadMissing([
             'banners' => fn ($q) => $q->where('is_active', true)->orderBy('sort_order'),
             'sponsors' => fn ($q) => $q->where('is_active', true)->orderBy('slot_order'),
             'awards' => fn ($q) => $q->where('is_active', true)->orderBy('sort_order'),
@@ -27,19 +27,6 @@ class EventMicrositeController extends Controller
             'videoShorts' => fn ($q) => $q->where('is_active', true)->orderBy('sort_order'),
             'timelineItems' => fn ($q) => $q->orderBy('sort_order'),
         ]);
-
-        $event = $slug
-            ? $query->where('slug', $slug)->first()
-            : $query->where('status', 'active')->latest('year')->first();
-
-        // Fallback: If no event matched slug or none is active, show the latest created event
-        if (! $event) {
-            $event = $query->latest('year')->latest('id')->first();
-        }
-
-        if (! $event) {
-            return view('frontend.no-events');
-        }
 
         // Segregate sponsor tiers for the masthead
         $presentingPartner = $event->sponsors
@@ -81,22 +68,8 @@ class EventMicrositeController extends Controller
     /**
      * Display the All Pujas Directory page.
      */
-    public function allPujas(?string $slug = null): View
+    public function allPujas(Event $event): View
     {
-        $query = Event::query();
-
-        $event = $slug
-            ? $query->where('slug', $slug)->first()
-            : $query->where('status', 'active')->latest('year')->first();
-
-        if (! $event) {
-            $event = $query->latest('year')->latest('id')->first();
-        }
-
-        if (! $event) {
-            return view('frontend.no-events');
-        }
-
         $participants = $event->participants()
             ->approved()
             ->withCount('votes')
@@ -200,20 +173,13 @@ class EventMicrositeController extends Controller
      * Display the dedicated Voting page (v2 flow).
      * Strictly accessible only via /vote/{participant}.
      */
-    public function vote(string $participant): View
+    public function vote(Event $event, string $participant): View
     {
-        $query = Event::with([
+        $event->loadMissing([
             'banners' => fn ($q) => $q->where('is_active', true)->orderBy('sort_order'),
             'sponsors' => fn ($q) => $q->where('is_active', true)->orderBy('slot_order'),
             'awards' => fn ($q) => $q->where('is_active', true)->where('is_voting_allowed', true)->orderBy('sort_order'),
         ]);
-
-        $event = $query->where('status', 'active')->latest('year')->first()
-            ?? $query->latest('year')->latest('id')->first();
-
-        if (! $event) {
-            return view('frontend.no-events');
-        }
 
         $participants = $event->participants()
             ->approved()
@@ -225,31 +191,6 @@ class EventMicrositeController extends Controller
         $cleanSlug = Str::slug(urldecode($participant));
 
         $selectedParticipant = $participants->first(fn ($p) => $p->slug === $cleanSlug);
-
-        // If not found in current active event, search across all approved participants so event can be resolved from participant
-        if (! $selectedParticipant) {
-            $candidate = Participant::approved()
-                ->with(['event', 'zone', 'locality'])
-                ->withCount('votes')
-                ->get()
-                ->first(fn ($p) => $p->slug === $cleanSlug);
-
-            if ($candidate && $candidate->event) {
-                $event = $candidate->event;
-                $event->loadMissing([
-                    'banners' => fn ($q) => $q->where('is_active', true)->orderBy('sort_order'),
-                    'sponsors' => fn ($q) => $q->where('is_active', true)->orderBy('slot_order'),
-                    'awards' => fn ($q) => $q->where('is_active', true)->where('is_voting_allowed', true)->orderBy('sort_order'),
-                ]);
-                $participants = $event->participants()
-                    ->approved()
-                    ->withCount('votes')
-                    ->with(['zone', 'locality'])
-                    ->orderByDesc('is_shortlisted')
-                    ->get();
-                $selectedParticipant = $candidate;
-            }
-        }
 
         if (! $selectedParticipant) {
             abort(404);
@@ -306,19 +247,12 @@ class EventMicrositeController extends Controller
      * Display the Vote Confirmation & Voucher Success page.
      * Strictly accessible only via /vote-success/{participant}.
      */
-    public function voteSuccess(string $participant): View
+    public function voteSuccess(Event $event, string $participant): View
     {
-        $query = Event::with([
+        $event->loadMissing([
             'banners' => fn ($q) => $q->where('is_active', true)->orderBy('sort_order'),
             'sponsors' => fn ($q) => $q->where('is_active', true)->orderBy('slot_order'),
         ]);
-
-        $event = $query->where('status', 'active')->latest('year')->first()
-            ?? $query->latest('year')->latest('id')->first();
-
-        if (! $event) {
-            return view('frontend.no-events');
-        }
 
         $participants = $event->participants()
             ->approved()

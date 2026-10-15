@@ -1,6 +1,6 @@
 <section class="py-5" id="">
     <div class="container">
-        <a href="{{ route('all-pujas') }}"
+        <a href="{{ isset($event) && $event->slug ? route('events.all-pujas', ['event' => $event->slug]) : route('home') }}"
             class="awards-announced-header-box text-center d-block text-decoration-none mb-5"
             title="Click to view all Dibrugarh Durga Pujas">
             <!-- Top Corner Click Indicator Badge -->

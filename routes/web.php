@@ -1,29 +1,25 @@
 <?php
 
 use App\Http\Controllers\Frontend\EventMicrositeController;
+use App\Models\Event;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
-
-// Public Flagship Event Microsite
 
 Route::get('/welcome', function () {
     return view('welcome');
 })->name('welcome');
 
-Route::get('/', [EventMicrositeController::class, 'show'])->name('home');
+// Root Domain: Redirect to current active event slug
+Route::get('/', function () {
+    $event = Event::where('status', 'active')->latest('year')->first()
+        ?? Event::latest('year')->latest('id')->first();
 
-// Specific Event by Slug
-Route::get('/events/{slug}', [EventMicrositeController::class, 'show'])->name('events.show');
+    if (! $event) {
+        return view('frontend.no-events');
+    }
 
-// All Pujas Directory
-Route::get('/all-pujas', [EventMicrositeController::class, 'allPujas'])->name('all-pujas');
-Route::get('/events/{slug}/all-pujas', [EventMicrositeController::class, 'allPujas'])->name('events.all-pujas');
-
-// Dedicated Voting Flow (Accessible strictly via SEO slug)
-Route::get('/vote/{participant}', [EventMicrositeController::class, 'vote'])->name('vote.participant');
-
-// Vote Confirmed & Voucher Success Flow
-Route::get('/vote-success/{participant}', [EventMicrositeController::class, 'voteSuccess'])->name('vote-success.participant');
+    return redirect()->route('events.show', ['event' => $event->slug]);
+})->name('home');
 
 // Admin Utility: Create storage symbolic link via authenticated session
 Route::get('/admin-tools/storage-link', function () {
@@ -31,3 +27,13 @@ Route::get('/admin-tools/storage-link', function () {
 
     return response('Storage link created successfully.', 200);
 })->middleware('auth')->name('admin.tools.storage-link');
+
+// All Event Routes prefixed with Event Slug: /{event}
+Route::prefix('{event}')
+    ->where(['event' => '^(?!admin|admin-tools|livewire|api|event-assets|storage|up)[a-zA-Z0-9_-]+$'])
+    ->group(function () {
+        Route::get('/', [EventMicrositeController::class, 'show'])->name('events.show');
+        Route::get('/all-pujas', [EventMicrositeController::class, 'allPujas'])->name('events.all-pujas');
+        Route::get('/vote/{participant}', [EventMicrositeController::class, 'vote'])->name('events.vote');
+        Route::get('/vote-success/{participant}', [EventMicrositeController::class, 'voteSuccess'])->name('events.vote-success');
+    });

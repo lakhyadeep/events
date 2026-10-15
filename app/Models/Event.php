@@ -55,6 +55,11 @@ class Event extends Model
         ];
     }
 
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
     public function ogImageUrl(): Attribute
     {
         return Attribute::make(

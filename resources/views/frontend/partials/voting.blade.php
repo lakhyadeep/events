@@ -329,7 +329,7 @@
                 <p class="text-muted small mb-0">Search all pandals with real-time auto-suggestions, lazy loading directory, and live community voting.</p>
             </div>
             <div class="col-md-4 text-center text-md-end">
-                <a href="{{ route('all-pujas') }}" class="btn btn-vote-pill px-4 py-2 text-decoration-none">
+                <a href="{{ isset($event) && $event->slug ? route('events.all-pujas', ['event' => $event->slug]) : route('home') }}" class="btn btn-vote-pill px-4 py-2 text-decoration-none">
                     <span>Browse All Pujas</span>
                     <span class="vote-icon-badge">
                         <i class="bi bi-arrow-right"></i>
