@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Participants\Schemas;
 use App\Enums\RegistrationStatus;
 use App\Models\Locality;
 use App\Models\Zone;
+use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -12,7 +13,9 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Illuminate\Support\HtmlString;
 
 class ParticipantForm
 {
@@ -180,6 +183,28 @@ class ParticipantForm
                                 ->label('Prominent Landmark')
                                 ->placeholder('e.g. Near Lake Market')
                                 ->maxLength(191),
+                            TextInput::make('google_map_url')
+                                ->label('Google Map Link')
+                                ->placeholder('https://maps.app.goo.gl/... or https://maps.google.com/?q=...')
+                                ->url()
+                                ->prefixIcon('heroicon-m-map-pin')
+                                ->live(onBlur: true)
+                                ->suffixAction(
+                                    Action::make('openGoogleMap')
+                                        ->icon('heroicon-m-arrow-top-right-on-square')
+                                        ->tooltip('Open Google Maps in new tab')
+                                        ->url(fn (?string $state): ?string => filled($state) ? $state : null, shouldOpenInNewTab: true)
+                                        ->visible(fn (?string $state): bool => filled($state))
+                                )
+                                ->helperText(function (Get $get) {
+                                    $url = $get('google_map_url');
+                                    if (filled($url)) {
+                                        return new HtmlString('<a href="'.e($url).'" target="_blank" rel="noopener noreferrer" class="text-primary-600 dark:text-primary-400 underline font-medium inline-flex items-center gap-1">Open map link in new tab &nearr;</a>');
+                                    }
+
+                                    return null;
+                                })
+                                ->maxLength(2048),
                             TextInput::make('mobile_number')
                                 ->label('Official Helpline Mobile')
                                 ->placeholder('e.g. 9830011223')

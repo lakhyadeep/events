@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\Participants\Tables;
 
 use App\Enums\RegistrationStatus;
+use App\Models\Participant;
+use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -70,6 +72,13 @@ class ParticipantsTable
                 TextColumn::make('theme_artist')
                     ->label('Theme Artist')
                     ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('google_map_url')
+                    ->label('Map Link')
+                    ->icon('heroicon-o-map-pin')
+                    ->formatStateUsing(fn ($state) => filled($state) ? 'View Map' : '—')
+                    ->url(fn ($state) => filled($state) ? $state : null, shouldOpenInNewTab: true)
+                    ->color(fn ($state) => filled($state) ? 'primary' : 'gray')
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('is_shortlisted', 'desc')
             ->filters([
@@ -98,6 +107,13 @@ class ParticipantsTable
             ], layout: FiltersLayout::AboveContent)
             ->filtersFormColumns(5)
             ->recordActions([
+                Action::make('open_map')
+                    ->label('Map')
+                    ->icon('heroicon-o-arrow-top-right-on-square')
+                    ->color('primary')
+                    ->tooltip('Open Google Maps in new tab')
+                    ->url(fn (Participant $record): ?string => $record->google_map_url, shouldOpenInNewTab: true)
+                    ->visible(fn (Participant $record): bool => filled($record->google_map_url)),
                 EditAction::make(),
             ])
             ->toolbarActions([

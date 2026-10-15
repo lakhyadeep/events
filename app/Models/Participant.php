@@ -29,6 +29,7 @@ class Participant extends Model
         'locality',
         'address',
         'landmark',
+        'google_map_url',
         'key_contact_1_name',
         'key_contact_1_phone',
         'key_contact_2_name',

@@ -18,6 +18,7 @@ class ParticipantResource extends JsonResource
             'locality' => $this->locality,
             'landmark' => $this->landmark,
             'address' => $this->address,
+            'google_map_url' => $this->google_map_url,
             'year' => $this->year,
             'registration_status' => $this->registration_status?->value ?? $this->registration_status,
             'is_shortlisted' => (bool) $this->is_shortlisted,

@@ -5,7 +5,9 @@ namespace Tests\Feature;
 use App\Filament\Pages\Auth\RegisterSuperadmin;
 use App\Filament\Resources\Awards\Pages\CreateAward;
 use App\Filament\Resources\Events\Pages\CreateEvent;
+use App\Filament\Resources\Participants\Pages\EditParticipant;
 use App\Filament\Resources\Users\Pages\EditUser;
+use App\Http\Resources\ParticipantResource;
 use App\Models\Event;
 use App\Models\Participant;
 use App\Models\Sponsor;
@@ -252,5 +254,40 @@ class AdminManagementTest extends TestCase
             'name' => 'Special Heritage Award',
             'category' => null,
         ]);
+    }
+
+    public function test_admin_can_update_participant_google_map_url(): void
+    {
+        $admin = User::where('email', 'admin@dib24x7.com')->first();
+        $participant = Participant::first();
+        $mapUrl = 'https://maps.app.goo.gl/example123';
+
+        Livewire::actingAs($admin)
+            ->test(EditParticipant::class, [
+                'record' => $participant->id,
+            ])
+            ->fillForm([
+                'google_map_url' => $mapUrl,
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertDatabaseHas('participants', [
+            'id' => $participant->id,
+            'google_map_url' => $mapUrl,
+        ]);
+    }
+
+    public function test_participant_resource_includes_google_map_url(): void
+    {
+        $participant = Participant::first();
+        $participant->update([
+            'google_map_url' => 'https://maps.google.com/?q=27.4728,94.9120',
+        ]);
+
+        $resource = (new ParticipantResource($participant))->toArray(request());
+
+        $this->assertArrayHasKey('google_map_url', $resource);
+        $this->assertSame('https://maps.google.com/?q=27.4728,94.9120', $resource['google_map_url']);
     }
 }

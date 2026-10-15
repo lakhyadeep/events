@@ -136,6 +136,7 @@ class EventMicrositeController extends Controller
                 'established' => $p->first_year_of_puja ? 'Est. '.$p->first_year_of_puja : '',
                 'theme' => $p->puja_theme ?: ($p->short_introduction ?: ''),
                 'image' => $p->primary_image_url ?: asset('event-assets/images/hero.png'),
+                'google_map_url' => $p->google_map_url,
             ];
         })->values()->toArray();
 
@@ -267,6 +268,7 @@ class EventMicrositeController extends Controller
                 'votes' => (int) ($p->votes_count ?? 0),
                 'theme' => $p->puja_theme ?: ($p->short_introduction ?: ''),
                 'image' => $p->primary_image_url ?: '',
+                'google_map_url' => $p->google_map_url,
             ];
         })->values()->toArray();
 
@@ -337,6 +339,7 @@ class EventMicrositeController extends Controller
                 'votes' => (int) ($p->votes_count ?? 0),
                 'theme' => $p->puja_theme ?: ($p->short_introduction ?: ''),
                 'image' => $p->primary_image_url ?: '',
+                'google_map_url' => $p->google_map_url,
             ];
         })->values()->toArray();
 
