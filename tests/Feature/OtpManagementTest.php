@@ -62,6 +62,36 @@ class OtpManagementTest extends TestCase
         $this->assertSame('Your code is :otp. Valid for :minutes min.', $updated->message_template);
     }
 
+    public function test_admin_can_save_fast2sms_settings(): void
+    {
+        $user = User::query()->first();
+
+        $this->actingAs($user);
+
+        Livewire::test(ManageOtpSettings::class)
+            ->fillForm([
+                'active_driver' => 'fast2sms',
+                'otp_length' => 6,
+                'expiry_minutes' => 5,
+                'resend_cooldown_seconds' => 60,
+                'max_attempts' => 5,
+                'fast2sms_settings' => [
+                    'api_key' => 'F2S_ADMIN_TEST_KEY',
+                    'route' => 'otp',
+                ],
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        OtpSetting::clearCache();
+        $updated = OtpSetting::current();
+
+        $this->assertSame('fast2sms', $updated->active_driver);
+        $this->assertSame(6, $updated->otp_length);
+        $this->assertSame('F2S_ADMIN_TEST_KEY', $updated->fast2sms_settings['api_key']);
+        $this->assertSame('otp', $updated->fast2sms_settings['route']);
+    }
+
     public function test_admin_can_trigger_send_test_otp_action(): void
     {
         $user = User::query()->first();

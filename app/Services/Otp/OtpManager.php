@@ -4,6 +4,7 @@ namespace App\Services\Otp;
 
 use App\Models\OtpSetting;
 use App\Services\Otp\Contracts\SmsGatewayInterface;
+use App\Services\Otp\Drivers\Fast2SmsDriver;
 use App\Services\Otp\Drivers\LogSmsDriver;
 use Closure;
 use InvalidArgumentException;
@@ -90,6 +91,23 @@ class OtpManager
     protected function createLogSmsDriver(): LogSmsDriver
     {
         return new LogSmsDriver;
+    }
+
+    /**
+     * Create an instance of the Fast2SMS driver.
+     */
+    protected function createFast2smsDriver(): Fast2SmsDriver
+    {
+        $setting = $this->getOtpSetting();
+        $dbConfig = $setting?->fast2sms_settings ?? [];
+        $fileConfig = config('otp.drivers.fast2sms', []);
+
+        $config = array_merge(
+            is_array($fileConfig) ? $fileConfig : [],
+            is_array($dbConfig) ? array_filter($dbConfig, fn ($val) => filled($val)) : []
+        );
+
+        return new Fast2SmsDriver($config);
     }
 
     /**

@@ -7,7 +7,7 @@ return [
     | Default SMS / OTP Driver
     |--------------------------------------------------------------------------
     |
-    | Supported: "log"
+    | Supported: "log", "fast2sms"
     |
     */
     'default' => env('OTP_SMS_DRIVER', 'log'),
@@ -39,5 +39,12 @@ return [
     */
     'drivers' => [
         'log' => [],
+        'fast2sms' => [
+            'api_key' => env('FAST2SMS_API_KEY', ''),
+            'route' => env('FAST2SMS_ROUTE', 'otp'), // "otp", "dlt", or "q"
+            'sender_id' => env('FAST2SMS_SENDER_ID', ''),
+            'entity_id' => env('FAST2SMS_ENTITY_ID', ''),
+            'endpoint' => env('FAST2SMS_ENDPOINT', 'https://www.fast2sms.com/dev/bulkV2'),
+        ],
     ],
 ];

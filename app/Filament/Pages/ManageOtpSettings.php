@@ -16,6 +16,7 @@ use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\EmbeddedSchema;
 use Filament\Schemas\Components\Form;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use UnitEnum;
 
@@ -56,9 +57,11 @@ class ManageOtpSettings extends Page
                             ->label('Active SMS / OTP Gateway')
                             ->options([
                                 'log' => 'Log SMS Driver (Local & Staging / Testing)',
+                                'fast2sms' => 'Fast2SMS Gateway (Production SMS / India)',
                             ])
                             ->default('log')
-                            ->helperText('Currently operating in Log SMS mode. Production SMS provider will be integrated once verified.')
+                            ->helperText('Select the active gateway. Production SMS will use Fast2SMS once configured.')
+                            ->live()
                             ->required()
                             ->columnSpanFull(),
 
@@ -119,6 +122,37 @@ class ManageOtpSettings extends Page
                             ->label('Designated Test Mobile Numbers')
                             ->placeholder('e.g. 9876543210, 9999999999')
                             ->helperText('Comma-separated list of test mobile numbers that will accept the Master OTP code.'),
+                    ]),
+
+                Section::make('Fast2SMS Gateway Configuration')
+                    ->description('Configure Fast2SMS API key and routing for quick Indian SMS and OTP delivery.')
+                    ->columns(['default' => 1, 'sm' => 2])
+                    ->visible(fn (Get $get): bool => $get('active_driver') === 'fast2sms')
+                    ->schema([
+                        TextInput::make('fast2sms_settings.api_key')
+                            ->label('API Authorization Key')
+                            ->password()
+                            ->revealable()
+                            ->required(fn (Get $get): bool => $get('active_driver') === 'fast2sms')
+                            ->columnSpanFull(),
+
+                        Select::make('fast2sms_settings.route')
+                            ->label('Route Type')
+                            ->options([
+                                'otp' => 'OTP Route (Quick Instant OTP)',
+                                'dlt' => 'DLT Approved Route (Transactional)',
+                                'q' => 'Quick SMS Route',
+                            ])
+                            ->default('otp'),
+
+                        TextInput::make('fast2sms_settings.sender_id')
+                            ->label('Sender ID (DLT only)')
+                            ->placeholder('DIBEVT')
+                            ->maxLength(6),
+
+                        TextInput::make('fast2sms_settings.entity_id')
+                            ->label('Entity / Template ID (DLT only)')
+                            ->placeholder('e.g. 1207161...'),
                     ]),
             ])
             ->statePath('data');
