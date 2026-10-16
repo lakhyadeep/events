@@ -11,11 +11,9 @@ use App\Models\Participant;
 use App\Models\Sponsor;
 use App\Models\TimelineItem;
 use App\Models\VideoShort;
-use App\Models\Vote;
 use App\Models\Winner;
 use App\Models\Zone;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -64,7 +62,7 @@ class LiveMasterSeeder extends Seeder
      */
     protected function seedLiveEvent(): Event
     {
-        return Event::updateOrCreate(
+        return Event::firstOrCreate(
             ['slug' => 'durga-puja-awards-2026'],
             [
                 'name' => 'Dib 24x7 Sharod Samman 2026',
@@ -186,7 +184,7 @@ class LiveMasterSeeder extends Seeder
         ];
 
         foreach ($sponsorsData as $data) {
-            Sponsor::updateOrCreate(
+            Sponsor::firstOrCreate(
                 ['event_id' => $event->id, 'title' => $data['title']],
                 $data
             );
@@ -220,7 +218,7 @@ class LiveMasterSeeder extends Seeder
         ];
 
         foreach ($bannersData as $data) {
-            Banner::updateOrCreate(
+            Banner::firstOrCreate(
                 ['event_id' => $event->id, 'title' => $data['title']],
                 $data
             );
@@ -280,7 +278,7 @@ class LiveMasterSeeder extends Seeder
         ];
 
         foreach ($awardsData as $data) {
-            Award::updateOrCreate(
+            Award::firstOrCreate(
                 ['event_id' => $event->id, 'name' => $data['name']],
                 $data
             );
@@ -324,7 +322,7 @@ class LiveMasterSeeder extends Seeder
         ];
 
         foreach ($timelineData as $data) {
-            TimelineItem::updateOrCreate(
+            TimelineItem::firstOrCreate(
                 ['event_id' => $event->id, 'title' => $data['title']],
                 $data
             );
@@ -406,7 +404,7 @@ class LiveMasterSeeder extends Seeder
         ];
 
         foreach ($shortsData as $data) {
-            VideoShort::updateOrCreate(
+            VideoShort::firstOrCreate(
                 ['event_id' => $event->id, 'name' => $data['name']],
                 $data
             );
@@ -420,7 +418,7 @@ class LiveMasterSeeder extends Seeder
     {
         $activeDriver = app()->environment('testing') ? 'log' : 'fast2sms';
 
-        OtpSetting::updateOrCreate(
+        OtpSetting::firstOrCreate(
             ['id' => 1],
             [
                 'active_driver' => $activeDriver,
@@ -458,7 +456,7 @@ class LiveMasterSeeder extends Seeder
 
         $zonesCache = [];
         foreach ($zonesList as $z) {
-            $model = Zone::updateOrCreate(
+            $model = Zone::firstOrCreate(
                 ['slug' => $z['slug']],
                 [
                     'name' => $z['name'],
@@ -483,7 +481,7 @@ class LiveMasterSeeder extends Seeder
             ? storage_path('all-puja.csv')
             : storage_path('app/public/all-puja.csv');
 
-        if (!file_exists($csvPath)) {
+        if (! file_exists($csvPath)) {
             $this->command?->error("CSV file not found at: {$csvPath}");
 
             return;
@@ -495,19 +493,9 @@ class LiveMasterSeeder extends Seeder
         Storage::disk('public')->makeDirectory('participants/primary');
         Storage::disk('public')->makeDirectory('participants/gallery');
 
-        // Clear existing participants and localities for a fresh sync
-        Vote::query()->delete();
-        Winner::query()->delete();
-        Participant::query()->delete();
-        Locality::query()->delete();
-
-        if (DB::getDriverName() === 'sqlite') {
-            DB::statement("DELETE FROM sqlite_sequence WHERE name IN ('participants', 'localities', 'winners', 'votes')");
-        }
-
         $handle = fopen($csvPath, 'r');
         $rawHeader = fgetcsv($handle);
-        $header = array_map(fn($col) => trim((string) $col), $rawHeader ?: []);
+        $header = array_map(fn ($col) => trim((string) $col), $rawHeader ?: []);
 
         $colIndex = [
             'reg_no' => array_search('REGD PUJA #', $header),
@@ -525,7 +513,7 @@ class LiveMasterSeeder extends Seeder
         $createdCount = 0;
 
         while (($row = fgetcsv($handle)) !== false) {
-            $row = array_map(fn($v) => trim((string) $v), $row);
+            $row = array_map(fn ($v) => trim((string) $v), $row);
 
             $rawName = $row[$colIndex['name']] ?? '';
             if (empty($rawName) || strlen($rawName) < 4) {
@@ -561,11 +549,11 @@ class LiveMasterSeeder extends Seeder
 
             // Derive and Normalize Locality
             $localityName = $this->deriveLocalityName($rawName, $zoneName);
-            $localityCacheKey = $zone->id . '::' . $localityName;
+            $localityCacheKey = $zone->id.'::'.$localityName;
 
-            if (!isset($localitiesCache[$localityCacheKey])) {
+            if (! isset($localitiesCache[$localityCacheKey])) {
                 $existingLoc = Locality::where('zone_id', $zone->id)->where('name', $localityName)->first();
-                if (!$existingLoc) {
+                if (! $existingLoc) {
                     $existingLoc = Locality::create([
                         'zone_id' => $zone->id,
                         'name' => $localityName,
@@ -590,7 +578,7 @@ class LiveMasterSeeder extends Seeder
 
             // Normalize Google Map URL
             $mapUrl = null;
-            if (!empty($rawMap)) {
+            if (! empty($rawMap)) {
                 if (str_starts_with($rawMap, 'http://') || str_starts_with($rawMap, 'https://')) {
                     $mapUrl = $rawMap;
                 } elseif (preg_match('/^\s*(-?\d+(\.\d+)?)\s*,\s*(-?\d+(\.\d+)?)\s*$/', $rawMap, $matches)) {
@@ -610,68 +598,83 @@ class LiveMasterSeeder extends Seeder
             $galleryImage1 = $this->resolveGalleryImage($slug, 1);
             $galleryImage2 = $this->resolveGalleryImage($slug, 2);
 
-            // Create Participant
-            $createdParticipants[] = Participant::create([
-                'event_id' => $event->id,
-                'name' => $rawName,
+            // Create or update Participant from CSV without overwriting UI-uploaded media
+            $existing = Participant::where('event_id', $event->id)->where('name', $rawName)->first();
+
+            $participantData = [
                 'display_name' => $displayName,
                 'zone_id' => $zone->id,
                 'locality_id' => $locality->id,
                 'zone' => $zone->name,
                 'locality' => $locality->name,
                 'mobile_number' => $cleanPhone,
-                'key_contact_1_name' => $cleanContact ?: null,
+                'key_contact_1_name' => $cleanContact ?: ($existing?->key_contact_1_name ?? null),
                 'key_contact_1_phone' => $cleanPhone,
-                'google_map_url' => $mapUrl,
-                'puja_theme' => !empty($rawTheme) ? trim($rawTheme) : null,
-                'first_year_of_puja' => $firstYear,
-                'primary_display_image' => $primaryImage,
-                'image_1' => $galleryImage1,
-                'image_2' => $galleryImage2,
-                'image_3' => $galleryImage1,
+                'google_map_url' => $mapUrl ?: ($existing?->google_map_url ?? null),
+                'puja_theme' => ! empty($rawTheme) ? trim($rawTheme) : ($existing?->puja_theme ?? null),
+                'first_year_of_puja' => $firstYear ?: ($existing?->first_year_of_puja ?? null),
                 'year' => $event->year ?? 2026,
                 'registration_status' => 'approved',
                 'is_puja_contest' => true,
                 'is_shortlisted' => true,
                 'short_introduction' => "Official contender for {$event->name} representing {$locality->name}, {$zone->name}.",
-            ]);
+            ];
+
+            if (! $existing) {
+                // New participant from CSV: set images
+                $participantData['event_id'] = $event->id;
+                $participantData['name'] = $rawName;
+                $participantData['primary_display_image'] = $primaryImage;
+                $participantData['image_1'] = $galleryImage1;
+                $participantData['image_2'] = $galleryImage2;
+                $participantData['image_3'] = $galleryImage1;
+
+                $createdParticipants[] = Participant::create($participantData);
+            } else {
+                // Existing participant: preserve UI-uploaded images
+                if (empty($existing->primary_display_image)) {
+                    $participantData['primary_display_image'] = $primaryImage;
+                }
+                $existing->update($participantData);
+                $createdParticipants[] = $existing;
+            }
 
             $createdCount++;
         }
 
         fclose($handle);
 
-        // Link winners if awards exist for this event
-        $awards = Award::where('event_id', $event->id)->get();
-        if ($awards->isNotEmpty() && !empty($createdParticipants)) {
-            $bestPujaAward = $awards->first(fn($a) => Str::contains($a->name, 'Best Puja', true)) ?? $awards->first();
-            if ($bestPujaAward && isset($createdParticipants[0])) {
-                Winner::updateOrCreate([
-                    'event_id' => $event->id,
-                    'award_id' => $bestPujaAward->id,
-                    'participant_id' => $createdParticipants[0]->id,
-                    'rank_order' => '1st',
-                ], [
-                    'year' => $event->year ?? 2026,
-                    'status' => 'published',
-                ]);
-            }
+        // Only link sample winners on initial fresh setup if zero winners exist (never overwrite UI-managed winners)
+        if (Winner::where('event_id', $event->id)->count() === 0) {
+            $awards = Award::where('event_id', $event->id)->get();
+            if ($awards->isNotEmpty() && ! empty($createdParticipants)) {
+                $bestPujaAward = $awards->first(fn ($a) => Str::contains($a->name, 'Best Puja', true)) ?? $awards->first();
+                if ($bestPujaAward && isset($createdParticipants[0])) {
+                    Winner::create([
+                        'event_id' => $event->id,
+                        'award_id' => $bestPujaAward->id,
+                        'participant_id' => $createdParticipants[0]->id,
+                        'rank_order' => '1st',
+                        'year' => $event->year ?? 2026,
+                        'status' => 'published',
+                    ]);
+                }
 
-            $bestIdolAward = $awards->first(fn($a) => Str::contains($a->name, 'Pritama', true) || Str::contains($a->name, 'Pratima', true));
-            if ($bestIdolAward && isset($createdParticipants[1])) {
-                Winner::updateOrCreate([
-                    'event_id' => $event->id,
-                    'award_id' => $bestIdolAward->id,
-                    'participant_id' => $createdParticipants[1]->id,
-                    'rank_order' => '1st',
-                ], [
-                    'year' => $event->year ?? 2026,
-                    'status' => 'published',
-                ]);
+                $bestIdolAward = $awards->first(fn ($a) => Str::contains($a->name, 'Pritama', true) || Str::contains($a->name, 'Pratima', true));
+                if ($bestIdolAward && isset($createdParticipants[1])) {
+                    Winner::create([
+                        'event_id' => $event->id,
+                        'award_id' => $bestIdolAward->id,
+                        'participant_id' => $createdParticipants[1]->id,
+                        'rank_order' => '1st',
+                        'year' => $event->year ?? 2026,
+                        'status' => 'published',
+                    ]);
+                }
             }
         }
 
-        $this->command?->info("Successfully seeded {$createdCount} puja committees across " . count($zonesCache) . ' zones and ' . count($localitiesCache) . ' localities.');
+        $this->command?->info("Successfully seeded {$createdCount} puja committees across ".count($zonesCache).' zones and '.count($localitiesCache).' localities.');
     }
 
     /**
@@ -841,7 +844,7 @@ class LiveMasterSeeder extends Seeder
      */
     protected function resolvePrimaryImage(string $slug, string $rawName): string
     {
-        $targetDiskPath = 'participants/primary/' . $slug . '.jpg';
+        $targetDiskPath = 'participants/primary/'.$slug.'.jpg';
 
         if (Storage::disk('public')->exists($targetDiskPath)) {
             return $targetDiskPath;
@@ -869,8 +872,8 @@ class LiveMasterSeeder extends Seeder
             $knownKey = 'jalan-nagar-sarbajanin-pratima.jpg';
         }
 
-        if ($knownKey && Storage::disk('public')->exists('participants/primary/' . $knownKey)) {
-            $content = Storage::disk('public')->get('participants/primary/' . $knownKey);
+        if ($knownKey && Storage::disk('public')->exists('participants/primary/'.$knownKey)) {
+            $content = Storage::disk('public')->get('participants/primary/'.$knownKey);
             Storage::disk('public')->put($targetDiskPath, $content);
 
             return $targetDiskPath;
