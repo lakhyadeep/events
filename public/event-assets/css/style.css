@@ -1765,8 +1765,32 @@ body {
    9. SHORTS VIDEO MODAL
    ========================================================================== */
 .shorts-modal-dialog {
-    max-width: 410px;
+    max-width: 440px;
+    width: calc(100% - 24px);
     margin: 1.2rem auto;
+}
+
+@media (max-width: 576px) {
+    .shorts-modal-dialog {
+        max-width: 100%;
+        width: 100%;
+        margin: 0;
+        min-height: 100vh;
+        height: 100%;
+    }
+
+    .shorts-modal-content {
+        border-radius: 0;
+        border: none;
+        height: 100%;
+        min-height: 100vh;
+    }
+
+    .shorts-player-container {
+        height: 100vh;
+        min-height: 100%;
+        aspect-ratio: auto;
+    }
 }
 
 .shorts-modal-content {
@@ -1797,6 +1821,20 @@ body {
     object-fit: cover;
     z-index: 1;
     cursor: pointer;
+}
+
+.shorts-iframe-element {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 316.05%;
+    height: 100%;
+    min-height: 100%;
+    max-width: none;
+    border: none;
+    z-index: 1;
+    pointer-events: auto;
 }
 
 .shorts-vignette {

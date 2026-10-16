@@ -10,7 +10,7 @@
                     </video>
 
                     <!-- YouTube / Embedded Video Iframe -->
-                    <iframe id="shortsIframeElement" class="shorts-iframe-element"
+                    <iframe id="shortsIframeElement" class="shorts-iframe-element d-none"
                         src=""
                         title="Shorts Video Player"
                         frameborder="0"
