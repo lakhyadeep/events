@@ -98,7 +98,7 @@
         </div>
     </nav>
 
-    @if ($isVotingOpen)
+    @if ($isVotingOpen && $isHomePage)
         <a href="{{ $allPujasUrl }}" class="btn btn-vote-pill vote-button-float text-decoration-none" id="btnVoteModal">
             <span>Vote Now</span>
             <span class="vote-icon-badge">

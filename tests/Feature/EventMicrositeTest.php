@@ -617,4 +617,35 @@ class EventMicrositeTest extends TestCase
         $response->assertDontSee('<section class="marketing-banner-section', false);
         $response->assertDontSee('id="marketingBannerCarousel"', false);
     }
+
+    public function test_floating_vote_button_is_only_visible_on_homepage(): void
+    {
+        $event = $this->getActiveEvent();
+        $event->update([
+            'is_voting_active' => true,
+            'voting_start_at' => now()->subDay(),
+            'voting_end_at' => now()->addDay(),
+        ]);
+        $participant = $this->getApprovedParticipant();
+
+        // Homepage renders floating vote button
+        $homeResponse = $this->get('/'.$event->slug);
+        $homeResponse->assertStatus(200);
+        $homeResponse->assertSee('vote-button-float');
+
+        // All Pujas page does NOT render floating vote button
+        $allPujasResponse = $this->get('/'.$event->slug.'/all-pujas');
+        $allPujasResponse->assertStatus(200);
+        $allPujasResponse->assertDontSee('vote-button-float');
+
+        // Vote page does NOT render floating vote button
+        $voteResponse = $this->get('/'.$event->slug.'/vote/'.$participant->slug);
+        $voteResponse->assertStatus(200);
+        $voteResponse->assertDontSee('vote-button-float');
+
+        // Vote success page does NOT render floating vote button
+        $voteSuccessResponse = $this->get('/'.$event->slug.'/vote-success/'.$participant->slug);
+        $voteSuccessResponse->assertStatus(200);
+        $voteSuccessResponse->assertDontSee('vote-button-float');
+    }
 }
