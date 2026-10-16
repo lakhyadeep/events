@@ -9,7 +9,7 @@
 @endphp
 <x-layouts.microsite :event="$event" :meta-title="$successMetaTitle"
     :meta-description="$event->meta_description ?: ('Thank you for voting in ' . ($event->display_name ?: $event->name) . '!')"
-    :og-image="$selectedParticipant?->primary_image_url ?: ($event->og_image ?? null)" :canonical-url="$canonicalUrl"
+    :og-image="$selectedParticipant?->primary_image_url ?: ($event->og_image_url ?? null)" :canonical-url="$canonicalUrl"
     :use-success-script="true">
     <!-- Top Navigation Header -->
     @include('frontend.partials.header')

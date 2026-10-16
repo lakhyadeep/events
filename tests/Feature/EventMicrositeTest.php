@@ -528,4 +528,16 @@ class EventMicrositeTest extends TestCase
 
         $response->assertRedirect('/'.$activeEvent->slug.'/all-pujas?zone=Central%20Dibrugarh&search=Thana');
     }
+
+    public function test_event_og_image_renders_as_fully_qualified_absolute_url(): void
+    {
+        $activeEvent = Event::where('status', 'active')->firstOrFail();
+        $activeEvent->update(['og_image' => 'events/og/01M527VN0GYGVFAG47S8MDSK0C.jpg']);
+
+        $response = $this->get('/'.$activeEvent->slug);
+
+        $response->assertStatus(200);
+        $expectedUrl = asset('storage/events/og/01M527VN0GYGVFAG47S8MDSK0C.jpg');
+        $response->assertSee('<meta property="og:image" content="'.$expectedUrl.'">', false);
+    }
 }

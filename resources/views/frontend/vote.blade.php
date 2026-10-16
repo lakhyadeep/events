@@ -14,7 +14,7 @@
     :event="$event"
     :meta-title="$voteMetaTitle"
     :meta-description="$voteMetaDesc"
-    :og-image="$selectedParticipant?->primary_image_url ?: ($event->og_image ?? null)"
+    :og-image="$selectedParticipant?->primary_image_url ?: ($event->og_image_url ?? null)"
     :canonical-url="$canonicalUrl"
     :use-vote-script="true"
 >

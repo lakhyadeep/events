@@ -1,7 +1,7 @@
 <x-layouts.microsite :event="$event"
     :meta-title="($event->meta_title ?: 'All Pujas Directory — ' . ($event->display_name ?? 'Dibrugarh Durgo Utsav 2026'))"
     :meta-description="$event->meta_description ?: 'Explore the complete directory of registered Sarbajanin Durga Pujas across Dibrugarh with interactive search, auto-suggestions, and live voting.'"
-    :og-image="$event->og_image ?? null" :canonical-url="route('events.all-pujas', ['event' => $event->slug])" :use-all-pujas-script="true">
+    :og-image="$event->og_image_url ?? null" :canonical-url="route('events.all-pujas', ['event' => $event->slug])" :use-all-pujas-script="true">
     <!-- Top Navigation Header -->
     @include('frontend.partials.header')
 

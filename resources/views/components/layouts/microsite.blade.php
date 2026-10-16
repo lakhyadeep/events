@@ -14,6 +14,11 @@
         $currentEvent = \App\Models\Event::where('status', 'active')->latest('year')->first() ?? \App\Models\Event::latest('year')->first();
     }
     $canonical = $canonicalUrl ?? url()->current();
+    if (! empty($ogImage)) {
+        if (! str_starts_with($ogImage, 'http://') && ! str_starts_with($ogImage, 'https://') && ! str_starts_with($ogImage, '//')) {
+            $ogImage = asset('storage/'.ltrim($ogImage, '/'));
+        }
+    }
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth">
