@@ -1,5 +1,8 @@
 @php
-    $heroBanner = $event?->banners?->first();
+    $heroBanner = $heroBanner ?? (
+        $event?->banners?->first(fn ($b) => ($b->category === \App\Enums\BannerCategory::Hero || $b->category === 'hero') && $b->is_active)
+        ?? $event?->banners?->first()
+    );
     $desktopBannerUrl = ($heroBanner && $heroBanner->desktop_image_url)
         ? $heroBanner->desktop_image_url
         : asset('event-assets/images/hero.png');

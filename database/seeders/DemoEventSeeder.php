@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\BannerCategory;
 use App\Models\Award;
 use App\Models\Banner;
 use App\Models\Event;
@@ -278,6 +279,7 @@ class DemoEventSeeder extends Seeder
         $bannersData = [
             [
                 'title' => 'The Grand Celebration of Art & Devotion in Dibrugarh',
+                'category' => BannerCategory::Hero,
                 'image_desktop' => $this->ensureUploadedMedia('banners/desktop/01M3XCHZ62T8A8JRQHRFYA5ZT4.jpg', public_path('event-assets/images/hero-banner.jpg')),
                 'image_mobile' => $this->ensureUploadedMedia('banners/mobile/01M3XCHZ6ECNP9DCHD2VE277Z1.jpg', public_path('event-assets/images/hero-mobile.jpg')),
                 'cta_link' => '#participants',
@@ -285,6 +287,7 @@ class DemoEventSeeder extends Seeder
             ],
             [
                 'title' => 'Cast Your Vote for People\'s Choice Award 2026',
+                'category' => BannerCategory::Marketing,
                 'image_desktop' => $this->ensureUploadedMedia('banners/desktop/01M4NE7K48VSWX80WAAK2AZSQT.jpg', public_path('event-assets/images/hero-banner.jpg')),
                 'image_mobile' => $this->ensureUploadedMedia('banners/mobile/01M4NE7K4MS2WD49JPGA0MX8F4.jpg', public_path('event-assets/images/hero-mobile.jpg')),
                 'cta_link' => '#vote',

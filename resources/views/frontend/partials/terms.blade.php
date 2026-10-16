@@ -10,7 +10,7 @@
                 <span
                     class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3 py-2 fw-bold text-uppercase mb-2"
                     style="letter-spacing: 1px; font-size: 0.75rem;">
-                    <i class="bi bi-shield-check me-1"></i>Official Guidelines — Dibrugarh Durgotsav Awards 2026
+                    <i class="bi bi-shield-check me-1"></i>Official Guidelines
                 </span>
                 <h2 class="fw-bold fs-2 text-dark mb-2">Terms &amp; Conditions</h2>
                 <p class="text-muted small mx-auto" style="max-width: 600px;">

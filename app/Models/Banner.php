@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\BannerCategory;
 use App\Models\Concerns\ResolvesMediaUrl;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -17,6 +18,7 @@ class Banner extends Model
     protected $fillable = [
         'event_id',
         'title',
+        'category',
         'image_desktop',
         'image_mobile',
         'cta_link',
@@ -28,6 +30,7 @@ class Banner extends Model
     protected function casts(): array
     {
         return [
+            'category' => BannerCategory::class,
             'is_active' => 'boolean',
             'year' => 'integer',
             'sort_order' => 'integer',
@@ -56,5 +59,25 @@ class Banner extends Model
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);
+    }
+
+    public function scopeHero(Builder $query): Builder
+    {
+        return $query->where('category', BannerCategory::Hero);
+    }
+
+    public function scopeMarketing(Builder $query): Builder
+    {
+        return $query->where('category', BannerCategory::Marketing);
+    }
+
+    public function isHero(): bool
+    {
+        return $this->category === BannerCategory::Hero;
+    }
+
+    public function isMarketing(): bool
+    {
+        return $this->category === BannerCategory::Marketing;
     }
 }

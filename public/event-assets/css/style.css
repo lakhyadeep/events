@@ -4217,3 +4217,27 @@ footer.site-footer {
         margin-bottom: 8px;
     }
 }
+
+
+.badge {
+    white-space: wrap !important;
+}
+
+.vote-button-float {
+    position: fixed;
+    right: 10px;
+    bottom: 20px;
+    width: auto !important;
+    display: flex;
+    gap: 8px;
+    padding: 8px 15px !important;
+    display: none;
+
+    >span {
+        line-height: 20px;
+    }
+
+    @media(max-width:768px) {
+        display: block;
+    }
+}

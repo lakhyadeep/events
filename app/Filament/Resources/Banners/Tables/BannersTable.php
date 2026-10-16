@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Banners\Tables;
 
+use App\Enums\BannerCategory;
 use App\Models\Banner;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -35,6 +36,11 @@ class BannersTable
                     ->searchable()
                     ->badge()
                     ->color('primary'),
+                TextColumn::make('category')
+                    ->label('Category')
+                    ->badge()
+                    ->formatStateUsing(fn ($state) => $state instanceof BannerCategory ? $state->label() : ucfirst((string) $state))
+                    ->color(fn ($state) => ($state === BannerCategory::Hero || $state === 'hero') ? 'warning' : 'info'),
                 TextColumn::make('cta_link')
                     ->label('CTA Target')
                     ->color('gray')
@@ -58,8 +64,11 @@ class BannersTable
                     ->relationship('event', 'display_name')
                     ->searchable()
                     ->preload(),
+                SelectFilter::make('category')
+                    ->label('Banner Category')
+                    ->options(BannerCategory::options()),
                 TernaryFilter::make('is_active')
-                    ->label('Active Carousel State'),
+                    ->label('Active State'),
                 SelectFilter::make('year')
                     ->options(fn () => Banner::distinct()->pluck('year', 'year')->toArray()),
             ], layout: FiltersLayout::AboveContent)

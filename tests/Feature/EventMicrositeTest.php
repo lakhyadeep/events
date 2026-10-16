@@ -63,7 +63,8 @@ class EventMicrositeTest extends TestCase
 
         // Logo inside the container must be the award logo asset, NOT the banner image
         $response->assertSee('event-assets/images/logo-award2026.png', false);
-        $response->assertDontSee('<img src="'.$banner->desktop_image_url.'"', false);
+        $heroSection = strstr($response->getContent(), '</section>', true) ?: '';
+        $this->assertStringNotContainsString('<img src="'.$banner->desktop_image_url.'"', $heroSection);
     }
 
     public function test_awards_section_renders_grand_champion_and_award_categories(): void
@@ -337,6 +338,7 @@ class EventMicrositeTest extends TestCase
         $response->assertDontSee('<section class="glimpses-section"', false);
         $response->assertDontSee('<section class="timeline-section"', false);
         $response->assertDontSee('<section class="terms-conditions-section', false);
+        $response->assertDontSee('<section class="marketing-banner-section', false);
 
         // Nav links and vote button ARE retained in the navigation
         $response->assertSee('data-target="about"', false);
@@ -562,5 +564,57 @@ class EventMicrositeTest extends TestCase
         $response->assertStatus(200);
         $expectedUrl = asset('storage/events/og/01M527VN0GYGVFAG47S8MDSK0C.jpg');
         $response->assertSee('<meta property="og:image" content="'.$expectedUrl.'">', false);
+    }
+
+    public function test_marketing_promotional_banner_renders_dynamic_carousel_slides_and_cta_links(): void
+    {
+        $response = $this->get('/sharod-samman-2026');
+
+        $response->assertStatus(200);
+
+        $event = Event::where('slug', 'sharod-samman-2026')->first();
+        $marketingBanners = $event->banners()->marketing()->where('is_active', true)->orderBy('sort_order')->get();
+        $heroBanners = $event->banners()->hero()->where('is_active', true)->get();
+
+        $this->assertGreaterThan(0, $marketingBanners->count());
+
+        // Banner carousel wrapper and section must be rendered
+        $response->assertSee('id="promo-banner"', false);
+        $response->assertSee('id="marketingBannerCarousel"', false);
+
+        foreach ($marketingBanners as $banner) {
+            $response->assertSee($banner->desktop_image_url, false);
+            if ($banner->mobile_image_url) {
+                $response->assertSee($banner->mobile_image_url, false);
+            }
+            if ($banner->cta_link) {
+                $response->assertSee('href="'.$banner->cta_link.'"', false);
+            }
+        }
+
+        // Hero banners must NOT be rendered in marketing carousel
+        foreach ($heroBanners as $hero) {
+            $this->assertStringNotContainsString(
+                'alt="'.$hero->title.'" class="img-fluid w-100 d-block marketing-banner-img"',
+                $response->getContent()
+            );
+        }
+
+        if ($marketingBanners->count() > 1) {
+            $response->assertSee('marketing-carousel-indicators', false);
+            $response->assertSee('marketing-carousel-control', false);
+        }
+    }
+
+    public function test_marketing_banner_section_hidden_when_all_marketing_banners_inactive(): void
+    {
+        $event = Event::where('slug', 'sharod-samman-2026')->first();
+        $event->banners()->marketing()->update(['is_active' => false]);
+
+        $response = $this->get('/sharod-samman-2026');
+
+        $response->assertStatus(200);
+        $response->assertDontSee('<section class="marketing-banner-section', false);
+        $response->assertDontSee('id="marketingBannerCarousel"', false);
     }
 }

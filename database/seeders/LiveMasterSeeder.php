@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\BannerCategory;
 use App\Models\Award;
 use App\Models\Banner;
 use App\Models\Event;
@@ -195,6 +196,7 @@ class LiveMasterSeeder extends Seeder
         $bannersData = [
             [
                 'title' => 'The Grand Celebration of Art & Devotion in Dibrugarh',
+                'category' => BannerCategory::Hero,
                 'image_desktop' => 'banners/desktop/01M3XCHZ62T8A8JRQHRFYA5ZT4.jpg',
                 'image_mobile' => 'banners/mobile/01M50CR7FDR2QTPGXA34XYN8CT.jpg',
                 'cta_link' => '#participants',
@@ -204,11 +206,22 @@ class LiveMasterSeeder extends Seeder
             ],
             [
                 'title' => "Cast Your Vote for People's Choice Award 2026",
+                'category' => BannerCategory::Marketing,
                 'image_desktop' => 'banners/desktop/01M4NE7K48VSWX80WAAK2AZSQT.jpg',
                 'image_mobile' => 'banners/mobile/01M4NE7K4MS2WD49JPGA0MX8F4.jpg',
                 'cta_link' => '#vote',
                 'year' => 2026,
                 'sort_order' => 2,
+                'is_active' => true,
+            ],
+            [
+                'title' => 'Dibrugarh Durgo Utsav 2026 Promotional Banner',
+                'category' => BannerCategory::Marketing,
+                'image_desktop' => 'https://d324x08swjodnj.cloudfront.net/assets/images/marketting-banners/October2026/KSd3k3rQlfnqHJ8qN4V1.png',
+                'image_mobile' => 'https://d324x08swjodnj.cloudfront.net/assets/images/marketting-banners/October2026/HPXIaAyrTpWKhkNEIAua.png',
+                'cta_link' => '#vote',
+                'year' => 2026,
+                'sort_order' => 3,
                 'is_active' => true,
             ],
         ];

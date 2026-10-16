@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Banners\Schemas;
 
+use App\Enums\BannerCategory;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -66,18 +67,24 @@ class BannerForm
                                 ->searchable()
                                 ->preload()
                                 ->required(),
+                            Select::make('category')
+                                ->label('Banner Placement Category')
+                                ->options(BannerCategory::options())
+                                ->default(BannerCategory::Marketing->value)
+                                ->helperText('Hero banner displays at top hero section; Marketing banners rotate in the promo carousel.')
+                                ->required(),
                             TextInput::make('year')
                                 ->label('Event Year')
                                 ->required()
                                 ->numeric()
                                 ->default(now()->year),
                             TextInput::make('sort_order')
-                                ->label('Carousel Sort Order')
+                                ->label('Sort / Display Order')
                                 ->numeric()
                                 ->default(0),
                             Toggle::make('is_active')
-                                ->label('Display on Carousel')
-                                ->helperText('Visible in above-the-fold rotation')
+                                ->label('Active & Visible')
+                                ->helperText('Control visibility on frontend')
                                 ->default(true),
                         ]),
                 ])->columnSpan(['default' => 1, 'lg' => 1]),

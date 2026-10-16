@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\BannerCategory;
 use App\Enums\EventStatus;
 use App\Enums\VotingMode;
 use App\Models\Concerns\ResolvesMediaUrl;
@@ -70,6 +71,16 @@ class Event extends Model
     public function banners(): HasMany
     {
         return $this->hasMany(Banner::class)->orderBy('sort_order');
+    }
+
+    public function heroBanners(): HasMany
+    {
+        return $this->banners()->where('category', BannerCategory::Hero);
+    }
+
+    public function marketingBanners(): HasMany
+    {
+        return $this->banners()->where('category', BannerCategory::Marketing);
     }
 
     public function sponsors(): HasMany
