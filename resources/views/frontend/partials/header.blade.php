@@ -9,6 +9,7 @@
                 $isHomePage = !$isAllPujasPage && !$isVotePage && !$isVoteSuccessPage;
                 $homeUrl = isset($event) && $event->slug ? route('events.show', ['event' => $event->slug]) : route('home');
                 $allPujasUrl = isset($event) && $event->slug ? route('events.all-pujas', ['event' => $event->slug]) : route('home');
+                $isPublishedWinners = isset($publishedWinners) && $publishedWinners->isNotEmpty();
             @endphp
             <!-- Logo Branding -->
             <a class="brand-logo-container" href="{{ $isHomePage ? '#home' : $homeUrl . '#home' }}" id="brandLogo">
@@ -34,10 +35,13 @@
                         <a class="nav-link {{ $isAllPujasPage ? 'active' : '' }}" href="{{ $allPujasUrl }}">All
                             Pujas</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" data-target="awards-announced"
-                            href="{{ $isHomePage ? '#awards-announced' : $homeUrl . '#awards-announced' }}">Winners</a>
-                    </li>
+
+                    @if ($isPublishedWinners)
+                        <li class="nav-item">
+                            <a class="nav-link" data-target="awards-announced"
+                                href="{{ $isHomePage ? '#awards-announced' : $homeUrl . '#awards-announced' }}">Winners</a>
+                        </li>
+                    @endif
                     <li class="nav-item">
                         <a class="nav-link" data-target="gallery"
                             href="{{ $isHomePage ? '#gallery' : $homeUrl . '#gallery' }}">Gallery</a>

@@ -38,7 +38,7 @@
                                 <!-- Pinnacle Best of Best Ribbon Badge -->
                                 <div class="pinnacle-ribbon-badge">
                                     <i class="bi bi-stars text-warning me-1"></i>
-                                    <span>BEST OF BEST • GRAND CHAMPION</span>
+                                    <span>BEST OF THE BEST • GRAND CHAMPION</span>
                                     <i class="bi bi-stars text-warning ms-1"></i>
                                 </div>
 
