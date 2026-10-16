@@ -198,6 +198,76 @@ class Fast2SmsDriver implements SmsGatewayInterface
     }
 
     /**
+     * Check the current Fast2SMS wallet balance.
+     *
+     * @return array{
+     *     successful: bool,
+     *     balance: float|null,
+     *     message: string,
+     *     rawPayload?: array<string, mixed>,
+     * }
+     */
+    public function checkWalletBalance(): array
+    {
+        $apiKey = trim((string) ($this->config['api_key'] ?? ''));
+
+        if ($apiKey === '') {
+            return [
+                'successful' => false,
+                'balance' => null,
+                'message' => 'Fast2SMS API Key is not configured.',
+            ];
+        }
+
+        try {
+            $response = Http::withHeaders([
+                'authorization' => $apiKey,
+                'accept' => 'application/json',
+            ])
+                ->connectTimeout(5)
+                ->timeout(10)
+                ->post('https://www.fast2sms.com/dev/wallet');
+
+            $json = $response->json() ?? [];
+
+            if ($response->successful()) {
+                if (isset($json['wallet'])) {
+                    return [
+                        'successful' => true,
+                        'balance' => (float) $json['wallet'],
+                        'message' => 'Fast2SMS wallet balance retrieved successfully.',
+                        'rawPayload' => $json,
+                    ];
+                }
+            }
+
+            $errorMessage = '';
+            if (! empty($json['message'])) {
+                $errorMessage = is_array($json['message']) ? implode('; ', $json['message']) : (string) $json['message'];
+            } elseif ($response->failed()) {
+                $errorMessage = 'Fast2SMS error: HTTP '.$response->status();
+            } else {
+                $errorMessage = 'Unable to parse wallet balance from Fast2SMS.';
+            }
+
+            return [
+                'successful' => false,
+                'balance' => null,
+                'message' => $errorMessage,
+                'rawPayload' => $json,
+            ];
+        } catch (Throwable $e) {
+            Log::warning('Fast2SMS checkWalletBalance exception: '.$e->getMessage());
+
+            return [
+                'successful' => false,
+                'balance' => null,
+                'message' => 'Fast2SMS connection error: '.$e->getMessage(),
+            ];
+        }
+    }
+
+    /**
      * Get the identifier name of the gateway driver.
      */
     public function getName(): string

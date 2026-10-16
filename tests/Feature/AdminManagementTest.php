@@ -94,17 +94,17 @@ class AdminManagementTest extends TestCase
 
         $response = $this->actingAs($admin)->get('/admin');
         $response->assertStatus(200);
-        $response->assertSee('Active Events');
-        $response->assertSee('Approved Candidates');
-        $response->assertSee('Sponsors & Partners');
-        $response->assertSee('Puja Contest Entries');
-        $response->assertSee('Shortlisted Contenders');
+        $response->assertSee('Total Verified Votes');
+        $response->assertSee('Unique Voters');
+        $response->assertSee('Votes Cast Today');
+        $response->assertSee('SMS Dispatched Today');
+        $response->assertSee('Live Public Voting Leaderboard');
         $response->assertDontSee('Filament community');
 
         // Test second visit when stats are loaded from cache
         $cachedResponse = $this->actingAs($admin)->get('/admin');
         $cachedResponse->assertStatus(200);
-        $cachedResponse->assertSee('Active Events');
+        $cachedResponse->assertSee('Total Verified Votes');
     }
 
     public function test_associate_sponsors_scope_limits_to_five(): void

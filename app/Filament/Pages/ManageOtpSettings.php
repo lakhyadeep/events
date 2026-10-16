@@ -12,6 +12,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Actions;
+use Filament\Schemas\Components\Callout;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\EmbeddedSchema;
 use Filament\Schemas\Components\Form;
@@ -129,11 +130,49 @@ class ManageOtpSettings extends Page
                     ->columns(['default' => 1, 'sm' => 2])
                     ->visible(fn (Get $get): bool => $get('active_driver') === 'fast2sms')
                     ->schema([
+                        Callout::make('Fast2SMS Balance Status')
+                            ->color(function (): string {
+                                $details = OtpSetting::current()->getFast2SmsBalanceDetails();
+
+                                return $details['is_low'] ? 'danger' : 'success';
+                            })
+                            ->icon(function (): string {
+                                $details = OtpSetting::current()->getFast2SmsBalanceDetails();
+
+                                return $details['is_low'] ? 'heroicon-o-exclamation-triangle' : 'heroicon-o-check-circle';
+                            })
+                            ->heading(function (): string {
+                                $details = OtpSetting::current()->getFast2SmsBalanceDetails();
+                                $bal = $details['balance'] !== null ? '₹'.number_format($details['balance'], 2) : 'Unavailable';
+
+                                return $details['is_low']
+                                    ? "⚠️ Fast2SMS Wallet Balance Is Low ({$bal})"
+                                    : "Fast2SMS Wallet Balance: {$bal}";
+                            })
+                            ->description(function (): string {
+                                $details = OtpSetting::current()->getFast2SmsBalanceDetails();
+                                if ($details['is_low']) {
+                                    return "Your wallet balance is below the warning threshold of ₹{$details['threshold']}. Please recharge your Fast2SMS account to ensure uninterrupted SMS/OTP delivery.";
+                                }
+
+                                return "Wallet balance is in good standing and above the warning threshold of ₹{$details['threshold']}.";
+                            })
+                            ->columnSpanFull(),
+
                         TextInput::make('fast2sms_settings.api_key')
                             ->label('API Authorization Key')
                             ->password()
                             ->revealable()
                             ->required(fn (Get $get): bool => $get('active_driver') === 'fast2sms')
+                            ->columnSpanFull(),
+
+                        TextInput::make('fast2sms_settings.low_balance_threshold')
+                            ->label('Low Balance Alert Threshold (₹)')
+                            ->numeric()
+                            ->minValue(0)
+                            ->default(50)
+                            ->prefix('₹')
+                            ->helperText('Trigger warning banners and notifications on the admin panel when your wallet drops below this amount.')
                             ->columnSpanFull(),
 
                         Select::make('fast2sms_settings.route')
@@ -198,6 +237,44 @@ class ManageOtpSettings extends Page
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('checkBalance')
+                ->label('Check SMS Balance')
+                ->icon('heroicon-o-arrow-path')
+                ->color('gray')
+                ->visible(fn (): bool => OtpSetting::current()->active_driver === 'fast2sms')
+                ->action(function (): void {
+                    $setting = OtpSetting::current();
+                    $details = $setting->getFast2SmsBalanceDetails(forceRefresh: true);
+
+                    if (! $details['successful']) {
+                        Notification::make()
+                            ->title('Fast2SMS Connection Check')
+                            ->body($details['message'] ?? 'Unable to connect to Fast2SMS.')
+                            ->warning()
+                            ->duration(8000)
+                            ->send();
+
+                        return;
+                    }
+
+                    $bal = number_format((float) $details['balance'], 2);
+                    if ($details['is_low']) {
+                        Notification::make()
+                            ->title('⚠️ Low Fast2SMS Balance Alert!')
+                            ->body("Current Wallet Balance: ₹{$bal}. It has dropped below the threshold of ₹{$details['threshold']}. Please recharge immediately.")
+                            ->danger()
+                            ->persistent()
+                            ->send();
+                    } else {
+                        Notification::make()
+                            ->title('Fast2SMS Wallet Healthy')
+                            ->body("Current Wallet Balance: ₹{$bal}. Threshold: ₹{$details['threshold']}.")
+                            ->success()
+                            ->duration(6000)
+                            ->send();
+                    }
+                }),
+
             Action::make('sendTestOtp')
                 ->label('Send Test OTP')
                 ->icon('heroicon-o-paper-airplane')
