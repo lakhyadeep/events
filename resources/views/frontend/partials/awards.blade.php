@@ -5,7 +5,7 @@
     <div class="awards-embedded-box mb-0" id="categories" style="border-bottom: none;">
         <div class="container">
             <!-- Section Title & Festive Divider Motif -->
-            <h2 class="awards-main-heading text-white">Awards to be Presented</h2>
+            <h2 class="awards-main-heading text-white">People's Favorite Awards</h2>
 
             <div class="festive-divider-wrap" aria-hidden="true">
                 <div class="festive-line"></div>
@@ -17,7 +17,7 @@
                         <circle cx="12" cy="12" r="1.2" fill="#8b131a" />
                     </svg>
                 </div>
-                <div class="festive-line festive-line-right"></div>
+                <div class="festive-line festive-line-right"></div>w
             </div>
 
             <!-- Awards Cards Grid -->
@@ -364,7 +364,7 @@
                                                         </g>
                                                     </svg>
                                                 </div>
-                                                <div class="award-position-title">Winner</div>
+                                                <div class="award-position-title">1<sup>st</sup></div>
                                             </div>
                                         </div>
 
@@ -392,7 +392,7 @@
                                                         </g>
                                                     </svg>
                                                 </div>
-                                                <div class="award-position-title">Runner Up</div>
+                                                <div class="award-position-title">2<sup>nd</sup></div>
                                             </div>
                                         </div>
 
@@ -420,7 +420,7 @@
                                                         </g>
                                                     </svg>
                                                 </div>
-                                                <div class="award-position-title">Second Runner Up</div>
+                                                <div class="award-position-title">3<sup>rd</sup></div>
                                             </div>
                                         </div>
 

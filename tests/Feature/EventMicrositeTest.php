@@ -28,7 +28,7 @@ class EventMicrositeTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('Dibrugarh 24x7');
-        $response->assertSee('About Dibrugarh Durgo Utsav 2026');
+        $response->assertSee('About Dibrugarh Durgotsav Awards 2026');
         $response->assertSee('ORGANISED BY');
         $response->assertSee('TITLE SPONSOR');
         $response->assertSee('ASSOCIATE PARTNERS');
