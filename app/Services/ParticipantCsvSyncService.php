@@ -61,31 +61,81 @@ class ParticipantCsvSyncService
         $localitiesCache = Locality::all()->mapWithKeys(fn ($loc) => [$loc->zone_id.'::'.$loc->name => $loc])->all();
 
         $handle = fopen($csvPath, 'r');
-        $rawHeader = fgetcsv($handle);
-        $header = array_map(fn ($col) => trim((string) $col), $rawHeader ?: []);
+        if (! $handle) {
+            return [
+                'created' => 0,
+                'updated' => 0,
+                'total' => 0,
+                'message' => "Unable to open CSV file at: {$csvPath}",
+            ];
+        }
+
+        // Dynamically find the header row, skipping blank lines or title rows
+        $header = null;
+        while (($row = fgetcsv($handle)) !== false) {
+            if ($this->isHeaderRow($row)) {
+                $header = array_map(fn ($col) => trim((string) $col), $row);
+                break;
+            }
+        }
+
+        if (! $header) {
+            fclose($handle);
+
+            return [
+                'created' => 0,
+                'updated' => 0,
+                'total' => 0,
+                'message' => 'No valid header row found in the CSV. Expected headers like "PUJA COMMITTEE NAME", "AREA", "PHONE NUMBER", etc.',
+            ];
+        }
 
         $colIndex = [
-            'reg_no' => $this->findColumnIndex($header, ['REG NO', 'REG', 'SL NO', 'SL']),
-            'name' => $this->findColumnIndex($header, ['NAME OF THE PUJA COMMITTEES', 'NAME', 'COMMITTEE']),
-            'area' => $this->findColumnIndex($header, ['AMC AREA / POLICE OUTPOST / AREA', 'AMC AREA', 'AREA', 'ZONE']),
-            'phone' => $this->findColumnIndex($header, ['PHONE NUMBER', 'PHONE', 'MOBILE']),
-            'contact' => $this->findColumnIndex($header, ['NAME OF THE CONTACT PERSON', 'CONTACT PERSON', 'CONTACT']),
-            'theme' => $this->findColumnIndex($header, ['THEME', 'PUJA THEME']),
-            'milestone' => $this->findColumnIndex($header, ['MILESTONE', 'YEARS', 'YEAR OF ESTABLISHMENT']),
-            'map' => $this->findColumnIndex($header, ['GOOGLE MAP', 'MAP URL', 'LOCATION', 'COORDINATES']),
+            'reg_no' => $this->findColumnIndex($header, ['REGD', 'REG NO', 'REG #', 'PUJA #', 'SL NO', 'SL', 'REG']),
+            'name' => $this->findColumnIndex($header, [
+                'PUJA COMMITTEE NAME', 'PUJA COMMITEE NAME',
+                'NAME OF THE PUJA COMMITTEES', 'NAME OF THE PUJA COMMITTEE', 'NAME OF THE PUJA COMMITEE',
+                'COMMITTEE NAME', 'COMMITEE NAME', 'PUJA NAME',
+                'PUJA COMMITTEE', 'PUJA COMMITEE',
+                'COMMITTEE', 'COMMITEE', 'NAME',
+            ], [
+                'PRESIDENT', 'SECRETARY', 'CONTACT', 'PERSON',
+            ]),
+            'area' => $this->findColumnIndex($header, ['AMC AREA / POLICE OUTPOST / AREA', 'AMC AREA', 'AREA', 'ZONE', 'POLICE OUTPOST'], ['MAP']),
+            'phone' => $this->findColumnIndex($header, ['PHONE NUMBER', 'PHONE', 'MOBILE NUMBER', 'MOBILE', 'CONTACT NO', 'MOBILE NO']),
+            'contact' => $this->findColumnIndex($header, [
+                'PRESIDENT/SECRETARY NAME', 'PRESIDENT / SECRETARY', 'PRESIDENT', 'SECRETARY',
+                'NAME OF THE CONTACT PERSON', 'CONTACT PERSON', 'CONTACT NAME', 'CONTACT', 'REPRESENTATIVE',
+            ], [
+                'PUJA', 'COMMITTEE', 'COMMITEE',
+            ]),
+            'theme' => $this->findColumnIndex($header, ['PUJA THEME', 'THEME']),
+            'milestone' => $this->findColumnIndex($header, ['MILESTONE YEAR', 'MILESTONE', 'YEARS', 'YEAR OF ESTABLISHMENT']),
+            'map' => $this->findColumnIndex($header, ['GOOGLE MAP', 'MAP LOCATION', 'MAP URL', 'COORDINATES', 'MAP', 'LOCATION']),
         ];
+
+        if ($colIndex['name'] === null) {
+            fclose($handle);
+
+            return [
+                'created' => 0,
+                'updated' => 0,
+                'total' => 0,
+                'message' => 'Could not find the Puja Committee Name column in the CSV file.',
+            ];
+        }
 
         $createdCount = 0;
         $updatedCount = 0;
         $createdParticipants = [];
 
         while (($row = fgetcsv($handle)) !== false) {
-            if (empty(array_filter($row))) {
+            if (empty(array_filter($row, fn ($val) => trim((string) $val) !== ''))) {
                 continue;
             }
 
-            $rawName = trim((string) ($row[$colIndex['name']] ?? ''));
-            if (empty($rawName) || Str::contains($rawName, 'TOTAL', true) || Str::contains($rawName, 'COMMITTEE', true) && strlen($rawName) < 15) {
+            $rawName = $colIndex['name'] !== null ? trim((string) ($row[$colIndex['name']] ?? '')) : '';
+            if (empty($rawName) || Str::contains($rawName, 'TOTAL', true) || (Str::contains($rawName, 'COMMITTEE', true) && strlen($rawName) < 15)) {
                 continue;
             }
 
@@ -93,13 +143,13 @@ class ParticipantCsvSyncService
                 continue;
             }
 
-            $regNo = (int) ($row[$colIndex['reg_no']] ?? 0);
-            $rawArea = $row[$colIndex['area']] ?? '';
-            $rawPhone = $row[$colIndex['phone']] ?? '';
-            $rawContact = $row[$colIndex['contact']] ?? '';
-            $rawTheme = $row[$colIndex['theme']] ?? '';
-            $rawMilestone = $row[$colIndex['milestone']] ?? '';
-            $rawMap = $row[$colIndex['map']] ?? '';
+            $regNo = $colIndex['reg_no'] !== null ? (int) ($row[$colIndex['reg_no']] ?? 0) : 0;
+            $rawArea = $colIndex['area'] !== null ? ($row[$colIndex['area']] ?? '') : '';
+            $rawPhone = $colIndex['phone'] !== null ? ($row[$colIndex['phone']] ?? '') : '';
+            $rawContact = $colIndex['contact'] !== null ? ($row[$colIndex['contact']] ?? '') : '';
+            $rawTheme = $colIndex['theme'] !== null ? ($row[$colIndex['theme']] ?? '') : '';
+            $rawMilestone = $colIndex['milestone'] !== null ? ($row[$colIndex['milestone']] ?? '') : '';
+            $rawMap = $colIndex['map'] !== null ? ($row[$colIndex['map']] ?? '') : '';
 
             if (empty($rawTheme) && Str::contains($rawMilestone, 'Assamese Culture', true)) {
                 $rawTheme = $rawMilestone;
@@ -187,9 +237,13 @@ class ParticipantCsvSyncService
             ];
 
             $existing = Participant::where('event_id', $event->id)
-                ->where(function ($query) use ($rawName, $cleanPhone) {
+                ->where(function ($query) use ($rawName, $displayName, $cleanPhone, $rawPhone) {
                     $query->where('name', $rawName)
-                        ->orWhere('mobile_number', $cleanPhone);
+                        ->orWhere('display_name', $displayName);
+
+                    if (! empty($rawPhone) && strlen(preg_replace('/[^\d]/', '', $rawPhone)) >= 10) {
+                        $query->orWhere('mobile_number', $cleanPhone);
+                    }
                 })
                 ->first();
 
@@ -243,10 +297,25 @@ class ParticipantCsvSyncService
         ];
     }
 
-    protected function findColumnIndex(array $header, array $potentialNames): int
+    public function findColumnIndex(array $header, array $potentialNames, array $excludeNames = []): ?int
     {
         foreach ($header as $index => $colName) {
             $clean = strtoupper(trim((string) $colName));
+            if ($clean === '') {
+                continue;
+            }
+
+            $isExcluded = false;
+            foreach ($excludeNames as $ex) {
+                if (str_contains($clean, strtoupper($ex))) {
+                    $isExcluded = true;
+                    break;
+                }
+            }
+            if ($isExcluded) {
+                continue;
+            }
+
             foreach ($potentialNames as $name) {
                 if (str_contains($clean, strtoupper($name))) {
                     return $index;
@@ -254,7 +323,33 @@ class ParticipantCsvSyncService
             }
         }
 
-        return 0;
+        return null;
+    }
+
+    public function isHeaderRow(array $row): bool
+    {
+        $nonEmpty = array_filter(array_map(fn ($col) => strtoupper(trim((string) $col)), $row));
+        if (empty($nonEmpty)) {
+            return false;
+        }
+
+        $headerIndicators = [
+            'PUJA', 'COMMITTEE', 'COMMITEE', 'SAMITI', 'SAMITY',
+            'REG', 'REGD', 'SL NO', 'AREA', 'PHONE', 'MOBILE',
+            'CONTACT', 'PRESIDENT', 'SECRETARY', 'THEME', 'MILESTONE', 'MAP', 'LOCATION',
+        ];
+
+        $matches = 0;
+        foreach ($nonEmpty as $cell) {
+            foreach ($headerIndicators as $indicator) {
+                if (str_contains($cell, $indicator)) {
+                    $matches++;
+                    break;
+                }
+            }
+        }
+
+        return $matches >= 2;
     }
 
     public function normalizeZoneName(string $rawArea): string
@@ -344,6 +439,15 @@ class ParticipantCsvSyncService
         }
         if (str_contains($nameUpper, 'ASHOK PATH')) {
             return 'Ashok Path';
+        }
+        if (str_contains($nameUpper, 'GANGAPARA')) {
+            return 'Gangapara';
+        }
+        if (str_contains($nameUpper, 'MASTERPARA')) {
+            return 'Masterpara';
+        }
+        if (str_contains($nameUpper, 'SUBHASHPALLY')) {
+            return 'Subhashpally';
         }
 
         return $zoneName;
