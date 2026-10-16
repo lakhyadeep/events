@@ -351,7 +351,7 @@ function handleVoteFormSubmit() {
 
                 if (msg.toLowerCase().includes('already') || msg.toLowerCase().includes('duplicate') || msg.toLowerCase().includes('limit')) {
                     const eventName = window.currentEventName || 'this event';
-                    showAlreadyVoted(mobile, eventName);
+                    showAlreadyVoted(mobile, eventName, msg);
                 } else {
                     showFormError(msg, 'Please Check Your Input');
                 }
@@ -381,12 +381,14 @@ function showFormError(msg, heading) {
     }
 }
 
-function showAlreadyVoted(mobile, eventName) {
+function showAlreadyVoted(mobile, eventName, customMsg) {
     $('#voteSuccessBanner').hide();
     $('#formErrorAlert').addClass('d-none');
 
     // Single already-voted alert directly above form
-    const formattedMsg = 'Mobile number <strong>+91 ' + escapeHtml(mobile) + '</strong> has already cast a vote in ' + escapeHtml(eventName) + '. Only 1 vote per mobile number is permitted.';
+    const formattedMsg = customMsg
+        ? escapeHtml(customMsg)
+        : 'Mobile number <strong>+91 ' + escapeHtml(mobile) + '</strong> has already cast a vote in ' + escapeHtml(eventName) + '. Only 1 vote per mobile number is permitted.';
     $('#alreadyVotedMsg').html(formattedMsg);
     $('#alreadyVotedAlert').removeClass('d-none').hide().fadeIn(300);
 
@@ -529,7 +531,7 @@ function setupOtpHandlers() {
                         }
                     }
                     if (errorMsg.toLowerCase().includes('already') || errorMsg.toLowerCase().includes('limit')) {
-                        showAlreadyVoted(pendingSubmission.mobile, window.currentEventName || 'this event');
+                        showAlreadyVoted(pendingSubmission.mobile, window.currentEventName || 'this event', errorMsg);
                     } else {
                         showFormError(errorMsg, 'Voting Closed');
                     }

@@ -154,11 +154,41 @@ class Event extends Model
         }
 
         $clean = preg_replace('/[^0-9]/', '', $mobile) ?? '';
+        if (strlen($clean) > 10) {
+            $clean = substr($clean, -10);
+        }
+
         if (strlen($clean) !== 10) {
             return ['allowed' => false, 'message' => 'Please provide a valid 10-digit mobile number.'];
         }
 
-        // Option 1: When an award category is selected (Participant + Award)
+        // Mode 1: Participant Mode (Default)
+        // One phone number can vote only one participant and one award category in the entire event.
+        if ($this->voting_mode !== VotingMode::ParticipantAndAward) {
+            $existingVote = $this->votes()
+                ->where('mobile_number', $clean)
+                ->with(['participant', 'award'])
+                ->first();
+
+            if ($existingVote) {
+                $participant = $existingVote->participant;
+                $award = $existingVote->award;
+
+                $pName = $participant?->display_name ?: ($participant?->name ?: 'a candidate');
+                $aName = $award?->display_name ?: ($award?->name ?: null);
+
+                $details = $aName ? "\"{$pName}\" for \"{$aName}\"" : "\"{$pName}\"";
+
+                return [
+                    'allowed' => false,
+                    'message' => "Mobile number +91 {$clean} has already cast a vote for {$details}. Only 1 vote per mobile number is permitted.",
+                ];
+            }
+
+            return ['allowed' => true, 'message' => 'Eligible to vote.'];
+        }
+
+        // Mode 2: Participant and Award Category Mode
         // A mobile number can cast one vote in each award category.
         if ($awardId) {
             $alreadyVotedInAward = $this->votes()
@@ -179,8 +209,7 @@ class Event extends Model
             return ['allowed' => true, 'message' => 'Eligible to vote.'];
         }
 
-        // Option 2: General candidate voting (without award category)
-        // A mobile number can vote for multiple different participants, but only once per candidate.
+        // General candidate voting (without award category) under ParticipantAndAward mode
         if ($participantId) {
             $alreadyVoted = $this->votes()
                 ->where('mobile_number', $clean)

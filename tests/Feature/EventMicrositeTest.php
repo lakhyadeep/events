@@ -400,7 +400,7 @@ class EventMicrositeTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('Thank You! Your Vote Has Been Counted');
-        $response->assertSee('TONIGUY2026');
+        $response->assertSee('Toni&Guy24x7', false);
         $response->assertSee('btnCopyCoupon');
         $response->assertSee('btnShareWhatsApp');
         $response->assertSee('https://wa.me/?text=', false);
