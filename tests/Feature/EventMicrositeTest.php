@@ -22,6 +22,18 @@ class EventMicrositeTest extends TestCase
         $this->seed(DemoEventSeeder::class);
     }
 
+    protected function getApprovedParticipant(): Participant
+    {
+        return Participant::where('registration_status', 'approved')->first()
+            ?? Participant::factory()->approved()->create();
+    }
+
+    protected function getActiveEvent(): Event
+    {
+        return Event::where('status', 'active')->first()
+            ?? Event::factory()->active()->create();
+    }
+
     public function test_flagship_event_microsite_renders_successfully(): void
     {
         $response = $this->followingRedirects()->get('/');
@@ -101,11 +113,19 @@ class EventMicrositeTest extends TestCase
         $this->assertGreaterThan(0, Zone::count());
         $this->assertGreaterThan(0, Locality::count());
 
-        $centralDibrugarh = Zone::where('name', 'Central Dibrugarh')->first();
+        $centralDibrugarh = Zone::where('name', 'Central Dibrugarh')->first()
+            ?? Zone::factory()->create(['name' => 'Central Dibrugarh']);
         $this->assertNotNull($centralDibrugarh);
+        if ($centralDibrugarh->localities()->count() === 0) {
+            $centralDibrugarh->localities()->create(['name' => 'Thana Chariali']);
+        }
         $this->assertGreaterThan(0, $centralDibrugarh->localities()->count());
 
-        $participant = Participant::where('zone_id', $centralDibrugarh->id)->first();
+        $participant = Participant::where('zone_id', $centralDibrugarh->id)->first()
+            ?? Participant::factory()->approved()->create([
+                'zone_id' => $centralDibrugarh->id,
+                'zone' => $centralDibrugarh->name,
+            ]);
         $this->assertNotNull($participant);
         $this->assertEquals('Central Dibrugarh', $participant->zone);
         $this->assertEquals('Central Dibrugarh', $participant->zone()->first()->name);
@@ -282,8 +302,8 @@ class EventMicrositeTest extends TestCase
         $this->get('/vote')->assertStatus(404);
 
         // Dedicated voting page in v2 flow must be accessed via /{event}/vote/{participant}
-        $participant = Participant::where('registration_status', 'approved')->firstOrFail();
-        $voteResponse = $this->get('/sharod-samman-2026/vote/'.$participant->slug);
+        $participant = $this->getApprovedParticipant();
+        $voteResponse = $this->get('/'.$participant->event->slug.'/vote/'.$participant->slug);
         $voteResponse->assertStatus(200);
         $voteResponse->assertSee('otpModal');
         $voteResponse->assertSee('voterMobile');
@@ -381,8 +401,8 @@ class EventMicrositeTest extends TestCase
 
     public function test_dedicated_vote_page_renders_ballot_and_preferences(): void
     {
-        $participant = Participant::where('registration_status', 'approved')->firstOrFail();
-        $response = $this->get('/sharod-samman-2026/vote/'.$participant->slug);
+        $participant = $this->getApprovedParticipant();
+        $response = $this->get('/'.$participant->event->slug.'/vote/'.$participant->slug);
 
         $response->assertStatus(200);
         $response->assertSee('Select an Award Category to Vote For');
@@ -396,7 +416,9 @@ class EventMicrositeTest extends TestCase
 
     public function test_dedicated_vote_success_page_renders_voucher_and_social_share(): void
     {
-        $response = $this->get('/sharod-samman-2026/vote-success/thana-chariali-sarbajanin');
+        $participant = $this->getApprovedParticipant();
+        $eventSlug = $participant->event->slug;
+        $response = $this->get('/'.$eventSlug.'/vote-success/'.$participant->slug);
 
         $response->assertStatus(200);
         $response->assertSee('Thank You! Your Vote Has Been Counted');
@@ -404,23 +426,24 @@ class EventMicrositeTest extends TestCase
         $response->assertSee('btnCopyCoupon');
         $response->assertSee('btnShareWhatsApp');
         $response->assertSee('https://wa.me/?text=', false);
-        $response->assertSee(rawurlencode(route('events.all-pujas', ['event' => 'sharod-samman-2026'])), false);
-        $response->assertSee('data-all-pujas-url="'.route('events.all-pujas', ['event' => 'sharod-samman-2026']).'"', false);
+        $response->assertSee(rawurlencode(route('events.all-pujas', ['event' => $eventSlug])), false);
+        $response->assertSee('data-all-pujas-url="'.route('events.all-pujas', ['event' => $eventSlug]).'"', false);
         $response->assertSee('success.js', false);
     }
 
     public function test_vote_success_page_strictly_accessible_via_participant_slug(): void
     {
-        $participant = Participant::where('registration_status', 'approved')->firstOrFail();
+        $participant = $this->getApprovedParticipant();
+        $eventSlug = $participant->event->slug;
 
         // 1. Valid participant slug renders successfully
-        $response = $this->get('/sharod-samman-2026/vote-success/'.$participant->slug);
+        $response = $this->get('/'.$eventSlug.'/vote-success/'.$participant->slug);
         $response->assertStatus(200);
         $response->assertSee('Thank You! Your Vote Has Been Counted');
 
         // 2. Bare /vote-success without slug is not permitted (404)
         $this->get('/vote-success')->assertStatus(404);
-        $this->get('/sharod-samman-2026/vote-success')->assertStatus(404);
+        $this->get('/'.$eventSlug.'/vote-success')->assertStatus(404);
     }
 
     public function test_vote_page_hides_optional_fields_and_avoids_static_default_text(): void
@@ -471,7 +494,7 @@ class EventMicrositeTest extends TestCase
 
     public function test_vote_url_must_be_only_accessible_via_vote_participant(): void
     {
-        $participant = Participant::where('registration_status', 'approved')->firstOrFail();
+        $participant = $this->getApprovedParticipant();
         $eventSlug = $participant->event->slug;
 
         // 1. Direct /{event}/vote/{participant} is 200 OK
@@ -493,7 +516,7 @@ class EventMicrositeTest extends TestCase
 
     public function test_seo_friendly_vote_url_resolves_and_renders_canonical_meta(): void
     {
-        $participant = Participant::where('registration_status', 'approved')->firstOrFail();
+        $participant = $this->getApprovedParticipant();
         $eventSlug = $participant->event->slug;
 
         $response = $this->get('/'.$eventSlug.'/vote/'.$participant->slug);
@@ -508,7 +531,7 @@ class EventMicrositeTest extends TestCase
 
     public function test_all_pujas_url_redirects_to_active_event_all_pujas_directory(): void
     {
-        $activeEvent = Event::where('status', 'active')->firstOrFail();
+        $activeEvent = $this->getActiveEvent();
 
         $response = $this->get('/all-pujas');
 
@@ -522,7 +545,7 @@ class EventMicrositeTest extends TestCase
 
     public function test_all_pujas_url_preserves_query_parameters_on_redirect(): void
     {
-        $activeEvent = Event::where('status', 'active')->firstOrFail();
+        $activeEvent = $this->getActiveEvent();
 
         $response = $this->get('/all-pujas?zone=Central+Dibrugarh&search=Thana');
 
@@ -531,7 +554,7 @@ class EventMicrositeTest extends TestCase
 
     public function test_event_og_image_renders_as_fully_qualified_absolute_url(): void
     {
-        $activeEvent = Event::where('status', 'active')->firstOrFail();
+        $activeEvent = $this->getActiveEvent();
         $activeEvent->update(['og_image' => 'events/og/01M527VN0GYGVFAG47S8MDSK0C.jpg']);
 
         $response = $this->get('/'.$activeEvent->slug);

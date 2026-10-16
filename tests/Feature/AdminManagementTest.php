@@ -109,7 +109,16 @@ class AdminManagementTest extends TestCase
 
     public function test_associate_sponsors_scope_limits_to_five(): void
     {
-        $event = Event::first();
+        $event = Event::first() ?? Event::factory()->create();
+
+        if (Sponsor::where('event_id', $event->id)->associate()->count() === 0) {
+            Sponsor::create([
+                'event_id' => $event->id,
+                'name' => 'Sample Sponsor',
+                'category' => 'associate',
+                'is_active' => true,
+            ]);
+        }
 
         // Count associate sponsors retrieved via scope
         $associateSponsors = Sponsor::where('event_id', $event->id)->associate()->get();
@@ -120,7 +129,9 @@ class AdminManagementTest extends TestCase
 
     public function test_winner_model_relationships(): void
     {
-        $winner = Winner::with(['event', 'award', 'participant'])->first();
+        $winner = Winner::factory()->create([
+            'status' => 'published',
+        ]);
 
         $this->assertNotNull($winner);
         $this->assertNotNull($winner->event);
@@ -131,7 +142,7 @@ class AdminManagementTest extends TestCase
 
     public function test_admin_can_load_all_resource_list_pages(): void
     {
-        $admin = User::where('email', 'admin@dib24x7.com')->first();
+        $admin = User::where('email', 'admin@dib24x7.com')->first() ?? User::factory()->admin()->create();
 
         $routes = [
             '/admin/events',
@@ -156,8 +167,8 @@ class AdminManagementTest extends TestCase
 
     public function test_admin_can_load_participant_edit_page(): void
     {
-        $admin = User::where('email', 'admin@dib24x7.com')->first();
-        $participant = Participant::first();
+        $admin = User::where('email', 'admin@dib24x7.com')->first() ?? User::factory()->admin()->create();
+        $participant = Participant::factory()->create();
 
         $this->assertNotNull($participant);
 
@@ -235,8 +246,8 @@ class AdminManagementTest extends TestCase
 
     public function test_admin_can_create_award_without_category_group(): void
     {
-        $admin = User::where('email', 'admin@dib24x7.com')->first();
-        $event = Event::first();
+        $admin = User::where('email', 'admin@dib24x7.com')->first() ?? User::factory()->admin()->create();
+        $event = Event::first() ?? Event::factory()->create();
 
         Livewire::actingAs($admin)
             ->test(CreateAward::class)
@@ -258,8 +269,8 @@ class AdminManagementTest extends TestCase
 
     public function test_admin_can_update_participant_google_map_url(): void
     {
-        $admin = User::where('email', 'admin@dib24x7.com')->first();
-        $participant = Participant::first();
+        $admin = User::where('email', 'admin@dib24x7.com')->first() ?? User::factory()->admin()->create();
+        $participant = Participant::factory()->create();
         $mapUrl = 'https://maps.app.goo.gl/example123';
 
         Livewire::actingAs($admin)
@@ -280,8 +291,7 @@ class AdminManagementTest extends TestCase
 
     public function test_participant_resource_includes_google_map_url(): void
     {
-        $participant = Participant::first();
-        $participant->update([
+        $participant = Participant::factory()->create([
             'google_map_url' => 'https://maps.google.com/?q=27.4728,94.9120',
         ]);
 
