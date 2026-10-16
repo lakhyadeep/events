@@ -91,10 +91,22 @@ class VotingFlowTest extends TestCase
         return $matches[0] ?? '';
     }
 
-    public function test_candidate_voting_allows_one_vote_per_candidate_and_allows_voting_for_other_candidates(): void
+    public function test_one_phone_number_can_vote_only_one_participant_and_one_award_category_in_participant_mode(): void
     {
         $event = $this->createEvent([
             'is_voting_active' => true,
+            'voting_mode' => VotingMode::Participant,
+        ]);
+
+        $award1 = $this->createAward($event, [
+            'name' => 'Best Pandal',
+            'display_name' => 'Best Pandal',
+            'is_voting_allowed' => true,
+        ]);
+        $award2 = $this->createAward($event, [
+            'name' => 'Best Pratima',
+            'display_name' => 'Best Pratima',
+            'is_voting_allowed' => true,
         ]);
 
         $participant1 = $this->createParticipant($event);
@@ -102,10 +114,11 @@ class VotingFlowTest extends TestCase
 
         $mobile = '9876543210';
 
-        // 1. Initial eligibility check passes for participant 1
+        // 1. Initial eligibility check passes for participant 1 with award 1
         $checkResponse = $this->postJson('/api/v1/votes/check', [
             'event_id' => $event->id,
             'participant_id' => $participant1->id,
+            'award_id' => $award1->id,
             'phone' => $mobile,
         ]);
         $checkResponse->assertStatus(200)->assertJson(['allowed' => true]);
@@ -116,16 +129,18 @@ class VotingFlowTest extends TestCase
             'purpose' => 'voting',
             'event_id' => $event->id,
             'participant_id' => $participant1->id,
+            'award_id' => $award1->id,
         ]);
         $otpResponse->assertStatus(200);
 
         $code = $this->getLastOtpCode();
         $this->assertNotEmpty($code);
 
-        // 3. Cast vote for participant 1
+        // 3. Cast vote for participant 1 with award 1
         $voteResponse = $this->postJson('/api/v1/votes/cast', [
             'event_id' => $event->id,
             'participant_id' => $participant1->id,
+            'award_id' => $award1->id,
             'phone' => $mobile,
             'otp' => $code,
         ]);
@@ -137,64 +152,69 @@ class VotingFlowTest extends TestCase
         $this->assertDatabaseHas('votes', [
             'event_id' => $event->id,
             'participant_id' => $participant1->id,
+            'award_id' => $award1->id,
             'mobile_number' => $mobile,
         ]);
 
-        // 4. Duplicate vote attempt for participant 1 fails
-        $checkAgain = $this->postJson('/api/v1/votes/check', [
+        // 4. Duplicate vote attempt for participant 1 (even in another award) fails
+        $checkAgainSameParticipant = $this->postJson('/api/v1/votes/check', [
             'event_id' => $event->id,
             'participant_id' => $participant1->id,
+            'award_id' => $award2->id,
             'phone' => $mobile,
         ]);
-        $checkAgain->assertStatus(422)->assertJson(['allowed' => false]);
+        $checkAgainSameParticipant->assertStatus(422)
+            ->assertJson(['allowed' => false])
+            ->assertJsonFragment(['message' => 'Mobile number +91 '.$mobile.' has already cast a vote for "'.$participant1->display_name.'" for "'.$award1->display_name.'". Only 1 vote per mobile number is permitted.']);
 
-        $otpAgain = $this->postJson('/api/v1/otp/send', [
+        $otpAgainSame = $this->postJson('/api/v1/otp/send', [
             'phone' => $mobile,
             'purpose' => 'voting',
             'event_id' => $event->id,
             'participant_id' => $participant1->id,
+            'award_id' => $award2->id,
         ]);
-        $otpAgain->assertStatus(422)->assertJson(['success' => false]);
+        $otpAgainSame->assertStatus(422)->assertJson(['success' => false]);
 
-        // 5. BUT the same mobile CAN vote for participant 2!
+        // 5. Subsequent vote attempt for participant 2 also fails! One vote per mobile number only.
         Otp::query()->delete(); // Clear cooldown for testing
 
         $checkP2 = $this->postJson('/api/v1/votes/check', [
             'event_id' => $event->id,
             'participant_id' => $participant2->id,
+            'award_id' => $award2->id,
             'phone' => $mobile,
         ]);
-        $checkP2->assertStatus(200)->assertJson(['allowed' => true]);
+        $checkP2->assertStatus(422)->assertJson(['allowed' => false]);
 
         $otpP2 = $this->postJson('/api/v1/otp/send', [
             'phone' => $mobile,
             'purpose' => 'voting',
             'event_id' => $event->id,
             'participant_id' => $participant2->id,
+            'award_id' => $award2->id,
         ]);
-        $otpP2->assertStatus(200);
-        $code2 = $this->getLastOtpCode();
+        $otpP2->assertStatus(422)->assertJson(['success' => false]);
 
+        // Direct cast attempt for participant 2 also fails
         $voteP2 = $this->postJson('/api/v1/votes/cast', [
             'event_id' => $event->id,
             'participant_id' => $participant2->id,
+            'award_id' => $award2->id,
             'phone' => $mobile,
-            'otp' => $code2,
+            'otp' => '123456',
         ]);
-        $voteP2->assertStatus(200);
+        $voteP2->assertStatus(422);
 
-        $this->assertDatabaseHas('votes', [
-            'event_id' => $event->id,
-            'participant_id' => $participant2->id,
-            'mobile_number' => $mobile,
-        ]);
-        $this->assertSame(2, Vote::where('event_id', $event->id)->where('mobile_number', $mobile)->count());
+        // Exactly 1 vote remains in the database
+        $this->assertSame(1, Vote::where('event_id', $event->id)->where('mobile_number', $mobile)->count());
     }
 
-    public function test_award_voting_allows_one_vote_per_award_category_and_allows_voting_across_multiple_award_categories(): void
+    public function test_award_voting_allows_one_vote_per_award_category_and_allows_voting_across_multiple_award_categories_in_participant_and_award_mode(): void
     {
         $event = $this->createEvent([
             'is_voting_active' => true,
+            'voting_mode' => VotingMode::ParticipantAndAward,
         ]);
 
         $award1 = $this->createAward($event, [

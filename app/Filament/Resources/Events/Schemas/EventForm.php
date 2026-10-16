@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Events\Schemas;
 
 use App\Enums\EventStatus;
+use App\Enums\VotingMode;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
@@ -119,6 +120,12 @@ class EventForm
                                 ->label('Voting Active')
                                 ->helperText('Show Vote Now button')
                                 ->live(),
+                            Select::make('voting_mode')
+                                ->label('Voting Restriction Mode')
+                                ->options(VotingMode::options())
+                                ->default(VotingMode::Participant->value)
+                                ->helperText('Participant: 1 vote per mobile number across the event. Participant + Award: 1 vote per award category.')
+                                ->required(),
                             Toggle::make('is_awards_active')
                                 ->label('Awards Active')
                                 ->helperText('Reveal winners podium'),
