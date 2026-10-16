@@ -28,7 +28,7 @@ class VotesTable
                     ->formatStateUsing(function (string $state): string {
                         $digits = preg_replace('/[^0-9]/', '', $state) ?? '';
                         if (strlen($digits) >= 10) {
-                            return '+91 '.substr($digits, 0, 5).'*****';
+                            return '+91 ' . substr($digits, 0, 5) . '*****';
                         }
 
                         return $state;
@@ -36,9 +36,9 @@ class VotesTable
                     ->searchable()
                     ->sortable()
                     ->copyable()
-                    ->copyableState(fn ($record) => '+91 '.$record->mobile_number)
+                    ->copyableState(fn($record) => '+91 ' . $record->mobile_number)
                     ->copyMessage('Mobile number copied to clipboard')
-                    ->description(fn ($record) => 'IP: '.($record->ip_address ?? 'Unknown')),
+                    ->description(fn($record) => 'IP: ' . ($record->ip_address ?? 'Unknown')),
 
                 TextColumn::make('participant.display_name')
                     ->label('Voted For (Puja / Candidate)')
@@ -67,6 +67,7 @@ class VotesTable
                 TextColumn::make('created_at')
                     ->label('Cast At')
                     ->dateTime('d M Y, h:i A')
+                    ->timezone('Asia/Kolkata')
                     ->sortable(),
             ])
             ->defaultSort('created_at', 'desc')
