@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\Otp\Drivers\Fast2SmsDriver;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
@@ -71,6 +72,7 @@ class OtpSetting extends Model
 
         try {
             Cache::forget('otp_current_settings');
+            Cache::forget('fast2sms_wallet_balance_details');
         } catch (\Throwable) {
             // Ignore cache forget issues
         }
@@ -157,5 +159,113 @@ class OtpSetting extends Model
         }
 
         return false;
+    }
+
+    /**
+     * Get the configured low balance notification threshold in INR.
+     */
+    public function getLowBalanceThreshold(): float
+    {
+        $settings = $this->fast2sms_settings ?? [];
+
+        return isset($settings['low_balance_threshold']) && is_numeric($settings['low_balance_threshold'])
+            ? (float) $settings['low_balance_threshold']
+            : 50.0;
+    }
+
+    /**
+     * Retrieve current Fast2SMS wallet balance details (with 5-minute caching).
+     *
+     * @return array{
+     *     driver: string,
+     *     configured: bool,
+     *     successful: bool,
+     *     balance: float|null,
+     *     threshold: float,
+     *     is_low: bool,
+     *     message: string,
+     *     checked_at: string|null,
+     * }
+     */
+    public function getFast2SmsBalanceDetails(bool $forceRefresh = false): array
+    {
+        $threshold = $this->getLowBalanceThreshold();
+        $apiKey = trim((string) ($this->fast2sms_settings['api_key'] ?? ''));
+
+        if ($this->active_driver !== 'fast2sms') {
+            return [
+                'driver' => $this->active_driver,
+                'configured' => $apiKey !== '',
+                'successful' => true,
+                'balance' => null,
+                'threshold' => $threshold,
+                'is_low' => false,
+                'message' => "Active gateway is [{$this->active_driver}].",
+                'checked_at' => null,
+            ];
+        }
+
+        if ($apiKey === '') {
+            return [
+                'driver' => 'fast2sms',
+                'configured' => false,
+                'successful' => false,
+                'balance' => null,
+                'threshold' => $threshold,
+                'is_low' => true,
+                'message' => 'Fast2SMS API Key is not configured.',
+                'checked_at' => now()->toIso8601String(),
+            ];
+        }
+
+        $cacheKey = 'fast2sms_wallet_balance_details';
+
+        if ($forceRefresh) {
+            Cache::forget($cacheKey);
+        }
+
+        return Cache::remember($cacheKey, now()->addMinutes(5), function () use ($threshold): array {
+            $driver = new Fast2SmsDriver($this->fast2sms_settings ?? []);
+            $result = $driver->checkWalletBalance();
+
+            $balance = $result['balance'] ?? null;
+            $isLow = ($result['successful'] && $balance !== null && $balance <= $threshold)
+                || (! $result['successful'] && str_contains(strtolower($result['message'] ?? ''), 'balance'));
+
+            return [
+                'driver' => 'fast2sms',
+                'configured' => true,
+                'successful' => $result['successful'],
+                'balance' => $balance,
+                'threshold' => $threshold,
+                'is_low' => $isLow,
+                'message' => $result['message'],
+                'checked_at' => now()->toIso8601String(),
+            ];
+        });
+    }
+
+    /**
+     * Get the cached numeric Fast2SMS balance.
+     */
+    public function getFast2SmsBalance(bool $forceRefresh = false): ?float
+    {
+        $details = $this->getFast2SmsBalanceDetails($forceRefresh);
+
+        return $details['balance'] ?? null;
+    }
+
+    /**
+     * Check if Fast2SMS wallet balance is low or requires immediate attention.
+     */
+    public function isFast2SmsBalanceLow(): bool
+    {
+        if ($this->active_driver !== 'fast2sms') {
+            return false;
+        }
+
+        $details = $this->getFast2SmsBalanceDetails();
+
+        return (bool) ($details['is_low'] ?? false);
     }
 }

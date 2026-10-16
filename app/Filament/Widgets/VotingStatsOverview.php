@@ -9,7 +9,7 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class VotingStatsOverview extends StatsOverviewWidget
 {
-    protected static ?int $sort = 2;
+    protected static ?int $sort = 1;
 
     protected static bool $isLazy = false;
 

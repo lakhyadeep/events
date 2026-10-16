@@ -258,4 +258,58 @@ class OtpDriversTest extends TestCase
         $response = $driver->sendOtp('9999999999', '112233');
         $this->assertTrue($response->successful);
     }
+
+    public function test_fast2sms_driver_check_wallet_balance_success(): void
+    {
+        Http::fake([
+            'www.fast2sms.com/dev/wallet' => Http::response([
+                'return' => true,
+                'wallet' => '145.50',
+            ], 200),
+        ]);
+
+        $driver = new Fast2SmsDriver([
+            'api_key' => 'TEST_KEY',
+        ]);
+
+        $result = $driver->checkWalletBalance();
+
+        $this->assertTrue($result['successful']);
+        $this->assertSame(145.50, $result['balance']);
+        $this->assertStringContainsString('retrieved successfully', $result['message']);
+    }
+
+    public function test_fast2sms_driver_check_wallet_balance_missing_key(): void
+    {
+        $driver = new Fast2SmsDriver([
+            'api_key' => '',
+        ]);
+
+        $result = $driver->checkWalletBalance();
+
+        $this->assertFalse($result['successful']);
+        $this->assertNull($result['balance']);
+        $this->assertStringContainsString('Fast2SMS API Key is not configured', $result['message']);
+    }
+
+    public function test_fast2sms_driver_check_wallet_balance_api_failure(): void
+    {
+        Http::fake([
+            'www.fast2sms.com/dev/wallet' => Http::response([
+                'return' => false,
+                'status_code' => 416,
+                'message' => 'Insufficient balance',
+            ], 200),
+        ]);
+
+        $driver = new Fast2SmsDriver([
+            'api_key' => 'TEST_KEY',
+        ]);
+
+        $result = $driver->checkWalletBalance();
+
+        $this->assertFalse($result['successful']);
+        $this->assertNull($result['balance']);
+        $this->assertSame('Insufficient balance', $result['message']);
+    }
 }

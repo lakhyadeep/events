@@ -12,6 +12,8 @@ class VotingLeaderboardWidget extends TableWidget
 {
     protected static ?int $sort = 3;
 
+    protected static bool $isLazy = false;
+
     protected static ?string $heading = 'Live Public Voting Leaderboard (Top 10 Contenders)';
 
     protected int|string|array $columnSpan = 'full';
