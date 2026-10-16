@@ -26,9 +26,9 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // 2. Seed Event, Sponsors, Banners, Participants, Awards & Milestones
+        // 2. Seed Event, Sponsors, Banners, Awards & Milestones
         $this->call([
-            DemoEventSeeder::class,
+            LiveMasterSeeder::class,
         ]);
     }
 }
