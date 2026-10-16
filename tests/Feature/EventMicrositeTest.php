@@ -505,4 +505,27 @@ class EventMicrositeTest extends TestCase
         $response->assertSee('<link rel="canonical" href="'.$expectedCanonical.'">', false);
         $response->assertSee('window.selectedParticipantSlug = "'.$participant->slug.'"', false);
     }
+
+    public function test_all_pujas_url_redirects_to_active_event_all_pujas_directory(): void
+    {
+        $activeEvent = Event::where('status', 'active')->firstOrFail();
+
+        $response = $this->get('/all-pujas');
+
+        $response->assertRedirect('/'.$activeEvent->slug.'/all-pujas');
+
+        $followed = $this->followingRedirects()->get('/all-pujas');
+        $followed->assertStatus(200);
+        $followed->assertSee('Dibrugarh Durga Pujas');
+        $followed->assertSee('Search and vote for your favourite puja committee');
+    }
+
+    public function test_all_pujas_url_preserves_query_parameters_on_redirect(): void
+    {
+        $activeEvent = Event::where('status', 'active')->firstOrFail();
+
+        $response = $this->get('/all-pujas?zone=Central+Dibrugarh&search=Thana');
+
+        $response->assertRedirect('/'.$activeEvent->slug.'/all-pujas?zone=Central%20Dibrugarh&search=Thana');
+    }
 }
