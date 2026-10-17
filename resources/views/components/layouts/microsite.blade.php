@@ -69,6 +69,8 @@
         window.allPujasUrl = {!! json_encode($currentEvent ? route('events.all-pujas', ['event' => $currentEvent->slug]) : route('home')) !!};
         window.voteBaseUrl = {!! json_encode($currentEvent ? url('/'.$currentEvent->slug.'/vote') : route('home')) !!};
         window.voteSuccessUrl = {!! json_encode($currentEvent ? url('/'.$currentEvent->slug.'/vote-success') : route('home')) !!};
+        window.currentEventSlug = {!! json_encode($currentEvent?->slug) !!};
+        window.currentEventId = {!! json_encode($currentEvent?->id) !!};
     </script>
     @if (!empty($useAllPujasScript))
         <!-- All Pujas JavaScript Logic -->
@@ -82,6 +84,11 @@
     @else
         <!-- Festive Microsite Script -->
         <script src="{{ vasset('event-assets/js/script.js') }}"></script>
+    @endif
+
+    @if (empty($useVoteScript) && empty($useSuccessScript))
+        <!-- Async Behavioral Analytics Tracker (Excluded from voting screens for complete stability) -->
+        <script src="{{ vasset('event-assets/js/analytics-tracker.js') }}" defer></script>
     @endif
 
     {{ $scripts ?? '' }}

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AnalyticsApiController;
 use App\Http\Controllers\Api\EventApiController;
 use App\Http\Controllers\Api\OtpController;
 use App\Http\Controllers\Api\VoteController;
@@ -24,4 +25,7 @@ Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
     Route::get('/events/{slug}/participants', [EventApiController::class, 'participants']);
     Route::get('/events/{slug}/shorts', [EventApiController::class, 'shorts']);
     Route::get('/events/{slug}/winners', [EventApiController::class, 'winners']);
+
+    // Analytics Behavioral Event Ingestion
+    Route::post('/analytics/event', [AnalyticsApiController::class, 'recordEvent'])->middleware('throttle:120,1');
 });

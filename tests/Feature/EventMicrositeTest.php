@@ -75,7 +75,7 @@ class EventMicrositeTest extends TestCase
 
         // Pinnacle Grand Champion card
         $response->assertSee('award-card award-card-crown', false);
-        $response->assertSee('BEST OF BEST • GRAND CHAMPION', false);
+        $response->assertSee('BEST OF THE BEST • GRAND CHAMPION', false);
         $response->assertSee('crown-gold-title', false);
 
         // Category Cards (Theme, Pandal, Idol)
@@ -343,7 +343,7 @@ class EventMicrositeTest extends TestCase
         // Nav links and vote button ARE retained in the navigation
         $response->assertSee('data-target="about"', false);
         $response->assertSee('All Pujas', false);
-        $response->assertSee('data-target="awards-announced"', false);
+        $response->assertDontSee('data-target="awards-announced"', false);
         $response->assertSee('data-target="gallery"', false);
         $response->assertSee('data-target="events"', false);
         $response->assertSee('Voting Closed', false);

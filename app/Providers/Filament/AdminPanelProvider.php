@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Auth\RegisterSuperadmin;
+use App\Filament\Widgets\AnalyticsQuickStatsWidget;
 use App\Filament\Widgets\SmsBalanceAlertWidget;
 use App\Filament\Widgets\SmsUsageOverviewWidget;
 use App\Filament\Widgets\VotingLeaderboardWidget;
@@ -48,6 +49,7 @@ class AdminPanelProvider extends PanelProvider
                 Dashboard::class,
             ])
             ->widgets([
+                AnalyticsQuickStatsWidget::class,
                 SmsBalanceAlertWidget::class,
                 VotingStatsOverview::class,
                 SmsUsageOverviewWidget::class,

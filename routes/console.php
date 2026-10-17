@@ -53,3 +53,16 @@ if ((bool) config('backup.run_in_background', false) && function_exists('proc_op
 Schedule::command('queue:work --stop-when-empty --max-time=50')
     ->everyMinute()
     ->withoutOverlapping(2);
+
+/*
+|--------------------------------------------------------------------------
+| Automated Analytics Log Pruning
+|--------------------------------------------------------------------------
+|
+| Retains 90 days of page view and user activity tracking records to keep
+| the database lean and performant.
+|
+*/
+Schedule::command('analytics:prune --days=90')
+    ->dailyAt('03:30')
+    ->withoutOverlapping(30);
