@@ -21,35 +21,7 @@ class TopPujasTableWidget extends TableWidget
 
     protected int|string|array $columnSpan = 'full';
 
-    /**
-     * Cached lookup of map navigation clicks per participant.
-     *
-     * @var array<int, int> | null
-     */
-    protected ?array $mapClicksCache = null;
-
-    /**
-     * Cached lookup of vote initiation clicks per participant.
-     *
-     * @var array<int, int> | null
-     */
     protected ?array $voteClicksCache = null;
-
-    protected function getMapClicks(int $participantId): int
-    {
-        if ($this->mapClicksCache === null) {
-            $this->mapClicksCache = UserActivity::query()
-                ->when($this->eventId, fn ($q) => $q->where('event_id', $this->eventId))
-                ->where('target_type', 'participant')
-                ->where('action_type', 'map_directions_click')
-                ->groupBy('target_id')
-                ->selectRaw('target_id, count(*) as total')
-                ->pluck('total', 'target_id')
-                ->all();
-        }
-
-        return $this->mapClicksCache[$participantId] ?? 0;
-    }
 
     protected function getVoteClicks(int $participantId): int
     {
@@ -70,7 +42,7 @@ class TopPujasTableWidget extends TableWidget
     public function table(Table $table): Table
     {
         return $table
-            ->heading('Pujas Engagement Leaderboard: Navigations & Interaction Clicks')
+            ->heading('Pujas Engagement Leaderboard: Votes & Conversions')
             ->query(function (): Builder {
                 return Participant::query()
                     ->when($this->eventId, fn ($q) => $q->where('event_id', $this->eventId))
@@ -90,19 +62,12 @@ class TopPujasTableWidget extends TableWidget
                     ->color('gray')
                     ->sortable(),
 
-                TextColumn::make('map_clicks')
-                    ->label('"Get Directions" Clicks')
-                    ->state(fn (Participant $record): int => $this->getMapClicks($record->id))
-                    ->icon('heroicon-m-map-pin')
-                    ->badge()
-                    ->color('warning'),
-
                 TextColumn::make('vote_clicks')
-                    ->label('Vote Clicks Initiated')
+                    ->label('Votes Initiated')
                     ->state(fn (Participant $record): int => $this->getVoteClicks($record->id))
-                    ->icon('heroicon-m-cursor-arrow-rays')
+                    ->icon('heroicon-m-device-phone-mobile')
                     ->badge()
-                    ->color('primary'),
+                    ->color('amber'),
 
                 TextColumn::make('votes_count')
                     ->label('Verified Votes')

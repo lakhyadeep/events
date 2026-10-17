@@ -44,7 +44,7 @@ class AnalyticsTrackingTest extends TestCase
 
         $this->assertDatabaseHas('page_views', [
             'event_id' => $event->id,
-            'page_type' => 'landing',
+            'page_type' => 'homepage',
             'device_type' => 'mobile',
             'platform' => 'iOS',
             'browser' => 'Safari',
@@ -77,15 +77,14 @@ class AnalyticsTrackingTest extends TestCase
         $participant = Participant::first();
 
         $payload = [
-            'action_type' => 'map_directions_click',
+            'action_type' => 'vote_initiated',
             'event_id' => $event?->id,
             'target_type' => 'participant',
             'target_id' => $participant?->id,
             'metadata' => [
                 'puja_name' => $participant?->name ?? 'Test Puja',
-                'map_url' => 'https://maps.google.com/?q=Test',
             ],
-            'url' => 'http://localhost/event/all-pujas',
+            'url' => 'http://localhost/event/vote',
             'device_type' => 'mobile',
         ];
 
@@ -97,7 +96,7 @@ class AnalyticsTrackingTest extends TestCase
             ]);
 
         $this->assertDatabaseHas('user_activities', [
-            'action_type' => 'map_directions_click',
+            'action_type' => 'vote_initiated',
             'target_type' => 'participant',
             'target_id' => $participant?->id,
             'device_type' => 'mobile',
@@ -146,5 +145,63 @@ class AnalyticsTrackingTest extends TestCase
 
         $this->assertDatabaseHas('page_views', ['id' => $recentView->id], 'analytics');
         $this->assertDatabaseHas('user_activities', ['id' => $recentActivity->id], 'analytics');
+    }
+
+    public function test_page_wise_tracking_covers_all_puja_vote_and_vote_success(): void
+    {
+        $event = Event::where('status', 'active')->first() ?? Event::factory()->create(['status' => 'active', 'slug' => 'durga-puja-test']);
+        $participant = Participant::where('event_id', $event->id)->approved()->first()
+            ?? Participant::factory()->create(['event_id' => $event->id, 'is_approved' => true, 'slug' => 'test-puja']);
+
+        // 1. All Pujas
+        $this->get('/'.$event->slug.'/all-pujas', ['User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0'])
+            ->assertStatus(200);
+
+        $this->assertDatabaseHas('page_views', [
+            'event_id' => $event->id,
+            'page_type' => 'all_puja',
+        ], 'analytics');
+
+        // 2. Vote Screen
+        $this->get('/'.$event->slug.'/vote/'.$participant->slug, ['User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0'])
+            ->assertStatus(200);
+
+        $this->assertDatabaseHas('page_views', [
+            'event_id' => $event->id,
+            'page_type' => 'vote',
+        ], 'analytics');
+
+        // 3. Vote Success Screen
+        $this->get('/'.$event->slug.'/vote-success/'.$participant->slug, ['User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0'])
+            ->assertStatus(200);
+
+        $this->assertDatabaseHas('page_views', [
+            'event_id' => $event->id,
+            'page_type' => 'vote_success',
+        ], 'analytics');
+    }
+
+    public function test_voting_flow_records_vote_initiated_and_vote_verified(): void
+    {
+        $event = Event::where('status', 'active')->first() ?? Event::factory()->create(['status' => 'active', 'slug' => 'durga-puja-test']);
+        $participant = Participant::where('event_id', $event->id)->approved()->first()
+            ?? Participant::factory()->create(['event_id' => $event->id, 'is_approved' => true]);
+
+        // 1. Send OTP for voting (should record vote_initiated)
+        $otpResponse = $this->postJson('/api/v1/otp/send', [
+            'phone' => '9876543210',
+            'purpose' => 'voting',
+            'event_id' => $event->id,
+            'participant_id' => $participant->id,
+        ]);
+
+        $otpResponse->assertStatus(200);
+
+        $this->assertDatabaseHas('user_activities', [
+            'action_type' => 'vote_initiated',
+            'event_id' => $event->id,
+            'target_type' => 'participant',
+            'target_id' => $participant->id,
+        ], 'analytics');
     }
 }

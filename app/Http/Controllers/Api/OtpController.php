@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\OtpSetting;
+use App\Services\AnalyticsService;
 use App\Services\Otp\OtpService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class OtpController extends Controller
 {
@@ -96,6 +98,32 @@ class OtpController extends Controller
         }
 
         $setting = OtpSetting::current();
+
+        if ($purpose === 'voting') {
+            try {
+                $visitorId = $request->cookie('analytics_vid') ?? (string) Str::uuid();
+                $awardId = ! empty($validated['award_id'])
+                    ? (int) $validated['award_id']
+                    : (! empty($validated['award_ids']) ? (int) reset($validated['award_ids']) : null);
+
+                app(AnalyticsService::class)->recordActivity(
+                    actionType: 'vote_initiated',
+                    visitorId: $visitorId,
+                    sessionId: $request->hasSession() ? $request->session()->getId() : null,
+                    eventId: ! empty($validated['event_id']) ? (int) $validated['event_id'] : null,
+                    targetType: 'participant',
+                    targetId: ! empty($validated['participant_id']) ? (int) $validated['participant_id'] : null,
+                    metadata: [
+                        'award_id' => $awardId,
+                        'phone_masked' => substr($validated['phone'], 0, 2).'******'.substr($validated['phone'], -2),
+                    ],
+                    url: $request->header('referer'),
+                    deviceType: app(AnalyticsService::class)->detectDeviceType($request->userAgent())
+                );
+            } catch (\Throwable) {
+                // Tracking failure must never interrupt user flow
+            }
+        }
 
         return response()->json([
             'success' => true,

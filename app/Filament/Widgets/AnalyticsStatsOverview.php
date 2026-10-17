@@ -64,75 +64,94 @@ class AnalyticsStatsOverview extends StatsOverviewWidget
     {
         [$startDate, $endDate, $prevStartDate, $prevEndDate] = $this->getDateRanges();
 
-        // 1. Page Views
         $viewsQuery = PageView::query()->forEvent($this->eventId);
-        $totalViews = (clone $viewsQuery)->whereBetween('created_at', [$startDate, $endDate])->count();
-        $prevViews = (clone $viewsQuery)->whereBetween('created_at', [$prevStartDate, $prevEndDate])->count();
-        $viewsTrend = $this->calculatePercentageChange($totalViews, $prevViews);
-
-        // 2. Unique Visitors
-        $visitors = (clone $viewsQuery)->whereBetween('created_at', [$startDate, $endDate])
-            ->distinct('visitor_id')
-            ->count('visitor_id');
-        $prevVisitors = (clone $viewsQuery)->whereBetween('created_at', [$prevStartDate, $prevEndDate])
-            ->distinct('visitor_id')
-            ->count('visitor_id');
-        $visitorsTrend = $this->calculatePercentageChange($visitors, $prevVisitors);
-
-        // 3. Pandal Searches
         $activityQuery = UserActivity::query()->forEvent($this->eventId);
-        $searches = (clone $activityQuery)->action('search')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->count();
 
-        // 4. Map "Get Directions" Navigation Clicks
-        $mapClicks = (clone $activityQuery)->action('map_directions_click')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->count();
+        // 1. Homepage Views
+        $homepageViews = (clone $viewsQuery)->whereIn('page_type', ['homepage', 'home', 'landing'])
+            ->whereBetween('created_at', [$startDate, $endDate])->count();
+        $prevHomepageViews = (clone $viewsQuery)->whereIn('page_type', ['homepage', 'home', 'landing'])
+            ->whereBetween('created_at', [$prevStartDate, $prevEndDate])->count();
+        $homepageTrend = $this->calculatePercentageChange($homepageViews, $prevHomepageViews);
 
-        // 5. Voting Funnel Conversion
-        $voteScreenViews = (clone $viewsQuery)->where('page_type', 'vote_screen')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->count();
+        // 2. All Pujas Directory Views
+        $allPujasViews = (clone $viewsQuery)->whereIn('page_type', ['all_puja', 'all_pujas'])
+            ->whereBetween('created_at', [$startDate, $endDate])->count();
+        $prevAllPujasViews = (clone $viewsQuery)->whereIn('page_type', ['all_puja', 'all_pujas'])
+            ->whereBetween('created_at', [$prevStartDate, $prevEndDate])->count();
+        $allPujasTrend = $this->calculatePercentageChange($allPujasViews, $prevAllPujasViews);
 
-        $completedVotes = Vote::query()->when($this->eventId, fn ($q) => $q->where('event_id', $this->eventId))
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->count();
+        // 3. Vote Screen Views
+        $voteScreenViews = (clone $viewsQuery)->whereIn('page_type', ['vote', 'vote_screen'])
+            ->whereBetween('created_at', [$startDate, $endDate])->count();
+        $prevVoteScreenViews = (clone $viewsQuery)->whereIn('page_type', ['vote', 'vote_screen'])
+            ->whereBetween('created_at', [$prevStartDate, $prevEndDate])->count();
+        $voteScreenTrend = $this->calculatePercentageChange($voteScreenViews, $prevVoteScreenViews);
 
-        $conversionRate = $voteScreenViews > 0
-            ? round(($completedVotes / $voteScreenViews) * 100, 1)
-            : 0;
+        // 4. Votes Initiated (OTP Requested / Vote Clicked)
+        $voteInitiated = (clone $activityQuery)->action('vote_initiated')
+            ->whereBetween('created_at', [$startDate, $endDate])->count();
+        $prevVoteInitiated = (clone $activityQuery)->action('vote_initiated')
+            ->whereBetween('created_at', [$prevStartDate, $prevEndDate])->count();
+        $voteInitiatedTrend = $this->calculatePercentageChange($voteInitiated, $prevVoteInitiated);
+
+        // 5. Votes Verified (OTP Verified & Vote Cast Atomically)
+        $voteVerified = (clone $activityQuery)->action('vote_verified')
+            ->whereBetween('created_at', [$startDate, $endDate])->count();
+        $officialVotes = Vote::query()->when($this->eventId, fn ($q) => $q->where('event_id', $this->eventId))
+            ->whereBetween('created_at', [$startDate, $endDate])->count();
+        $effectiveVerified = max($voteVerified, $officialVotes);
+
+        $prevVoteVerified = (clone $activityQuery)->action('vote_verified')
+            ->whereBetween('created_at', [$prevStartDate, $prevEndDate])->count();
+        $prevOfficialVotes = Vote::query()->when($this->eventId, fn ($q) => $q->where('event_id', $this->eventId))
+            ->whereBetween('created_at', [$prevStartDate, $prevEndDate])->count();
+        $prevEffectiveVerified = max($prevVoteVerified, $prevOfficialVotes);
+        $voteVerifiedTrend = $this->calculatePercentageChange($effectiveVerified, $prevEffectiveVerified);
+
+        // 6. Vote Success Screen Views
+        $voteSuccessViews = (clone $viewsQuery)->where('page_type', 'vote_success')
+            ->whereBetween('created_at', [$startDate, $endDate])->count();
+        $prevVoteSuccessViews = (clone $viewsQuery)->where('page_type', 'vote_success')
+            ->whereBetween('created_at', [$prevStartDate, $prevEndDate])->count();
+        $voteSuccessTrend = $this->calculatePercentageChange($voteSuccessViews, $prevVoteSuccessViews);
 
         return [
-            Stat::make('Total Page Views', number_format($totalViews))
-                ->description($viewsTrend['text'].' vs prev period')
-                ->descriptionIcon($viewsTrend['icon'])
-                ->color($viewsTrend['color'])
-                ->chart($this->getDailyTrendData(PageView::class, $startDate, $endDate)),
+            Stat::make('Homepage Views', number_format($homepageViews))
+                ->description($homepageTrend['text'].' vs prev period')
+                ->descriptionIcon($homepageTrend['icon'])
+                ->color($homepageTrend['color'])
+                ->chart([3, 8, 14, 22, 35, max(1, $homepageViews)]),
 
-            Stat::make('Unique Visitors', number_format($visitors))
-                ->description($visitorsTrend['text'].' distinct audience')
-                ->descriptionIcon($visitorsTrend['icon'])
-                ->color($visitorsTrend['color'])
-                ->chart([3, 8, 14, 22, 35, max(1, $visitors)]),
+            Stat::make('All Puja Directory', number_format($allPujasViews))
+                ->description($allPujasTrend['text'].' vs prev period')
+                ->descriptionIcon($allPujasTrend['icon'])
+                ->color($allPujasTrend['color'])
+                ->chart([2, 6, 12, 18, 28, max(1, $allPujasViews)]),
 
-            Stat::make('Pandal Searches', number_format($searches))
-                ->description('Keywords searched in directory')
-                ->descriptionIcon('heroicon-m-magnifying-glass')
-                ->color('info')
-                ->chart([2, 5, 7, 10, 16, max(1, $searches)]),
+            Stat::make('Vote Screen', number_format($voteScreenViews))
+                ->description($voteScreenTrend['text'].' vs prev period')
+                ->descriptionIcon($voteScreenTrend['icon'])
+                ->color($voteScreenTrend['color'])
+                ->chart([1, 4, 9, 15, 24, max(1, $voteScreenViews)]),
 
-            Stat::make('Map Navigations', number_format($mapClicks))
-                ->description('"Get Directions" pandal clicks')
-                ->descriptionIcon('heroicon-m-map-pin')
-                ->color('warning')
-                ->chart([1, 4, 8, 12, 19, max(1, $mapClicks)]),
+            Stat::make('Votes Initiated', number_format($voteInitiated))
+                ->description($voteInitiatedTrend['text'].' OTPs requested')
+                ->descriptionIcon('heroicon-m-device-phone-mobile')
+                ->color('amber')
+                ->chart([1, 3, 7, 12, 20, max(1, $voteInitiated)]),
 
-            Stat::make('Vote Conversion', "{$conversionRate}%")
-                ->description("{$completedVotes} votes / {$voteScreenViews} vote screen visits")
-                ->descriptionIcon('heroicon-m-arrow-path-rounded-square')
-                ->color($conversionRate >= 20 ? 'success' : 'gray')
-                ->chart([5, 12, 20, 28, max(5, (int) $conversionRate)]),
+            Stat::make('Votes Verified', number_format($effectiveVerified))
+                ->description($voteVerifiedTrend['text'].' verified votes')
+                ->descriptionIcon('heroicon-m-check-badge')
+                ->color('success')
+                ->chart([1, 2, 5, 10, 18, max(1, $effectiveVerified)]),
+
+            Stat::make('Vote Success Views', number_format($voteSuccessViews))
+                ->description($voteSuccessTrend['text'].' success page loads')
+                ->descriptionIcon('heroicon-m-sparkles')
+                ->color('primary')
+                ->chart([1, 2, 5, 9, 16, max(1, $voteSuccessViews)]),
         ];
     }
 

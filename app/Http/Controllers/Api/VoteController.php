@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\Participant;
 use App\Models\Vote;
+use App\Services\AnalyticsService;
 use App\Services\Otp\OtpService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class VoteController extends Controller
 {
@@ -192,6 +194,27 @@ class VoteController extends Controller
                     'user_agent' => $request->userAgent(),
                 ]);
             });
+
+            // Track vote_verified in analytics
+            try {
+                $visitorId = $request->cookie('analytics_vid') ?? (string) Str::uuid();
+                app(AnalyticsService::class)->recordActivity(
+                    actionType: 'vote_verified',
+                    visitorId: $visitorId,
+                    sessionId: $request->hasSession() ? $request->session()->getId() : null,
+                    eventId: $event->id,
+                    targetType: 'participant',
+                    targetId: $participant->id,
+                    metadata: [
+                        'award_id' => $awardId,
+                        'vote_id' => $vote->id,
+                    ],
+                    url: $request->header('referer'),
+                    deviceType: app(AnalyticsService::class)->detectDeviceType($request->userAgent())
+                );
+            } catch (\Throwable) {
+                // Tracking failure must never interrupt voting confirmation
+            }
         } catch (\RuntimeException $e) {
             return response()->json([
                 'success' => false,

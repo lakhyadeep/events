@@ -17,7 +17,7 @@ class AnalyticsService
     {
         $userAgent = $request->userAgent() ?? '';
 
-        if ($request->user() !== null || $this->isBot($userAgent) || $this->shouldIgnorePath($request->path())) {
+        if ($this->isBot($userAgent) || $this->shouldIgnorePath($request->path())) {
             return null;
         }
 
@@ -33,7 +33,7 @@ class AnalyticsService
         return PageView::create([
             'event_id' => $event?->id,
             'visitor_id' => $visitorId,
-            'session_id' => $sessionId ?? $request->session()->getId(),
+            'session_id' => $sessionId ?? ($request->hasSession() ? $request->session()->getId() : null),
             'page_type' => $pageType,
             'url' => Str::limit($request->fullUrl(), 500, ''),
             'route_name' => $request->route()?->getName(),
@@ -95,7 +95,7 @@ class AnalyticsService
         ];
 
         foreach ($ignoredPrefixes as $prefix) {
-            if ($normalized === $prefix || str_starts_with($normalized, $prefix.'/')) {
+            if ($normalized === $prefix || str_starts_with($normalized, $prefix.'/') || str_starts_with($normalized, $prefix.'-')) {
                 return true;
             }
         }
@@ -158,14 +158,34 @@ class AnalyticsService
     {
         $routeName = $request->route()?->getName();
 
-        return match ($routeName) {
-            'home', 'welcome' => 'home',
-            'events.show' => 'landing',
-            'events.all-pujas', 'all-pujas.redirect' => 'all_pujas',
-            'events.vote' => 'vote_screen',
-            'events.vote-success' => 'vote_success',
-            default => 'other',
-        };
+        if ($routeName) {
+            return match ($routeName) {
+                'home', 'welcome', 'events.show' => 'homepage',
+                'events.all-pujas', 'all-pujas.redirect' => 'all_puja',
+                'events.vote' => 'vote',
+                'events.vote-success' => 'vote_success',
+                default => 'other',
+            };
+        }
+
+        $path = trim($request->path(), '/');
+        if (empty($path)) {
+            return 'homepage';
+        }
+
+        if (str_contains($path, 'vote-success')) {
+            return 'vote_success';
+        }
+
+        if (str_contains($path, 'vote')) {
+            return 'vote';
+        }
+
+        if (str_contains($path, 'all-pujas')) {
+            return 'all_puja';
+        }
+
+        return 'homepage';
     }
 
     /**

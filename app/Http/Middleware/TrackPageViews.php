@@ -75,8 +75,8 @@ class TrackPageViews
             return;
         }
 
-        // Only track successful or redirect responses, not server errors or 404s
-        if ($response->getStatusCode() >= 400) {
+        // Only track successful GET document visits (200 OK), ignoring redirects, non-GET, AJAX, and Livewire internal requests
+        if (! $request->isMethod('GET') || $request->ajax() || $request->hasHeader('X-Livewire') || $response->getStatusCode() !== 200) {
             return;
         }
 

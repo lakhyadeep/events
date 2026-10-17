@@ -27,5 +27,5 @@ Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
     Route::get('/events/{slug}/winners', [EventApiController::class, 'winners']);
 
     // Analytics Behavioral Event Ingestion
-    Route::post('/analytics/event', [AnalyticsApiController::class, 'recordEvent'])->middleware('throttle:120,1');
+    Route::match(['post', 'options'], '/analytics/event', [AnalyticsApiController::class, 'recordEvent'])->withoutMiddleware('throttle:60,1');
 });

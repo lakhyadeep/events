@@ -20,13 +20,13 @@ class AnalyticsQuickStatsWidget extends StatsOverviewWidget
             $todayStart = today()->startOfDay();
             $viewsToday = PageView::where('created_at', '>=', $todayStart)->count();
             $visitorsToday = PageView::where('created_at', '>=', $todayStart)->distinct('visitor_id')->count('visitor_id');
-            $mapClicksToday = UserActivity::where('action_type', 'map_directions_click')->where('created_at', '>=', $todayStart)->count();
+            $votesToday = UserActivity::where('action_type', 'vote_verified')->where('created_at', '>=', $todayStart)->count();
             $searchesToday = UserActivity::where('action_type', 'search')->where('created_at', '>=', $todayStart)->count();
 
             return [
                 'viewsToday' => $viewsToday,
                 'visitorsToday' => $visitorsToday,
-                'mapClicksToday' => $mapClicksToday,
+                'votesToday' => $votesToday,
                 'searchesToday' => $searchesToday,
             ];
         });
@@ -48,12 +48,12 @@ class AnalyticsQuickStatsWidget extends StatsOverviewWidget
                 ->url($analyticsUrl)
                 ->chart([3, 8, 14, 20, 28, max(1, $data['visitorsToday'])]),
 
-            Stat::make('Directory Interactions', number_format($data['searchesToday'] + $data['mapClicksToday']))
-                ->description("{$data['mapClicksToday']} map clicks, {$data['searchesToday']} searches today")
-                ->descriptionIcon('heroicon-m-cursor-arrow-rays')
+            Stat::make('Today\'s Verified Votes', number_format($data['votesToday']))
+                ->description("{$data['votesToday']} votes verified today")
+                ->descriptionIcon('heroicon-m-check-badge')
                 ->color('success')
                 ->url($analyticsUrl)
-                ->chart([1, 4, 7, 12, 18, max(1, $data['searchesToday'] + $data['mapClicksToday'])]),
+                ->chart([1, 4, 7, 12, 18, max(1, $data['votesToday'])]),
         ];
     }
 }

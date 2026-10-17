@@ -30,12 +30,6 @@ class VotingStatsOverview extends StatsOverviewWidget
         });
 
         return [
-            Stat::make('Total Verified Votes', number_format($data['totalVotes']))
-                ->description('OTP-verified vote entries')
-                ->descriptionIcon('heroicon-m-check-badge')
-                ->color('danger')
-                ->chart([5, 12, 19, 28, 45, max(1, $data['totalVotes'])]),
-
             Stat::make('Unique Voters', number_format($data['uniqueVoters']))
                 ->description('Distinct verified mobile numbers')
                 ->descriptionIcon('heroicon-m-device-phone-mobile')

@@ -5,7 +5,7 @@ namespace App\Filament\Pages;
 use App\Filament\Widgets\AnalyticsDeviceChart;
 use App\Filament\Widgets\AnalyticsStatsOverview;
 use App\Filament\Widgets\AnalyticsTrafficChart;
-use App\Filament\Widgets\RecentActivityTableWidget;
+use App\Filament\Widgets\PageWiseFunnelWidget;
 use App\Filament\Widgets\TopPujasTableWidget;
 use App\Models\Event;
 use BackedEnum;
@@ -46,7 +46,7 @@ class Analytics extends Page
 
     public function getSubheading(): string|Htmlable|null
     {
-        return 'Real-time telemetry, visitor demographics, search keywords, map directions, and voting conversion funnel.';
+        return 'Real-time page-wise telemetry, visitor demographics, search keywords, and full voting conversion funnel.';
     }
 
     public function getMaxContentWidth(): Width|string|null
@@ -79,8 +79,8 @@ class Analytics extends Page
     protected function getFooterWidgets(): array
     {
         return [
+            PageWiseFunnelWidget::class,
             TopPujasTableWidget::class,
-            RecentActivityTableWidget::class,
         ];
     }
 
