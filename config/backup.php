@@ -27,13 +27,15 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Daily Scheduler Time & Process Mode
+    | Daily Scheduler Time, Frequency & Process Mode
     |--------------------------------------------------------------------------
     |
-    | Time of day (24-hour format) when the automated background backup runs.
+    | Frequency can be: daily, every_5_minutes, every_15_minutes, hourly, etc.
+    | Time of day (24-hour format) when daily automated backups run.
     | On shared hosts, run_in_background is disabled by default for reliability.
     |
     */
+    'frequency' => env('BACKUP_FREQUENCY', 'daily'),
     'schedule_time' => env('BACKUP_SCHEDULE_TIME', '02:00'),
     'run_in_background' => (bool) env('BACKUP_RUN_IN_BACKGROUND', false),
 ];

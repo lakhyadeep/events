@@ -20,9 +20,22 @@ Artisan::command('inspire', function () {
 |
 */
 $backupTime = DatabaseBackupService::getScheduleTime();
+$backupFrequency = DatabaseBackupService::getScheduleFrequency();
+
 $backupSchedule = Schedule::command('db:backup')
-    ->dailyAt($backupTime)
     ->withoutOverlapping(60);
+
+match ($backupFrequency) {
+    'every_5_minutes' => $backupSchedule->everyFiveMinutes(),
+    'every_10_minutes' => $backupSchedule->everyTenMinutes(),
+    'every_15_minutes' => $backupSchedule->everyFifteenMinutes(),
+    'every_30_minutes' => $backupSchedule->everyThirtyMinutes(),
+    'hourly' => $backupSchedule->hourly(),
+    'every_6_hours' => $backupSchedule->everySixHours(),
+    'twice_daily' => $backupSchedule->twiceDaily(2, 14),
+    'weekly' => $backupSchedule->weeklyOn(0, $backupTime),
+    default => $backupSchedule->dailyAt($backupTime),
+};
 
 if ((bool) config('backup.run_in_background', false) && function_exists('proc_open')) {
     $backupSchedule->runInBackground();

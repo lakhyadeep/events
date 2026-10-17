@@ -170,6 +170,14 @@ class DatabaseBackupService
     }
 
     /**
+     * Get the configured backup frequency (daily, every_5_minutes, hourly, etc.).
+     */
+    public static function getScheduleFrequency(): string
+    {
+        return (string) Cache::get('backup_schedule_frequency', config('backup.frequency', 'daily'));
+    }
+
+    /**
      * Get the configured daily schedule time (24-hour format HH:MM).
      */
     public static function getScheduleTime(): string
@@ -196,9 +204,10 @@ class DatabaseBackupService
     /**
      * Save dynamic backup settings.
      */
-    public static function updateSettings(string $scheduleTime, int $retentionDays, int $keepMinimum): void
+    public static function updateSettings(string $scheduleTime, int $retentionDays, int $keepMinimum, string $frequency = 'daily'): void
     {
         Cache::forever('backup_schedule_time', $scheduleTime);
+        Cache::forever('backup_schedule_frequency', $frequency);
         Cache::forever('backup_retention_days', max(1, $retentionDays));
         Cache::forever('backup_keep_minimum', max(1, $keepMinimum));
     }

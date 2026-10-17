@@ -11,6 +11,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ManageRecords;
+use Filament\Schemas\Components\Utilities\Get;
 use Illuminate\Contracts\Support\Htmlable;
 use Throwable;
 
@@ -20,10 +21,23 @@ class ManageDatabaseBackups extends ManageRecords
 
     public function getSubheading(): string|Htmlable|null
     {
+        $frequency = DatabaseBackupService::getScheduleFrequency();
         $time = DatabaseBackupService::getScheduleTime();
         $retention = DatabaseBackupService::getRetentionDays();
 
-        return "Automated daily background backups run at {$time} (24-hour time). Snapshots are stored securely in storage/app/private/backups and retained for {$retention} days.";
+        $freqLabel = match ($frequency) {
+            'every_5_minutes' => 'Every 5 Minutes',
+            'every_10_minutes' => 'Every 10 Minutes',
+            'every_15_minutes' => 'Every 15 Minutes',
+            'every_30_minutes' => 'Every 30 Minutes',
+            'hourly' => 'Hourly',
+            'every_6_hours' => 'Every 6 Hours',
+            'twice_daily' => 'Twice Daily (02:00 & 14:00)',
+            'weekly' => "Weekly (Sunday at {$time})",
+            default => "Daily at {$time} (24h time)",
+        };
+
+        return "Automated backups frequency: {$freqLabel}. Snapshots are stored securely in storage/app/private/backups and retained for {$retention} days.";
     }
 
     protected function getHeaderActions(): array
@@ -90,19 +104,37 @@ class ManageDatabaseBackups extends ManageRecords
                 ->icon('heroicon-o-clock')
                 ->color('secondary')
                 ->modalHeading('Configure Backup Schedule & Retention')
-                ->modalDescription('Customize the daily execution time and retention policy for automated backups. These settings apply immediately to your scheduled cron tasks.')
+                ->modalDescription('Customize how frequently automated backups execute and how long they are retained. Changes apply immediately to your cron tasks.')
                 ->fillForm(fn () => [
+                    'frequency' => DatabaseBackupService::getScheduleFrequency(),
                     'schedule_time' => DatabaseBackupService::getScheduleTime(),
                     'retention_days' => DatabaseBackupService::getRetentionDays(),
                     'keep_minimum' => DatabaseBackupService::getKeepMinimum(),
                 ])
                 ->form([
+                    Select::make('frequency')
+                        ->label('Backup Frequency')
+                        ->options([
+                            'every_5_minutes' => 'Every 5 Minutes (Frequent Backup / Active Testing)',
+                            'every_15_minutes' => 'Every 15 Minutes',
+                            'every_30_minutes' => 'Every 30 Minutes',
+                            'hourly' => 'Hourly',
+                            'every_6_hours' => 'Every 6 Hours',
+                            'twice_daily' => 'Twice Daily (02:00 & 14:00)',
+                            'daily' => 'Daily (at specified time)',
+                            'weekly' => 'Weekly (Sundays)',
+                        ])
+                        ->default('daily')
+                        ->required()
+                        ->live(),
+
                     TextInput::make('schedule_time')
-                        ->label('Daily Backup Time (24h format HH:MM)')
+                        ->label('Daily / Weekly Execution Time (24h format HH:MM)')
                         ->placeholder('e.g. 02:00 or 03:30')
                         ->required()
+                        ->visible(fn (Get $get): bool => in_array($get('frequency') ?? 'daily', ['daily', 'weekly']))
                         ->regex('/^(?:[01]\d|2[0-3]):[0-5]\d$/')
-                        ->helperText('Specify the 24-hour time (HH:MM) when your daily backup should execute.'),
+                        ->helperText('Specify the 24-hour time (HH:MM) when daily or weekly backups run.'),
 
                     TextInput::make('retention_days')
                         ->label('Retention Period (Days)')
@@ -122,14 +154,15 @@ class ManageDatabaseBackups extends ManageRecords
                 ])
                 ->action(function (array $data): void {
                     DatabaseBackupService::updateSettings(
-                        scheduleTime: $data['schedule_time'],
+                        scheduleTime: $data['schedule_time'] ?? DatabaseBackupService::getScheduleTime(),
                         retentionDays: (int) $data['retention_days'],
                         keepMinimum: (int) $data['keep_minimum'],
+                        frequency: $data['frequency'] ?? 'daily',
                     );
 
                     Notification::make()
-                        ->title('Backup Settings Saved')
-                        ->body("Daily backup set to {$data['schedule_time']}. Retention: {$data['retention_days']} days.")
+                        ->title('Backup Schedule Settings Saved')
+                        ->body("Automated backup set to: {$data['frequency']}. Retention: {$data['retention_days']} days.")
                         ->success()
                         ->send();
                 }),
