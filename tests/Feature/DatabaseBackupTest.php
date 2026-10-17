@@ -210,9 +210,10 @@ class DatabaseBackupTest extends TestCase
 
     public function test_dynamic_backup_settings_can_be_configured_and_retrieved(): void
     {
-        DatabaseBackupService::updateSettings('04:45', 30, 5);
+        DatabaseBackupService::updateSettings('04:45', 30, 5, 'every_5_minutes');
 
         $this->assertEquals('04:45', DatabaseBackupService::getScheduleTime());
+        $this->assertEquals('every_5_minutes', DatabaseBackupService::getScheduleFrequency());
         $this->assertEquals(30, DatabaseBackupService::getRetentionDays());
         $this->assertEquals(5, DatabaseBackupService::getKeepMinimum());
     }
@@ -224,6 +225,7 @@ class DatabaseBackupTest extends TestCase
         Livewire::actingAs($user)
             ->test(ManageDatabaseBackups::class)
             ->callAction('configure_schedule', [
+                'frequency' => 'daily',
                 'schedule_time' => '03:15',
                 'retention_days' => 21,
                 'keep_minimum' => 4,
@@ -231,6 +233,7 @@ class DatabaseBackupTest extends TestCase
             ->assertNotified()
             ->assertHasNoActionErrors();
 
+        $this->assertEquals('daily', DatabaseBackupService::getScheduleFrequency());
         $this->assertEquals('03:15', DatabaseBackupService::getScheduleTime());
         $this->assertEquals(21, DatabaseBackupService::getRetentionDays());
         $this->assertEquals(4, DatabaseBackupService::getKeepMinimum());
