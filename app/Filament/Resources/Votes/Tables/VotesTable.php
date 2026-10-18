@@ -9,9 +9,11 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ViewAction;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -183,8 +185,42 @@ class VotesTable
 
                         return $query;
                     }),
+
+                Filter::make('same_ip_count')
+                    ->label('Same IP Count (> N)')
+                    ->form([
+                        TextInput::make('min_count')
+                            ->label('Same IP Count > N')
+                            ->numeric()
+                            ->minValue(1)
+                            ->placeholder('e.g. 2, 5, 10...')
+                            ->helperText('Filter votes where IP has more than N votes'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        $min = (int) ($data['min_count'] ?? 0);
+                        if ($min <= 0) {
+                            return $query;
+                        }
+
+                        return $query->whereIn('ip_address', function ($sub) use ($min): void {
+                            $sub->select('ip_address')
+                                ->from('votes')
+                                ->whereNotNull('ip_address')
+                                ->where('ip_address', '!=', '')
+                                ->groupBy('ip_address')
+                                ->havingRaw('COUNT(*) > '.(int) $min);
+                        });
+                    })
+                    ->indicateUsing(function (array $data): ?string {
+                        $min = (int) ($data['min_count'] ?? 0);
+                        if ($min <= 0) {
+                            return null;
+                        }
+
+                        return "Same IP Count > {$min}";
+                    }),
             ], layout: FiltersLayout::AboveContent)
-            ->filtersFormColumns(5)
+            ->filtersFormColumns(['default' => 1, 'sm' => 2, 'md' => 3, 'xl' => 6])
             ->recordUrl(fn (Vote $record): string => VoteResource::getUrl('view', ['record' => $record]))
             ->recordActions([
                 ViewAction::make(),

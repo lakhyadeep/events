@@ -628,4 +628,48 @@ class AdminManagementTest extends TestCase
         $this->assertDatabaseMissing('votes', ['id' => $vote2->id]);
         $this->assertDatabaseHas('votes', ['id' => $vote1->id]);
     }
+
+    public function test_admin_can_filter_votes_by_same_ip_count_greater_than_n(): void
+    {
+        $admin = User::where('email', 'admin@dib24x7.com')->first() ?? User::factory()->admin()->create();
+
+        $event = Event::first() ?? Event::factory()->create();
+        $participant = Participant::factory()->create(['event_id' => $event->id]);
+
+        $clusterVote1 = Vote::create([
+            'event_id' => $event->id,
+            'participant_id' => $participant->id,
+            'voter_name' => 'Cluster Voter 1',
+            'mobile_number' => '9876541111',
+            'ip_address' => '10.99.1.1',
+        ]);
+        $clusterVote2 = Vote::create([
+            'event_id' => $event->id,
+            'participant_id' => $participant->id,
+            'voter_name' => 'Cluster Voter 2',
+            'mobile_number' => '9876541112',
+            'ip_address' => '10.99.1.1',
+        ]);
+        $clusterVote3 = Vote::create([
+            'event_id' => $event->id,
+            'participant_id' => $participant->id,
+            'voter_name' => 'Cluster Voter 3',
+            'mobile_number' => '9876541113',
+            'ip_address' => '10.99.1.1',
+        ]);
+
+        $singleVote = Vote::create([
+            'event_id' => $event->id,
+            'participant_id' => $participant->id,
+            'voter_name' => 'Single Voter',
+            'mobile_number' => '9876541114',
+            'ip_address' => '10.99.1.2',
+        ]);
+
+        Livewire::actingAs($admin)
+            ->test(ListVotes::class)
+            ->filterTable('same_ip_count', ['min_count' => 2])
+            ->assertCanSeeTableRecords([$clusterVote1, $clusterVote2, $clusterVote3])
+            ->assertCanNotSeeTableRecords([$singleVote]);
+    }
 }
