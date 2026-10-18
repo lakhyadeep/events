@@ -81,7 +81,8 @@ class DatabaseBackupResource extends Resource
 
                 TextColumn::make('created_at')
                     ->label('Created')
-                    ->dateTime('M d, Y H:i:s')
+                    ->timezone('Asia/Kolkata')
+                    ->dateTime('M d, Y h:i:s A')
                     ->description(fn (DatabaseBackup $record): ?string => $record->created_at?->diffForHumans())
                     ->sortable(),
 

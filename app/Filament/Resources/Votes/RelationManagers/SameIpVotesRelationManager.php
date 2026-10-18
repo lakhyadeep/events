@@ -78,9 +78,17 @@ class SameIpVotesRelationManager extends RelationManager
                     ->copyMessage('Mobile number copied to clipboard'),
 
                 TextColumn::make('participant.display_name')
-                    ->label('Voted For (Puja)')
+                    ->label('Voted For')
                     ->weight('semibold')
                     ->color('primary')
+                    ->limit(20)
+                    ->tooltip(function (TextColumn $column): ?string {
+                        $state = $column->getState();
+
+                        return is_string($state) && mb_strlen($state) > 20 ? $state : null;
+                    })
+                    ->wrap()
+                    ->grow(false)
                     ->sortable(),
 
                 TextColumn::make('award.display_name')
