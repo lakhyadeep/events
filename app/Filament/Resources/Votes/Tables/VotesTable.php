@@ -34,7 +34,7 @@ class VotesTable
                     ->formatStateUsing(function (string $state): string {
                         $digits = preg_replace('/[^0-9]/', '', $state) ?? '';
                         if (strlen($digits) >= 10) {
-                            return '+91 '.substr($digits, 0, 5).'*****';
+                            return '+91 ' . substr($digits, 0, 5) . '*****';
                         }
 
                         return $state;
@@ -42,7 +42,7 @@ class VotesTable
                     ->searchable()
                     ->sortable()
                     ->copyable()
-                    ->copyableState(fn ($record) => '+91 '.$record->mobile_number)
+                    ->copyableState(fn($record) => '+91 ' . $record->mobile_number)
                     ->copyMessage('Mobile number copied to clipboard')
                     ->description(function (Vote $record): string {
                         $ip = $record->ip_address ?? 'Unknown';
@@ -53,11 +53,12 @@ class VotesTable
 
                 TextColumn::make('fraud_flag')
                     ->label('Integrity Status')
-                    ->state(fn (Vote $record): string => $record->fraud_assessment['label'])
+                    ->state(fn(Vote $record): string => $record->fraud_assessment['label'])
                     ->badge()
-                    ->color(fn (Vote $record): string => $record->fraud_assessment['color'])
-                    ->icon(fn (Vote $record): string => $record->fraud_assessment['is_fraud'] ? 'heroicon-o-shield-exclamation' : 'heroicon-o-shield-check')
-                    ->description(fn (Vote $record): string => $record->fraud_assessment['reason']),
+                    ->color(fn(Vote $record): string => $record->fraud_assessment['color'])
+                    ->icon(fn(Vote $record): string => $record->fraud_assessment['is_fraud'] ? 'heroicon-o-shield-exclamation' : 'heroicon-o-shield-check')
+                    ->description(fn(Vote $record): string => $record->fraud_assessment['reason'])
+                    ->toggleable(),
 
                 TextColumn::make('participant.display_name')
                     ->label('Voted For (Puja / Candidate)')
@@ -65,7 +66,8 @@ class VotesTable
                     ->sortable()
                     ->weight('bold')
                     ->badge()
-                    ->color('danger'),
+                    ->color('danger')
+                    ->toggleable(),
 
                 TextColumn::make('award.display_name')
                     ->label('Award Category')
@@ -94,7 +96,8 @@ class VotesTable
                     ->label('Cast At')
                     ->dateTime('d M Y, h:i A')
                     ->timezone('Asia/Kolkata')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(),
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
@@ -131,7 +134,7 @@ class VotesTable
                             return $query->where(function (Builder $sub) use ($allBlocked) {
                                 $sub->whereRaw('LENGTH(mobile_number) != 10')
                                     ->orWhereRaw("SUBSTR(mobile_number, 1, 1) NOT IN ('6', '7', '8', '9')")
-                                    ->when(! empty($allBlocked), fn ($q) => $q->orWhereIn('mobile_number', $allBlocked));
+                                    ->when(!empty($allBlocked), fn($q) => $q->orWhereIn('mobile_number', $allBlocked));
                             });
                         }
 
@@ -142,7 +145,7 @@ class VotesTable
 
                             return $query->whereRaw('LENGTH(mobile_number) = 10')
                                 ->whereRaw("SUBSTR(mobile_number, 1, 1) IN ('6', '7', '8', '9')")
-                                ->when(! empty($allBlocked), fn ($q) => $q->whereNotIn('mobile_number', $allBlocked));
+                                ->when(!empty($allBlocked), fn($q) => $q->whereNotIn('mobile_number', $allBlocked));
                         }
 
                         return $query;
@@ -189,8 +192,8 @@ class VotesTable
                     ->icon('heroicon-o-globe-alt')
                     ->color('warning')
                     ->tooltip('View all votes submitted from this IP address')
-                    ->visible(fn (Vote $record): bool => ! empty($record->ip_address) && $record->same_ip_votes_count > 1)
-                    ->url(fn (Vote $record): string => ListVotes::getUrl(['tableSearch' => $record->ip_address])),
+                    ->visible(fn(Vote $record): bool => !empty($record->ip_address) && $record->same_ip_votes_count > 1)
+                    ->url(fn(Vote $record): string => ListVotes::getUrl(['tableSearch' => $record->ip_address])),
                 Action::make('blacklist')
                     ->label('Blacklist Number')
                     ->icon('heroicon-o-no-symbol')
@@ -200,7 +203,7 @@ class VotesTable
                     ->modalDescription('Block this number from ever receiving OTPs or submitting votes in the future.')
                     ->action(function (Vote $record): void {
                         $cached = (array) Cache::get('fraud_disposable_blacklist', []);
-                        if (! in_array($record->mobile_number, $cached, true)) {
+                        if (!in_array($record->mobile_number, $cached, true)) {
                             $cached[] = $record->mobile_number;
                             Cache::put('fraud_disposable_blacklist', $cached, now()->addYears(1));
                         }
