@@ -4,13 +4,16 @@ namespace App\Filament\Resources\Votes\Tables;
 
 use App\Filament\Resources\Votes\VoteResource;
 use App\Models\Vote;
+use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ViewAction;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Fieldset;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
@@ -121,36 +124,72 @@ class VotesTable
                     ->searchable()
                     ->preload(),
 
-                SelectFilter::make('fraud_status')
-                    ->label('Integrity Status')
+                SelectFilter::make('time_window')
+                    ->label('Quick Interval Presets')
+                    ->placeholder('All Time')
                     ->options([
-                        'flagged' => 'Flagged as Fraud / Suspicious',
-                        'genuine' => 'Verified Genuine Only',
+                        '15_mins' => 'Last 15 Minutes',
+                        '30_mins' => 'Last 30 Minutes',
+                        '1_hour' => 'Last 1 Hour (Hourly)',
+                        '3_hours' => 'Last 3 Hours',
+                        '6_hours' => 'Last 6 Hours',
+                        '12_hours' => 'Last 12 Hours',
+                        'today' => 'Today',
+                        'yesterday' => 'Yesterday',
                     ])
                     ->query(function (Builder $query, array $data): Builder {
-                        if (($data['value'] ?? null) === 'flagged') {
-                            $disposable = config('fraud.disposable_numbers', []);
-                            $cached = (array) Cache::get('fraud_disposable_blacklist', []);
-                            $allBlocked = array_values(array_unique(array_merge($disposable, $cached)));
+                        return match ($data['value'] ?? null) {
+                            '15_mins' => $query->where('created_at', '>=', now()->subMinutes(15)),
+                            '30_mins' => $query->where('created_at', '>=', now()->subMinutes(30)),
+                            '1_hour' => $query->where('created_at', '>=', now()->subHour()),
+                            '3_hours' => $query->where('created_at', '>=', now()->subHours(3)),
+                            '6_hours' => $query->where('created_at', '>=', now()->subHours(6)),
+                            '12_hours' => $query->where('created_at', '>=', now()->subHours(12)),
+                            'today' => $query->where('created_at', '>=', today()->startOfDay()),
+                            'yesterday' => $query->whereBetween('created_at', [
+                                today()->subDay()->startOfDay(),
+                                today()->subDay()->endOfDay(),
+                            ]),
+                            default => $query,
+                        };
+                    }),
 
-                            return $query->where(function (Builder $sub) use ($allBlocked) {
-                                $sub->whereRaw('LENGTH(mobile_number) != 10')
-                                    ->orWhereRaw("SUBSTR(mobile_number, 1, 1) NOT IN ('6', '7', '8', '9')")
-                                    ->when(! empty($allBlocked), fn ($q) => $q->orWhereIn('mobile_number', $allBlocked));
-                            });
+                Filter::make('date_time_range')
+                    ->label('Custom Date & Time Range')
+                    ->form([
+                        DateTimePicker::make('from')
+                            ->label('From Date & Time')
+                            ->seconds(false)
+                            ->timezone('Asia/Kolkata')
+                            ->placeholder('Start date & time'),
+                        DateTimePicker::make('until')
+                            ->label('Until Date & Time')
+                            ->seconds(false)
+                            ->timezone('Asia/Kolkata')
+                            ->placeholder('End date & time'),
+                    ])
+                    ->columns(['default' => 1, 'sm' => 2])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['from'] ?? null,
+                                fn (Builder $q, $date) => $q->where('created_at', '>=', Carbon::parse($date)),
+                            )
+                            ->when(
+                                $data['until'] ?? null,
+                                fn (Builder $q, $date) => $q->where('created_at', '<=', Carbon::parse($date)),
+                            );
+                    })
+                    ->indicateUsing(function (array $data): array {
+                        $indicators = [];
+                        if (! empty($data['from'])) {
+                            $indicators['from'] = 'From '.Carbon::parse($data['from'])->timezone('Asia/Kolkata')->format('d M, h:i A');
+                        }
+                        if (! empty($data['until'])) {
+                            $indicators['until'] = 'Until '.Carbon::parse($data['until'])->timezone('Asia/Kolkata')->format('d M, h:i A');
                         }
 
-                        if (($data['value'] ?? null) === 'genuine') {
-                            $disposable = config('fraud.disposable_numbers', []);
-                            $cached = (array) Cache::get('fraud_disposable_blacklist', []);
-                            $allBlocked = array_values(array_unique(array_merge($disposable, $cached)));
-
-                            return $query->whereRaw('LENGTH(mobile_number) = 10')
-                                ->whereRaw("SUBSTR(mobile_number, 1, 1) IN ('6', '7', '8', '9')")
-                                ->when(! empty($allBlocked), fn ($q) => $q->whereNotIn('mobile_number', $allBlocked));
-                        }
-
-                        return $query;
+                        return $indicators;
                     }),
 
                 SelectFilter::make('same_ip')
@@ -220,7 +259,35 @@ class VotesTable
                         return "Same IP Count > {$min}";
                     }),
             ], layout: FiltersLayout::AboveContent)
-            ->filtersFormColumns(['default' => 1, 'sm' => 2, 'md' => 3, 'xl' => 6])
+            ->filtersFormColumns(12)
+            ->filtersFormSchema(fn (array $filters): array => [
+                Fieldset::make('Contest Scope')
+                    ->schema([
+                        $filters['event_id'],
+                        $filters['award_id'],
+                        $filters['participant_id'],
+                    ])
+                    ->columns(['default' => 1, 'sm' => 3])
+                    ->columnSpan(['default' => 12, 'xl' => 7]),
+
+                Fieldset::make('IP Forensics & Traffic')
+                    ->schema([
+                        $filters['same_ip'],
+                        $filters['same_ip_count'],
+                    ])
+                    ->columns(['default' => 1, 'sm' => 2])
+                    ->columnSpan(['default' => 12, 'xl' => 5]),
+
+                Fieldset::make('Date & Time Window')
+                    ->schema([
+                        $filters['time_window']
+                            ->columnSpan(['default' => 1, 'lg' => 1]),
+                        $filters['date_time_range']
+                            ->columnSpan(['default' => 1, 'lg' => 2]),
+                    ])
+                    ->columns(['default' => 1, 'lg' => 3])
+                    ->columnSpan(12),
+            ])
             ->recordUrl(fn (Vote $record): string => VoteResource::getUrl('view', ['record' => $record]))
             ->recordActions([
                 ViewAction::make(),

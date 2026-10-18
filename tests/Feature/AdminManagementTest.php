@@ -672,4 +672,63 @@ class AdminManagementTest extends TestCase
             ->assertCanSeeTableRecords([$clusterVote1, $clusterVote2, $clusterVote3])
             ->assertCanNotSeeTableRecords([$singleVote]);
     }
+
+    public function test_admin_can_filter_votes_by_time_window_and_date_time_range(): void
+    {
+        $admin = User::where('email', 'admin@dib24x7.com')->first() ?? User::factory()->admin()->create();
+
+        $event = Event::first() ?? Event::factory()->create();
+        $participant = Participant::factory()->create(['event_id' => $event->id]);
+
+        $recentVote = Vote::create([
+            'event_id' => $event->id,
+            'participant_id' => $participant->id,
+            'voter_name' => 'Recent 10m Voter',
+            'mobile_number' => '9876540001',
+            'ip_address' => '10.0.0.1',
+        ]);
+        $recentVote->forceFill(['created_at' => now()->subMinutes(10)])->save();
+
+        $hourlyVote = Vote::create([
+            'event_id' => $event->id,
+            'participant_id' => $participant->id,
+            'voter_name' => 'Hourly 45m Voter',
+            'mobile_number' => '9876540002',
+            'ip_address' => '10.0.0.2',
+        ]);
+        $hourlyVote->forceFill(['created_at' => now()->subMinutes(45)])->save();
+
+        $olderVote = Vote::create([
+            'event_id' => $event->id,
+            'participant_id' => $participant->id,
+            'voter_name' => 'Older 5h Voter',
+            'mobile_number' => '9876540003',
+            'ip_address' => '10.0.0.3',
+        ]);
+        $olderVote->forceFill(['created_at' => now()->subHours(5)])->save();
+
+        // 15 minutes filter
+        Livewire::actingAs($admin)
+            ->test(ListVotes::class)
+            ->filterTable('time_window', '15_mins')
+            ->assertCanSeeTableRecords([$recentVote])
+            ->assertCanNotSeeTableRecords([$hourlyVote, $olderVote]);
+
+        // 1 hour (hourly) filter
+        Livewire::actingAs($admin)
+            ->test(ListVotes::class)
+            ->filterTable('time_window', '1_hour')
+            ->assertCanSeeTableRecords([$recentVote, $hourlyVote])
+            ->assertCanNotSeeTableRecords([$olderVote]);
+
+        // Date time range filter
+        Livewire::actingAs($admin)
+            ->test(ListVotes::class)
+            ->filterTable('date_time_range', [
+                'from' => now()->subMinutes(50)->toDateTimeString(),
+                'until' => now()->subMinutes(20)->toDateTimeString(),
+            ])
+            ->assertCanSeeTableRecords([$hourlyVote])
+            ->assertCanNotSeeTableRecords([$recentVote, $olderVote]);
+    }
 }
