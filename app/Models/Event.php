@@ -6,6 +6,7 @@ use App\Enums\BannerCategory;
 use App\Enums\EventStatus;
 use App\Enums\VotingMode;
 use App\Models\Concerns\ResolvesMediaUrl;
+use App\Services\Fraud\FraudPreventionService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -164,14 +165,15 @@ class Event extends Model
             ];
         }
 
-        $clean = preg_replace('/[^0-9]/', '', $mobile) ?? '';
-        if (strlen($clean) > 10) {
-            $clean = substr($clean, -10);
+        $fraudCheck = app(FraudPreventionService::class)->validateMobileNumber($mobile);
+        if (! $fraudCheck['valid']) {
+            return [
+                'allowed' => false,
+                'message' => $fraudCheck['message'] ?? 'Please provide a valid 10-digit Indian mobile number.',
+            ];
         }
 
-        if (strlen($clean) !== 10) {
-            return ['allowed' => false, 'message' => 'Please provide a valid 10-digit mobile number.'];
-        }
+        $clean = $fraudCheck['phone'];
 
         // Mode 1: Participant Mode (Default)
         // One phone number can vote only one participant and one award category in the entire event.

@@ -7,6 +7,7 @@ use App\Models\Event;
 use App\Models\Participant;
 use App\Models\Vote;
 use App\Services\AnalyticsService;
+use App\Services\Fraud\FraudPreventionService;
 use App\Services\Otp\OtpService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -16,8 +17,11 @@ use Illuminate\Support\Str;
 class VoteController extends Controller
 {
     public function __construct(
-        protected OtpService $otpService
-    ) {}
+        protected OtpService $otpService,
+        protected ?FraudPreventionService $fraudPreventionService = null
+    ) {
+        $this->fraudPreventionService ??= app(FraudPreventionService::class);
+    }
 
     /**
      * Check if a mobile number is eligible to vote before requesting OTP.
@@ -52,6 +56,29 @@ class VoteController extends Controller
             ], 422);
         }
 
+        $fraudCheck = $this->fraudPreventionService->validateMobileNumber($validated['phone']);
+        if (! $fraudCheck['valid']) {
+            return response()->json([
+                'success' => false,
+                'allowed' => false,
+                'message' => $fraudCheck['message'] ?? 'Please provide a valid 10-digit Indian mobile number.',
+            ], 422);
+        }
+        $cleanPhone = $fraudCheck['phone'];
+
+        $visitorId = $request->header('X-Visitor-Id')
+            ?? $request->input('visitor_id')
+            ?? $request->cookie('analytics_vid')
+            ?? ($request->hasSession() ? $request->session()->getId() : null);
+        $deviceCheck = $this->fraudPreventionService->checkDevicePhoneLimit($visitorId, $event->id, $cleanPhone);
+        if (! $deviceCheck['allowed']) {
+            return response()->json([
+                'success' => false,
+                'allowed' => false,
+                'message' => $deviceCheck['message'],
+            ], 422);
+        }
+
         $participantId = ! empty($validated['participant_id']) ? (int) $validated['participant_id'] : null;
         $awardId = ! empty($validated['award_id'])
             ? (int) $validated['award_id']
@@ -67,7 +94,7 @@ class VoteController extends Controller
                 ], 422);
             }
 
-            $check = $event->canMobileVote($validated['phone'], $participantId, $awardId);
+            $check = $event->canMobileVote($cleanPhone, $participantId, $awardId);
             if (! $check['allowed']) {
                 return response()->json([
                     'success' => false,
@@ -76,7 +103,7 @@ class VoteController extends Controller
                 ], 422);
             }
         } else {
-            $check = $event->canMobileVote($validated['phone'], $participantId, null);
+            $check = $event->canMobileVote($cleanPhone, $participantId, null);
             if (! $check['allowed']) {
                 return response()->json([
                     'success' => false,
@@ -145,8 +172,30 @@ class VoteController extends Controller
             }
         }
 
-        // 2. Check voting eligibility rules for target award
-        $check = $event->canMobileVote($validated['phone'], $participant->id, $awardId);
+        // 2. Validate mobile number and check device phone limit
+        $fraudCheck = $this->fraudPreventionService->validateMobileNumber($validated['phone']);
+        if (! $fraudCheck['valid']) {
+            return response()->json([
+                'success' => false,
+                'message' => $fraudCheck['message'] ?? 'Please provide a valid 10-digit Indian mobile number.',
+            ], 422);
+        }
+        $cleanPhone = $fraudCheck['phone'];
+
+        $visitorId = $request->header('X-Visitor-Id')
+            ?? $request->input('visitor_id')
+            ?? $request->cookie('analytics_vid')
+            ?? ($request->hasSession() ? $request->session()->getId() : null);
+        $deviceCheck = $this->fraudPreventionService->checkDevicePhoneLimit($visitorId, $event->id, $cleanPhone);
+        if (! $deviceCheck['allowed']) {
+            return response()->json([
+                'success' => false,
+                'message' => $deviceCheck['message'],
+            ], 422);
+        }
+
+        // 3. Check voting eligibility rules for target award
+        $check = $event->canMobileVote($cleanPhone, $participant->id, $awardId);
         if (! $check['allowed']) {
             return response()->json([
                 'success' => false,
@@ -154,8 +203,8 @@ class VoteController extends Controller
             ], 422);
         }
 
-        // 3. Verify OTP code
-        $verifyResult = $this->otpService->verifyOtp($validated['phone'], $validated['otp'], 'voting');
+        // 4. Verify OTP code
+        $verifyResult = $this->otpService->verifyOtp($cleanPhone, $validated['otp'], 'voting');
 
         if (! $verifyResult->successful) {
             return response()->json([
@@ -167,12 +216,7 @@ class VoteController extends Controller
             ], 422);
         }
 
-        // 4. Record official Vote atomically
-        $cleanPhone = preg_replace('/[^0-9]/', '', $validated['phone']) ?? '';
-        if (strlen($cleanPhone) > 10) {
-            $cleanPhone = substr($cleanPhone, -10);
-        }
-
+        // 5. Record official Vote atomically
         $voterName = ! empty($validated['voter_name'])
             ? trim($validated['voter_name'])
             : (! empty($validated['name']) ? trim($validated['name']) : null);
@@ -194,6 +238,9 @@ class VoteController extends Controller
                     'user_agent' => $request->userAgent(),
                 ]);
             });
+
+            // Record this device's phone usage for fraud prevention
+            $this->fraudPreventionService->recordDevicePhone($visitorId, $event->id, $cleanPhone);
 
             // Track vote_verified in analytics
             try {

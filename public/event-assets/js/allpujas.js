@@ -515,13 +515,20 @@ function setupVotingHandlers() {
         e.preventDefault();
         $('#alreadyVotedAlert').addClass('d-none');
 
-        const mobile = $('#voterMobile').val().trim();
+        const rawMobile = $('#voterMobile').val().trim();
+        let mobile = rawMobile.replace(/[^0-9]/g, '');
+        if (mobile.length === 12 && mobile.startsWith('91')) {
+            mobile = mobile.substring(2);
+        } else if (mobile.length === 11 && mobile.startsWith('0')) {
+            mobile = mobile.substring(1);
+        }
+
         const participantId = $('#pandalSelect').val();
         const awardId = $('#awardSelect').val() || null;
         const eventId = $('#voteEventId').val() || (window.currentEventId || null);
 
-        if (mobile.length !== 10 || !/^\d{10}$/.test(mobile)) {
-            alert('Please enter a valid 10-digit mobile number.');
+        if (mobile.length !== 10 || !/^[6-9]\d{9}$/.test(mobile)) {
+            alert('Please enter a valid 10-digit Indian mobile number (starting with 6, 7, 8, or 9).');
             return;
         }
 

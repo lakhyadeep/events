@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Services\Fraud\FraudPreventionService;
 use App\Services\Otp\OtpManager;
 use App\Services\Otp\OtpService;
 use Filament\Actions\DeleteAction;
@@ -27,8 +28,9 @@ class AppServiceProvider extends ServiceProvider
             );
         }
 
+        $this->app->singleton(FraudPreventionService::class, fn () => new FraudPreventionService);
         $this->app->singleton(OtpManager::class, fn () => new OtpManager);
-        $this->app->singleton(OtpService::class, fn ($app) => new OtpService($app->make(OtpManager::class)));
+        $this->app->singleton(OtpService::class, fn ($app) => new OtpService($app->make(OtpManager::class), $app->make(FraudPreventionService::class)));
     }
 
     /**

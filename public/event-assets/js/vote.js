@@ -299,9 +299,16 @@ function handleVoteFormSubmit() {
         return;
     }
 
-    // Validate 10-digit mobile number
-    if (!mobile || !/^\d{10}$/.test(mobile)) {
-        showFormError('Please enter a valid 10-digit Indian mobile number.');
+    // Clean and validate 10-digit Indian mobile number (starting with 6, 7, 8, or 9)
+    let cleanMobile = mobile.replace(/[^0-9]/g, '');
+    if (cleanMobile.length === 12 && cleanMobile.startsWith('91')) {
+        cleanMobile = cleanMobile.substring(2);
+    } else if (cleanMobile.length === 11 && cleanMobile.startsWith('0')) {
+        cleanMobile = cleanMobile.substring(1);
+    }
+
+    if (!cleanMobile || !/^[6-9]\d{9}$/.test(cleanMobile)) {
+        showFormError('Please enter a valid 10-digit Indian mobile number (starting with 6, 7, 8, or 9).');
         $('#voterMobileInput').focus();
         return;
     }
@@ -313,7 +320,7 @@ function handleVoteFormSubmit() {
         awardId: selectedAwardId,
         feature: selectedFeature,
         name: voterName,
-        mobile: mobile,
+        mobile: cleanMobile,
         eventId: eventId ? parseInt(eventId) : null
     };
 

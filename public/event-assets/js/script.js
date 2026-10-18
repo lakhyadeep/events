@@ -45,13 +45,20 @@ $(document).ready(function () {
         e.preventDefault();
         $('#alreadyVotedAlert').addClass('d-none');
 
-        var mobile = $('#voterMobile').val().trim();
+        var rawMobile = $('#voterMobile').val().trim();
+        var mobile = rawMobile.replace(/[^0-9]/g, '');
+        if (mobile.length === 12 && mobile.startsWith('91')) {
+            mobile = mobile.substring(2);
+        } else if (mobile.length === 11 && mobile.startsWith('0')) {
+            mobile = mobile.substring(1);
+        }
+
         var participantId = $('#pandalSelect').val();
         var awardId = $('#awardSelect').val() || null;
         var eventId = $('#voteEventId').val() || null;
 
-        if (mobile.length !== 10 || !/^\d{10}$/.test(mobile)) {
-            alert('Please enter a valid 10-digit mobile number.');
+        if (mobile.length !== 10 || !/^[6-9]\d{9}$/.test(mobile)) {
+            alert('Please enter a valid 10-digit Indian mobile number (starting with 6, 7, 8, or 9).');
             return;
         }
 

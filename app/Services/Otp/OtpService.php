@@ -4,6 +4,7 @@ namespace App\Services\Otp;
 
 use App\Models\Otp;
 use App\Models\OtpSetting;
+use App\Services\Fraud\FraudPreventionService;
 use App\Services\Otp\Data\OtpSendResult;
 use App\Services\Otp\Data\OtpVerifyResult;
 use Illuminate\Support\Facades\Log;
@@ -11,23 +12,41 @@ use Illuminate\Support\Facades\Log;
 class OtpService
 {
     public function __construct(
-        protected OtpManager $otpManager
-    ) {}
+        protected OtpManager $otpManager,
+        protected ?FraudPreventionService $fraudPreventionService = null
+    ) {
+        $this->fraudPreventionService ??= app(FraudPreventionService::class);
+    }
 
     /**
      * Generate and dispatch an OTP to the given phone number.
      */
     public function sendOtp(string $phone, string $purpose = 'verification', ?string $ip = null): OtpSendResult
     {
-        $cleanPhone = $this->sanitizePhoneNumber($phone);
+        $fraudCheck = $this->fraudPreventionService->validateMobileNumber($phone);
 
-        if (strlen($cleanPhone) < 7 || strlen($cleanPhone) > 15) {
-            return OtpSendResult::failure('Please provide a valid mobile number.');
+        if (! $fraudCheck['valid']) {
+            return OtpSendResult::failure($fraudCheck['message'] ?? 'Please provide a valid mobile number.');
         }
 
+        $cleanPhone = $fraudCheck['phone'];
         $setting = OtpSetting::current();
 
-        // 1. Check for active resend cooldown to protect against spam / flood attacks
+        // 1. Hourly spam limit per phone number (max 5 OTPs per hour)
+        $hourlyCount = Otp::query()
+            ->where('phone', $cleanPhone)
+            ->where('purpose', $purpose)
+            ->where('created_at', '>=', now()->subHour())
+            ->count();
+
+        if ($hourlyCount >= 5) {
+            return OtpSendResult::failure(
+                'Too many OTP requests for this mobile number. Please try again after some time.',
+                resendAfterSeconds: 300
+            );
+        }
+
+        // 2. Check for active resend cooldown to protect against spam / flood attacks
         /** @var Otp|null $latestOtp */
         $latestOtp = Otp::query()
             ->where('phone', $cleanPhone)
@@ -211,6 +230,11 @@ class OtpService
      */
     public function sanitizePhoneNumber(string $phone): string
     {
+        $normalized = $this->fraudPreventionService->normalizeIndianMobile($phone);
+        if ($normalized !== null) {
+            return $normalized;
+        }
+
         return preg_replace('/[^0-9]/', '', $phone) ?? '';
     }
 

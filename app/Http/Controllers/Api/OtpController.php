@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\OtpSetting;
 use App\Services\AnalyticsService;
+use App\Services\Fraud\FraudPreventionService;
 use App\Services\Otp\OtpService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -14,8 +15,11 @@ use Illuminate\Support\Str;
 class OtpController extends Controller
 {
     public function __construct(
-        protected OtpService $otpService
-    ) {}
+        protected OtpService $otpService,
+        protected ?FraudPreventionService $fraudPreventionService = null
+    ) {
+        $this->fraudPreventionService ??= app(FraudPreventionService::class);
+    }
 
     /**
      * Dispatch an OTP to a designated mobile number.
@@ -41,6 +45,15 @@ class OtpController extends Controller
 
         $purpose = $validated['purpose'] ?? 'verification';
 
+        $fraudCheck = $this->fraudPreventionService->validateMobileNumber($validated['phone']);
+        if (! $fraudCheck['valid']) {
+            return response()->json([
+                'success' => false,
+                'message' => $fraudCheck['message'] ?? 'Please provide a valid 10-digit Indian mobile number.',
+            ], 422);
+        }
+        $cleanPhone = $fraudCheck['phone'];
+
         // Pre-flight check for voting to avoid wasting SMS credits if user already voted
         if ($purpose === 'voting' && ! empty($validated['event_id'])) {
             $event = Event::find($validated['event_id']);
@@ -49,6 +62,18 @@ class OtpController extends Controller
                     return response()->json([
                         'success' => false,
                         'message' => $event->getVotingClosedMessage(),
+                    ], 422);
+                }
+
+                $visitorId = $request->header('X-Visitor-Id')
+                    ?? $request->input('visitor_id')
+                    ?? $request->cookie('analytics_vid')
+                    ?? ($request->hasSession() ? $request->session()->getId() : null);
+                $deviceCheck = $this->fraudPreventionService->checkDevicePhoneLimit($visitorId, (int) $validated['event_id'], $cleanPhone);
+                if (! $deviceCheck['allowed']) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $deviceCheck['message'],
                     ], 422);
                 }
 
@@ -66,7 +91,7 @@ class OtpController extends Controller
                         ], 422);
                     }
 
-                    $check = $event->canMobileVote($validated['phone'], $participantId, $awardId);
+                    $check = $event->canMobileVote($cleanPhone, $participantId, $awardId);
                     if (! $check['allowed']) {
                         return response()->json([
                             'success' => false,
@@ -74,7 +99,7 @@ class OtpController extends Controller
                         ], 422);
                     }
                 } else {
-                    $check = $event->canMobileVote($validated['phone'], $participantId, null);
+                    $check = $event->canMobileVote($cleanPhone, $participantId, null);
                     if (! $check['allowed']) {
                         return response()->json([
                             'success' => false,
@@ -85,7 +110,7 @@ class OtpController extends Controller
             }
         }
 
-        $result = $this->otpService->sendOtp($validated['phone'], $purpose, $request->ip());
+        $result = $this->otpService->sendOtp($cleanPhone, $purpose, $request->ip());
 
         if (! $result->successful) {
             return response()->json([
@@ -148,7 +173,8 @@ class OtpController extends Controller
         ]);
 
         $purpose = $validated['purpose'] ?? 'verification';
-        $result = $this->otpService->verifyOtp($validated['phone'], $validated['code'], $purpose);
+        $cleanPhone = $this->fraudPreventionService->normalizeIndianMobile($validated['phone']) ?? $validated['phone'];
+        $result = $this->otpService->verifyOtp($cleanPhone, $validated['code'], $purpose);
 
         if (! $result->successful) {
             return response()->json([
