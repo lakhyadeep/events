@@ -4,9 +4,11 @@ namespace App\Models;
 
 use App\Services\Fraud\FraudPreventionService;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Vote extends Model
 {
@@ -47,6 +49,11 @@ class Vote extends Model
     public function award(): BelongsTo
     {
         return $this->belongsTo(Award::class);
+    }
+
+    public function otps(): HasMany
+    {
+        return $this->hasMany(Otp::class, 'phone', 'mobile_number');
     }
 
     /**
@@ -162,5 +169,86 @@ class Vote extends Model
         }
 
         return 'Other';
+    }
+
+    /**
+     * Count of total votes submitted from the same IP address.
+     */
+    public function getSameIpVotesCountAttribute(): int
+    {
+        if (empty($this->ip_address)) {
+            return 0;
+        }
+
+        return static::where('ip_address', $this->ip_address)->count();
+    }
+
+    /**
+     * Resolve comprehensive OTP audit trail data for this vote.
+     *
+     * @return array{
+     *     has_otp: bool,
+     *     status: string,
+     *     status_color: string,
+     *     dispatched_at: ?string,
+     *     verified_at: ?string,
+     *     verification_latency: ?string,
+     *     attempts: int,
+     *     otp_ip: ?string,
+     *     ip_matches_vote: bool,
+     *     total_dispatched: int,
+     *     recent_otps: Collection<int, Otp>
+     * }
+     */
+    public function getOtpAuditTrailAttribute(): array
+    {
+        /** @var Otp|null $otp */
+        $otp = $this->otps()
+            ->whereNotNull('verified_at')
+            ->where('created_at', '<=', $this->created_at?->addMinutes(10) ?? now())
+            ->latest('verified_at')
+            ->first() ?? $this->otps()->latest('id')->first();
+
+        $recentOtps = $this->otps()->latest('id')->take(5)->get();
+
+        $status = 'No Record';
+        $color = 'gray';
+
+        if ($otp) {
+            if ($otp->isVerified()) {
+                $status = 'Verified';
+                $color = 'success';
+            } elseif ($otp->isExpired()) {
+                $status = 'Expired';
+                $color = 'danger';
+            } else {
+                $status = 'Pending / Unverified';
+                $color = 'warning';
+            }
+        }
+
+        $latency = null;
+        if ($otp && $otp->created_at && $otp->verified_at) {
+            $seconds = (int) $otp->created_at->diffInSeconds($otp->verified_at);
+            if ($seconds < 60) {
+                $latency = "{$seconds}s after dispatch";
+            } else {
+                $latency = (int) round($seconds / 60).'m after dispatch';
+            }
+        }
+
+        return [
+            'has_otp' => $otp !== null,
+            'status' => $status,
+            'status_color' => $color,
+            'dispatched_at' => $otp?->created_at?->timezone('Asia/Kolkata')->format('d M Y, h:i:s A'),
+            'verified_at' => $otp?->verified_at?->timezone('Asia/Kolkata')->format('d M Y, h:i:s A'),
+            'verification_latency' => $latency,
+            'attempts' => $otp?->attempts ?? 0,
+            'otp_ip' => $otp?->ip_address,
+            'ip_matches_vote' => $otp && $this->ip_address && $otp->ip_address === $this->ip_address,
+            'total_dispatched' => $this->otps()->count(),
+            'recent_otps' => $recentOtps,
+        ];
     }
 }

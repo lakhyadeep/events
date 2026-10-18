@@ -10,6 +10,7 @@ use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Votes\Pages\ListVotes;
 use App\Http\Resources\ParticipantResource;
 use App\Models\Event;
+use App\Models\Otp;
 use App\Models\Participant;
 use App\Models\Sponsor;
 use App\Models\User;
@@ -347,5 +348,82 @@ class AdminManagementTest extends TestCase
         $this->assertStringContainsString('iPhone', $csvContent);
         $this->assertStringContainsString('Windows PC', $csvContent);
         $this->assertStringNotContainsString('AppleWebKit', $csvContent);
+    }
+
+    public function test_votes_table_same_ip_filter_works(): void
+    {
+        $admin = User::where('email', 'admin@dib24x7.com')->first() ?? User::factory()->admin()->create();
+
+        $event = Event::first() ?? Event::factory()->create();
+        $participant = Participant::factory()->create(['event_id' => $event->id]);
+
+        $vote1 = Vote::create([
+            'event_id' => $event->id,
+            'participant_id' => $participant->id,
+            'mobile_number' => '9876543201',
+            'ip_address' => '192.168.1.50',
+        ]);
+
+        $vote2 = Vote::create([
+            'event_id' => $event->id,
+            'participant_id' => $participant->id,
+            'mobile_number' => '9876543202',
+            'ip_address' => '192.168.1.50',
+        ]);
+
+        $vote3 = Vote::create([
+            'event_id' => $event->id,
+            'participant_id' => $participant->id,
+            'mobile_number' => '9876543203',
+            'ip_address' => '192.168.1.99',
+        ]);
+
+        // Filter for shared/duplicate IP
+        Livewire::actingAs($admin)
+            ->test(ListVotes::class)
+            ->filterTable('same_ip', 'shared')
+            ->assertCanSeeTableRecords([$vote1, $vote2])
+            ->assertCanNotSeeTableRecords([$vote3]);
+
+        // Filter for unique IP
+        Livewire::actingAs($admin)
+            ->test(ListVotes::class)
+            ->filterTable('same_ip', 'unique')
+            ->assertCanSeeTableRecords([$vote3])
+            ->assertCanNotSeeTableRecords([$vote1, $vote2]);
+    }
+
+    public function test_vote_otp_audit_trail_resolves_correctly(): void
+    {
+        $event = Event::first() ?? Event::factory()->create();
+        $participant = Participant::factory()->create(['event_id' => $event->id]);
+
+        $phone = '9876543299';
+        Otp::create([
+            'phone' => $phone,
+            'code_hash' => hash('sha256', '123456'),
+            'purpose' => 'voting',
+            'expires_at' => now()->addMinutes(10),
+            'verified_at' => now()->subMinute(),
+            'attempts' => 1,
+            'ip_address' => '10.0.0.1',
+        ]);
+
+        $vote = Vote::create([
+            'event_id' => $event->id,
+            'participant_id' => $participant->id,
+            'mobile_number' => $phone,
+            'ip_address' => '10.0.0.1',
+        ]);
+
+        $trail = $vote->otp_audit_trail;
+
+        $this->assertTrue($trail['has_otp']);
+        $this->assertSame('Verified', $trail['status']);
+        $this->assertSame('success', $trail['status_color']);
+        $this->assertTrue($trail['ip_matches_vote']);
+        $this->assertSame(1, $trail['attempts']);
+        $this->assertSame('10.0.0.1', $trail['otp_ip']);
+        $this->assertCount(1, $trail['recent_otps']);
     }
 }

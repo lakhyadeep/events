@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Votes\Tables;
 
+use App\Filament\Resources\Votes\Pages\ListVotes;
 use App\Models\Vote;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
@@ -43,7 +44,12 @@ class VotesTable
                     ->copyable()
                     ->copyableState(fn ($record) => '+91 '.$record->mobile_number)
                     ->copyMessage('Mobile number copied to clipboard')
-                    ->description(fn ($record) => 'IP: '.($record->ip_address ?? 'Unknown')),
+                    ->description(function (Vote $record): string {
+                        $ip = $record->ip_address ?? 'Unknown';
+                        $count = $record->same_ip_votes_count;
+
+                        return $count > 1 ? "IP: {$ip} (⚠️ {$count} votes)" : "IP: {$ip}";
+                    }),
 
                 TextColumn::make('fraud_flag')
                     ->label('Integrity Status')
@@ -75,7 +81,14 @@ class VotesTable
 
                 TextColumn::make('ip_address')
                     ->label('IP Address')
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->description(function (Vote $record): ?string {
+                        $count = $record->same_ip_votes_count;
+
+                        return $count > 1 ? "⚠️ {$count} votes from this IP" : null;
+                    }),
 
                 TextColumn::make('created_at')
                     ->label('Cast At')
@@ -134,10 +147,50 @@ class VotesTable
 
                         return $query;
                     }),
+
+                SelectFilter::make('same_ip')
+                    ->label('Same IP / Cluster')
+                    ->placeholder('All IP Activity')
+                    ->options([
+                        'shared' => 'Multiple Votes from Same IP (Shared IP)',
+                        'unique' => 'Single Vote per IP (Unique IP)',
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        if (($data['value'] ?? null) === 'shared') {
+                            return $query->whereIn('ip_address', function ($sub): void {
+                                $sub->select('ip_address')
+                                    ->from('votes')
+                                    ->whereNotNull('ip_address')
+                                    ->where('ip_address', '!=', '')
+                                    ->groupBy('ip_address')
+                                    ->havingRaw('COUNT(*) > 1');
+                            });
+                        }
+
+                        if (($data['value'] ?? null) === 'unique') {
+                            return $query->whereIn('ip_address', function ($sub): void {
+                                $sub->select('ip_address')
+                                    ->from('votes')
+                                    ->whereNotNull('ip_address')
+                                    ->where('ip_address', '!=', '')
+                                    ->groupBy('ip_address')
+                                    ->havingRaw('COUNT(*) = 1');
+                            });
+                        }
+
+                        return $query;
+                    }),
             ], layout: FiltersLayout::AboveContent)
-            ->filtersFormColumns(4)
+            ->filtersFormColumns(5)
             ->recordActions([
                 ViewAction::make(),
+                Action::make('same_ip_votes')
+                    ->label('Same IP Votes')
+                    ->icon('heroicon-o-globe-alt')
+                    ->color('warning')
+                    ->tooltip('View all votes submitted from this IP address')
+                    ->visible(fn (Vote $record): bool => ! empty($record->ip_address) && $record->same_ip_votes_count > 1)
+                    ->url(fn (Vote $record): string => ListVotes::getUrl(['tableSearch' => $record->ip_address])),
                 Action::make('blacklist')
                     ->label('Blacklist Number')
                     ->icon('heroicon-o-no-symbol')
