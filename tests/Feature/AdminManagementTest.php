@@ -610,7 +610,7 @@ class AdminManagementTest extends TestCase
             ->assertCanSeeTableRecords([$vote2])
             ->assertCanNotSeeTableRecords([$vote1])
             ->assertDontSee('Same IP First')
-            ->assertSee('Same IP Second')
+            ->assertTableActionExists('view', record: $vote2)
             ->callTableAction('delete', $vote2, data: ['current_password' => 'password'])
             ->assertCanNotSeeTableRecords([$vote2]);
 

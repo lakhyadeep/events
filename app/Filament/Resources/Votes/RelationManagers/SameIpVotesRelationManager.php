@@ -2,8 +2,10 @@
 
 namespace App\Filament\Resources\Votes\RelationManagers;
 
+use App\Filament\Resources\Votes\VoteResource;
 use App\Models\Vote;
 use BackedEnum;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -48,6 +50,7 @@ class SameIpVotesRelationManager extends RelationManager
     {
         return $table
             ->recordTitleAttribute('voter_name')
+            ->recordUrl(fn (Vote $record): string => VoteResource::getUrl('view', ['record' => $record]))
             ->modifyQueryUsing(fn (Builder $query) => $query->whereKeyNot($this->getOwnerRecord()->getKey()))
             ->emptyStateHeading('No other votes from this IP')
             ->emptyStateDescription('This is the only vote recorded from this IP address.')
@@ -59,7 +62,8 @@ class SameIpVotesRelationManager extends RelationManager
                     ->placeholder('Anonymous')
                     ->searchable()
                     ->sortable()
-                    ->weight('medium'),
+                    ->weight('medium')
+                    ->url(fn (Vote $record): string => VoteResource::getUrl('view', ['record' => $record])),
 
                 TextColumn::make('mobile_number')
                     ->label('Voter Mobile')
@@ -102,6 +106,11 @@ class SameIpVotesRelationManager extends RelationManager
             ])
             ->headerActions([])
             ->recordActions([
+                Action::make('view')
+                    ->label('View Vote')
+                    ->icon('heroicon-o-eye')
+                    ->color('info')
+                    ->url(fn (Vote $record): string => VoteResource::getUrl('view', ['record' => $record])),
                 DeleteAction::make()
                     ->label('Void Vote')
                     ->modalHeading('Void Vote')
