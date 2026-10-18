@@ -135,7 +135,7 @@ class VoteInfolist
                                 ->formatStateUsing(function (string $state): string {
                                     $digits = preg_replace('/[^0-9]/', '', $state) ?? '';
 
-                                    return strlen($digits) >= 10 ? '+91 '.substr($digits, 0, 5).'*****' : '+91 '.$state;
+                                    return strlen($digits) === 10 ? '+91 '.$digits : '+91 '.$state;
                                 })
                                 ->copyable()
                                 ->copyableState(fn (Vote $record): string => '+91 '.$record->mobile_number)

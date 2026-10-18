@@ -69,11 +69,8 @@ class SameIpVotesRelationManager extends RelationManager
                     ->label('Voter Mobile')
                     ->formatStateUsing(function (string $state): string {
                         $digits = preg_replace('/[^0-9]/', '', $state) ?? '';
-                        if (strlen($digits) >= 10) {
-                            return '+91 '.substr($digits, 0, 5).'*****';
-                        }
 
-                        return $state;
+                        return strlen($digits) === 10 ? '+91 '.$digits : $state;
                     })
                     ->searchable()
                     ->copyable()
