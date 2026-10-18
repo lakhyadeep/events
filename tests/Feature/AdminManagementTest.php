@@ -7,17 +7,20 @@ use App\Filament\Resources\Awards\Pages\CreateAward;
 use App\Filament\Resources\Events\Pages\CreateEvent;
 use App\Filament\Resources\Participants\Pages\EditParticipant;
 use App\Filament\Resources\Users\Pages\EditUser;
+use App\Filament\Resources\Votes\Pages\ListVotes;
 use App\Http\Resources\ParticipantResource;
 use App\Models\Event;
 use App\Models\Participant;
 use App\Models\Sponsor;
 use App\Models\User;
+use App\Models\Vote;
 use App\Models\Winner;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Livewire;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Tests\TestCase;
 
 class AdminManagementTest extends TestCase
@@ -299,5 +302,50 @@ class AdminManagementTest extends TestCase
 
         $this->assertArrayHasKey('google_map_url', $resource);
         $this->assertSame('https://maps.google.com/?q=27.4728,94.9120', $resource['google_map_url']);
+    }
+
+    public function test_votes_export_csv_includes_voter_name(): void
+    {
+        $admin = User::where('email', 'admin@dib24x7.com')->first() ?? User::factory()->admin()->create();
+
+        $event = Event::first() ?? Event::factory()->create();
+        $participant = Participant::factory()->create(['event_id' => $event->id]);
+
+        Vote::create([
+            'event_id' => $event->id,
+            'participant_id' => $participant->id,
+            'voter_name' => 'Rahul Sharma',
+            'mobile_number' => '9876543210',
+            'user_agent' => 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.5 Mobile/15E148 Safari/604.1',
+        ]);
+
+        Vote::create([
+            'event_id' => $event->id,
+            'participant_id' => $participant->id,
+            'voter_name' => null,
+            'mobile_number' => '9876543211',
+            'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36',
+        ]);
+
+        $component = Livewire::actingAs($admin)
+            ->test(ListVotes::class);
+
+        $action = $component->instance()->getAction('export_csv');
+        $this->assertNotNull($action);
+
+        $response = $action->call();
+        $this->assertInstanceOf(StreamedResponse::class, $response);
+
+        ob_start();
+        $response->sendContent();
+        $csvContent = ob_get_clean();
+
+        $this->assertStringContainsString('Voter Name', $csvContent);
+        $this->assertStringContainsString('Rahul Sharma', $csvContent);
+        $this->assertStringContainsString('Anonymous', $csvContent);
+        $this->assertStringContainsString('Device', $csvContent);
+        $this->assertStringContainsString('iPhone', $csvContent);
+        $this->assertStringContainsString('Windows PC', $csvContent);
+        $this->assertStringNotContainsString('AppleWebKit', $csvContent);
     }
 }

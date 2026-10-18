@@ -106,4 +106,61 @@ class Vote extends Model
             'reason' => 'Clean physical mobile number',
         ];
     }
+
+    /**
+     * Resolve a clean, human-readable device name from the recorded user agent.
+     */
+    public function getDeviceNameAttribute(): string
+    {
+        $userAgent = $this->user_agent;
+
+        if (empty($userAgent)) {
+            return 'Unknown';
+        }
+
+        if (preg_match('/iPhone/i', $userAgent)) {
+            return 'iPhone';
+        }
+
+        if (preg_match('/iPad/i', $userAgent)) {
+            return 'iPad';
+        }
+
+        if (preg_match('/iPod/i', $userAgent)) {
+            return 'iPod';
+        }
+
+        if (stripos($userAgent, 'Android') !== false) {
+            if (preg_match('/Android\s+[^;]+;\s*([^;\)]+?)(?:\s+Build|\)|;)/i', $userAgent, $matches)) {
+                $model = trim($matches[1]);
+                if (! empty($model) && strtoupper($model) !== 'K' && ! preg_match('/^[a-z]{2}(?:-[a-z]{2})?$/i', $model)) {
+                    if (str_starts_with(strtoupper($model), 'SM-')) {
+                        return 'Samsung '.$model;
+                    }
+
+                    return $model;
+                }
+            }
+
+            return (stripos($userAgent, 'Mobile') !== false) ? 'Android Mobile' : 'Android Tablet';
+        }
+
+        if (stripos($userAgent, 'Windows') !== false) {
+            return 'Windows PC';
+        }
+
+        if (stripos($userAgent, 'Macintosh') !== false || stripos($userAgent, 'Mac OS X') !== false) {
+            return 'Mac';
+        }
+
+        if (stripos($userAgent, 'CrOS') !== false) {
+            return 'Chromebook';
+        }
+
+        if (stripos($userAgent, 'Linux') !== false) {
+            return 'Linux PC';
+        }
+
+        return 'Other';
+    }
 }

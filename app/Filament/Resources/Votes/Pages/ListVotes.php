@@ -24,7 +24,7 @@ class ListVotes extends ListRecords
 
                     return response()->streamDownload(function () {
                         $handle = fopen('php://output', 'w');
-                        fputcsv($handle, ['ID', 'Event', 'Candidate / Committee', 'Award Category', 'Mobile Number', 'IP Address', 'User Agent', 'Cast At']);
+                        fputcsv($handle, ['ID', 'Event', 'Candidate / Committee', 'Award Category', 'Voter Name', 'Mobile Number', 'IP Address', 'Device', 'Cast At']);
 
                         Vote::with(['event', 'participant', 'award'])
                             ->latest('id')
@@ -35,9 +35,10 @@ class ListVotes extends ListRecords
                                         $vote->event?->display_name ?? 'N/A',
                                         $vote->participant?->display_name ?: ($vote->participant?->name ?? 'N/A'),
                                         $vote->award?->display_name ?: ($vote->award?->name ?? 'Overall Event Vote'),
+                                        $vote->voter_name ?: 'Anonymous',
                                         '+91 '.$vote->mobile_number,
                                         $vote->ip_address ?? 'N/A',
-                                        $vote->user_agent ?? 'N/A',
+                                        $vote->device_name,
                                         $vote->created_at?->toDateTimeString() ?? '',
                                     ]);
                                 }
