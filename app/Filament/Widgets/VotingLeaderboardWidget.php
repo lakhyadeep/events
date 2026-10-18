@@ -3,28 +3,65 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Participant;
+use Carbon\Carbon;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\TableWidget;
 
 class VotingLeaderboardWidget extends TableWidget
 {
+    use InteractsWithPageFilters;
+
     protected static ?int $sort = 3;
 
     protected static bool $isLazy = false;
 
-    protected static ?string $heading = 'Live Public Voting Leaderboard (Top 10 Contenders)';
-
     protected int|string|array $columnSpan = 'full';
+
+    public function getTableHeading(): ?string
+    {
+        $startDate = ! empty($this->pageFilters['startDate'] ?? null)
+            ? rescue(fn () => Carbon::parse($this->pageFilters['startDate']), null, false)
+            : null;
+
+        $endDate = ! empty($this->pageFilters['endDate'] ?? null)
+            ? rescue(fn () => Carbon::parse($this->pageFilters['endDate']), null, false)
+            : null;
+
+        if ($startDate || $endDate) {
+            $formattedStart = $startDate ? $startDate->format('M d, H:i') : 'Start';
+            $formattedEnd = $endDate ? $endDate->format('M d, H:i') : 'Now';
+
+            return "Live Public Voting Leaderboard (Filtered: {$formattedStart} - {$formattedEnd})";
+        }
+
+        return 'Live Public Voting Leaderboard (Top 10 Contenders)';
+    }
 
     public function table(Table $table): Table
     {
+        $startDate = ! empty($this->pageFilters['startDate'] ?? null)
+            ? rescue(fn () => Carbon::parse($this->pageFilters['startDate']), null, false)
+            : null;
+
+        $endDate = ! empty($this->pageFilters['endDate'] ?? null)
+            ? rescue(fn () => Carbon::parse($this->pageFilters['endDate']), null, false)
+            : null;
+
         return $table
             ->query(
                 Participant::query()
                     ->with(['event', 'zone', 'locality'])
-                    ->withCount('votes')
+                    ->withCount(['votes' => function ($query) use ($startDate, $endDate) {
+                        if ($startDate) {
+                            $query->where('created_at', '>=', $startDate);
+                        }
+                        if ($endDate) {
+                            $query->where('created_at', '<=', $endDate);
+                        }
+                    }])
                     ->orderByDesc('votes_count')
                     ->orderByDesc('is_shortlisted')
                     ->limit(10)

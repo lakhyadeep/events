@@ -40,12 +40,12 @@ class VotesTable
                     ->formatStateUsing(function (string $state): string {
                         $digits = preg_replace('/[^0-9]/', '', $state) ?? '';
 
-                        return strlen($digits) === 10 ? '+91 ' . $digits : $state;
+                        return strlen($digits) === 10 ? '+91 '.$digits : $state;
                     })
                     ->searchable()
                     ->sortable()
                     ->copyable()
-                    ->copyableState(fn($record) => '+91 ' . $record->mobile_number)
+                    ->copyableState(fn ($record) => '+91 '.$record->mobile_number)
                     ->copyMessage('Mobile number copied to clipboard')
                     ->description(function (Vote $record): string {
                         $ip = $record->ip_address ?? 'Unknown';
@@ -112,7 +112,7 @@ class VotesTable
                     ->relationship('event', 'display_name')
                     ->searchable()
                     ->preload()
-                    ->default(fn() => Event::where('status', 'active')->latest('year')->value('id') ?? Event::latest('year')->value('id')),
+                    ->default(fn () => Event::where('status', 'active')->latest('year')->value('id') ?? Event::latest('year')->value('id')),
 
                 SelectFilter::make('award_id')
                     ->label('Award Category')
@@ -175,20 +175,20 @@ class VotesTable
                         return $query
                             ->when(
                                 $data['from'] ?? null,
-                                fn(Builder $q, $date) => $q->where('created_at', '>=', Carbon::parse($date)),
+                                fn (Builder $q, $date) => $q->where('created_at', '>=', Carbon::parse($date)),
                             )
                             ->when(
                                 $data['until'] ?? null,
-                                fn(Builder $q, $date) => $q->where('created_at', '<=', Carbon::parse($date)),
+                                fn (Builder $q, $date) => $q->where('created_at', '<=', Carbon::parse($date)),
                             );
                     })
                     ->indicateUsing(function (array $data): array {
                         $indicators = [];
-                        if (!empty($data['from'])) {
-                            $indicators['from'] = 'From ' . Carbon::parse($data['from'])->timezone('Asia/Kolkata')->format('d M, h:i A');
+                        if (! empty($data['from'])) {
+                            $indicators['from'] = 'From '.Carbon::parse($data['from'])->timezone('Asia/Kolkata')->format('d M, h:i A');
                         }
-                        if (!empty($data['until'])) {
-                            $indicators['until'] = 'Until ' . Carbon::parse($data['until'])->timezone('Asia/Kolkata')->format('d M, h:i A');
+                        if (! empty($data['until'])) {
+                            $indicators['until'] = 'Until '.Carbon::parse($data['until'])->timezone('Asia/Kolkata')->format('d M, h:i A');
                         }
 
                         return $indicators;
@@ -249,7 +249,7 @@ class VotesTable
                                 ->whereNotNull('ip_address')
                                 ->where('ip_address', '!=', '')
                                 ->groupBy('ip_address')
-                                ->havingRaw('COUNT(*) > ' . (int) $min);
+                                ->havingRaw('COUNT(*) > '.(int) $min);
                         });
                     })
                     ->indicateUsing(function (array $data): ?string {
@@ -262,7 +262,7 @@ class VotesTable
                     }),
             ], layout: FiltersLayout::AboveContent)
             ->filtersFormColumns(12)
-            ->filtersFormSchema(fn(array $filters): array => [
+            ->filtersFormSchema(fn (array $filters): array => [
                 Fieldset::make('Contest Scope')
                     ->schema([
                         $filters['event_id'],
@@ -290,7 +290,7 @@ class VotesTable
                     ->columns(['default' => 1, 'lg' => 3])
                     ->columnSpan(12),
             ])
-            ->recordUrl(fn(Vote $record): string => VoteResource::getUrl('view', ['record' => $record]))
+            ->recordUrl(fn (Vote $record): string => VoteResource::getUrl('view', ['record' => $record]))
             ->recordActions([
                 ViewAction::make(),
                 Action::make('same_ip_votes')
@@ -298,8 +298,8 @@ class VotesTable
                     ->icon('heroicon-o-globe-alt')
                     ->color('warning')
                     ->tooltip('View all votes submitted from this IP address')
-                    ->visible(fn(Vote $record): bool => !empty($record->ip_address) && $record->same_ip_votes_count > 1)
-                    ->url(fn(Vote $record): string => VoteResource::getUrl('view', ['record' => $record])),
+                    ->visible(fn (Vote $record): bool => ! empty($record->ip_address) && $record->same_ip_votes_count > 1)
+                    ->url(fn (Vote $record): string => VoteResource::getUrl('view', ['record' => $record])),
                 Action::make('blacklist')
                     ->label('Blacklist Number')
                     ->icon('heroicon-o-no-symbol')
@@ -309,7 +309,7 @@ class VotesTable
                     ->modalDescription('Block this number from ever receiving OTPs or submitting votes in the future.')
                     ->action(function (Vote $record): void {
                         $cached = (array) Cache::get('fraud_disposable_blacklist', []);
-                        if (!in_array($record->mobile_number, $cached, true)) {
+                        if (! in_array($record->mobile_number, $cached, true)) {
                             $cached[] = $record->mobile_number;
                             Cache::put('fraud_disposable_blacklist', $cached, now()->addYears(1));
                         }
