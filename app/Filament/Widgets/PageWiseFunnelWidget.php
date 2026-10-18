@@ -6,9 +6,11 @@ use App\Models\PageView;
 use App\Models\UserActivity;
 use App\Models\Vote;
 use Carbon\Carbon;
-use Filament\Widgets\Widget;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Filament\Widgets\TableWidget;
 
-class PageWiseFunnelWidget extends Widget
+class PageWiseFunnelWidget extends TableWidget
 {
     public ?int $eventId = null;
 
@@ -20,12 +22,105 @@ class PageWiseFunnelWidget extends Widget
 
     protected int|string|array $columnSpan = 'full';
 
-    protected string $view = 'filament.widgets.page-wise-funnel';
-
-    protected function getViewData(): array
+    public function table(Table $table): Table
     {
+        return $table
+            ->heading('Page-Wise Tracking & Voting Conversion Funnel')
+            ->description(function (): string {
+                $summary = $this->getSummaryMetrics();
+
+                return "Stage-to-stage transition rates & drop-off analysis • {$summary['overallConversion']}% overall conversion ({$summary['totalVotes']} verified votes) • {$summary['periodLabel']}";
+            })
+            ->records(fn (): array => $this->getFunnelData())
+            ->paginated(false)
+            ->columns([
+                TextColumn::make('step')
+                    ->label('#')
+                    ->alignCenter()
+                    ->badge()
+                    ->color('gray'),
+
+                TextColumn::make('name')
+                    ->label('Journey Stage / Page')
+                    ->description(fn (array $record): string => $record['description'])
+                    ->icon(fn (array $record): string => $record['icon'])
+                    ->weight('bold'),
+
+                TextColumn::make('type')
+                    ->label('Type')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'Page View' => 'info',
+                        'User Action' => 'success',
+                        default => 'gray',
+                    })
+                    ->icon(fn (string $state): string => match ($state) {
+                        'Page View' => 'heroicon-m-globe-alt',
+                        'User Action' => 'heroicon-m-bolt',
+                        default => 'heroicon-m-sparkles',
+                    }),
+
+                TextColumn::make('views')
+                    ->label('Total Hits')
+                    ->numeric()
+                    ->alignEnd()
+                    ->weight('bold'),
+
+                TextColumn::make('visitors')
+                    ->label('Unique Visitors')
+                    ->numeric()
+                    ->alignEnd()
+                    ->icon('heroicon-o-users'),
+
+                TextColumn::make('step_conversion')
+                    ->label('Step Conversion')
+                    ->state(fn (array $record): string => $record['step'] === 1
+                        ? '100% Entry Baseline'
+                        : "{$record['step_pct']}% proceeded"
+                    )
+                    ->description(fn (array $record): ?string => ($record['step'] > 1 && $record['dropoff_count'] > 0)
+                        ? '-'.number_format($record['dropoff_count'])." drop ({$record['dropoff_pct']}%)"
+                        : null
+                    )
+                    ->badge()
+                    ->color(fn (array $record): string => $record['step'] === 1
+                        ? 'gray'
+                        : ($record['step_pct'] >= 75 ? 'success' : ($record['step_pct'] >= 40 ? 'warning' : 'danger'))
+                    )
+                    ->icon(fn (array $record): ?string => $record['step'] === 1 ? null : 'heroicon-m-arrow-down-right')
+                    ->alignEnd(),
+
+                TextColumn::make('baseline_pct')
+                    ->label('Funnel Retention')
+                    ->formatStateUsing(fn ($state): string => "{$state}%")
+                    ->badge()
+                    ->color(fn ($state): string => $state >= 50 ? 'success' : ($state >= 20 ? 'warning' : 'gray'))
+                    ->alignEnd(),
+            ]);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function getSummaryMetrics(): array
+    {
+        $funnelData = $this->getFunnelData();
+
+        $homeVisitors = $funnelData[0]['visitors'] ?? 0;
+        $voteVerified = $funnelData[4]['views'] ?? 0;
+
+        $periodLabels = [
+            'today' => 'Today',
+            'yesterday' => 'Yesterday',
+            '7days' => 'Last 7 Days',
+            '30days' => 'Last 30 Days',
+            'all' => 'All Time',
+        ];
+
         return [
-            'funnelData' => $this->getFunnelData(),
+            'overallConversion' => $homeVisitors > 0 ? round(($voteVerified / $homeVisitors) * 100, 1) : 0,
+            'totalVotes' => number_format($voteVerified),
+            'periodLabel' => $periodLabels[$this->period] ?? 'Selected Period',
         ];
     }
 
@@ -90,79 +185,86 @@ class PageWiseFunnelWidget extends Widget
         $voteSuccessViews = (clone $viewsQuery)->where('page_type', 'vote_success')->count();
         $voteSuccessVisitors = (clone $viewsQuery)->where('page_type', 'vote_success')->distinct('visitor_id')->count('visitor_id');
 
-        return [
+        $steps = [
             [
+                'key' => '1',
                 'step' => 1,
                 'name' => 'Homepage',
                 'description' => 'Festive awards landing page & introduction',
                 'type' => 'Page View',
                 'views' => $homeViews,
                 'visitors' => $homeVisitors,
-                'conversion_label' => 'Entry Baseline',
-                'pct' => 100,
                 'icon' => 'heroicon-m-home',
-                'badge_color' => 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
             ],
             [
+                'key' => '2',
                 'step' => 2,
                 'name' => 'All Puja Directory',
                 'description' => 'Directory of participating pandals & zone search',
                 'type' => 'Page View',
                 'views' => $allPujasViews,
                 'visitors' => $allPujasVisitors,
-                'conversion_label' => $homeViews > 0 ? round(($allPujasViews / $homeViews) * 100, 1).'% from Home' : '0%',
-                'pct' => $homeViews > 0 ? min(100, round(($allPujasViews / $homeViews) * 100)) : 0,
                 'icon' => 'heroicon-m-rectangle-stack',
-                'badge_color' => 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300',
             ],
             [
+                'key' => '3',
                 'step' => 3,
                 'name' => 'Vote Screen',
                 'description' => 'Participant voting form with categories',
                 'type' => 'Page View',
                 'views' => $voteViews,
                 'visitors' => $voteVisitors,
-                'conversion_label' => $allPujasViews > 0 ? round(($voteViews / $allPujasViews) * 100, 1).'% from Directory' : ($homeViews > 0 ? round(($voteViews / $homeViews) * 100, 1).'% from Home' : '0%'),
-                'pct' => $allPujasViews > 0 ? min(100, round(($voteViews / $allPujasViews) * 100)) : 0,
                 'icon' => 'heroicon-m-cursor-arrow-rays',
-                'badge_color' => 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
             ],
             [
+                'key' => '4',
                 'step' => 4,
                 'name' => 'Vote Initiated',
                 'description' => 'Mobile number entered & SMS OTP requested',
                 'type' => 'User Action',
                 'views' => $voteInitiated,
                 'visitors' => $voteInitiatedVisitors,
-                'conversion_label' => $voteViews > 0 ? round(($voteInitiated / $voteViews) * 100, 1).'% of Vote Views' : '0%',
-                'pct' => $voteViews > 0 ? min(100, round(($voteInitiated / $voteViews) * 100)) : 0,
                 'icon' => 'heroicon-m-device-phone-mobile',
-                'badge_color' => 'bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
             ],
             [
+                'key' => '5',
                 'step' => 5,
                 'name' => 'Vote Verified',
                 'description' => 'OTP verified & vote committed to ledger',
                 'type' => 'User Action',
                 'views' => $voteVerified,
                 'visitors' => $voteVerifiedVisitors,
-                'conversion_label' => $voteInitiated > 0 ? round(($voteVerified / $voteInitiated) * 100, 1).'% of Initiated' : '0%',
-                'pct' => $voteInitiated > 0 ? min(100, round(($voteVerified / $voteInitiated) * 100)) : 0,
                 'icon' => 'heroicon-m-check-badge',
-                'badge_color' => 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
             ],
             [
+                'key' => '6',
                 'step' => 6,
                 'name' => 'Vote Success',
                 'description' => 'Confirmation screen with social share badge',
                 'type' => 'Page View',
                 'views' => $voteSuccessViews,
                 'visitors' => $voteSuccessVisitors,
-                'conversion_label' => $voteVerified > 0 ? round(($voteSuccessViews / $voteVerified) * 100, 1).'% of Verified' : '0%',
-                'pct' => $voteVerified > 0 ? min(100, round(($voteSuccessViews / $voteVerified) * 100)) : 0,
                 'icon' => 'heroicon-m-sparkles',
-                'badge_color' => 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
             ],
         ];
+
+        $baselineViews = max(1, $homeViews);
+
+        foreach ($steps as $i => &$step) {
+            $step['baseline_pct'] = round(($step['views'] / $baselineViews) * 100, 1);
+
+            if ($i === 0) {
+                $step['step_pct'] = 100;
+                $step['dropoff_count'] = 0;
+                $step['dropoff_pct'] = 0;
+            } else {
+                $prevStepViews = $steps[$i - 1]['views'];
+                $step['step_pct'] = $prevStepViews > 0 ? round(($step['views'] / $prevStepViews) * 100, 1) : 0;
+                $step['dropoff_count'] = max(0, $prevStepViews - $step['views']);
+                $step['dropoff_pct'] = $prevStepViews > 0 ? round(($step['dropoff_count'] / $prevStepViews) * 100, 1) : 0;
+            }
+        }
+
+        return $steps;
     }
 }
