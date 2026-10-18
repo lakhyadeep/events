@@ -559,7 +559,7 @@ class AdminManagementTest extends TestCase
             'ip_address' => '10.0.0.5',
         ]);
 
-        $otp = Otp::create([
+        $verifiedOtp = Otp::create([
             'phone' => '9876543110',
             'code_hash' => Hash::make('123456'),
             'purpose' => 'vote_verification',
@@ -569,14 +569,25 @@ class AdminManagementTest extends TestCase
             'ip_address' => '10.0.0.5',
         ]);
 
+        $unverifiedOtp = Otp::create([
+            'phone' => '9876543110',
+            'code_hash' => Hash::make('654321'),
+            'purpose' => 'vote_verification',
+            'expires_at' => now()->subMinute(),
+            'verified_at' => null,
+            'attempts' => 2,
+            'ip_address' => '10.0.0.9',
+        ]);
+
         Livewire::actingAs($admin)
             ->test(OtpsRelationManager::class, [
                 'ownerRecord' => $vote,
                 'pageClass' => ViewVote::class,
             ])
-            ->assertCanSeeTableRecords([$otp])
-            ->assertSee('Verified')
-            ->assertSee('10.0.0.5');
+            ->assertCanSeeTableRecords([$unverifiedOtp])
+            ->assertCanNotSeeTableRecords([$verifiedOtp])
+            ->assertSee('Expired')
+            ->assertSee('10.0.0.9');
     }
 
     public function test_vote_same_ip_relation_manager_renders_and_can_void_votes(): void

@@ -8,21 +8,27 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class OtpsRelationManager extends RelationManager
 {
     protected static string $relationship = 'otps';
 
-    protected static ?string $title = 'SMS OTP Audit Trail';
+    protected static ?string $title = 'Unverified SMS OTP Trail';
 
-    protected static string|BackedEnum|null $icon = 'heroicon-o-shield-check';
+    protected static string|BackedEnum|null $icon = 'heroicon-o-shield-exclamation';
 
     public static function getBadge(Model $ownerRecord, string $pageClass): ?string
     {
-        $count = $ownerRecord->otps()->count();
+        $count = $ownerRecord->otps()->whereNull('verified_at')->count();
 
         return $count > 0 ? (string) $count : null;
+    }
+
+    public static function getBadgeColor(Model $ownerRecord, string $pageClass): ?string
+    {
+        return 'warning';
     }
 
     public function form(Schema $schema): Schema
@@ -34,6 +40,10 @@ class OtpsRelationManager extends RelationManager
     {
         return $table
             ->recordTitleAttribute('phone')
+            ->modifyQueryUsing(fn (Builder $query) => $query->whereNull('verified_at'))
+            ->emptyStateHeading('No unverified OTPs')
+            ->emptyStateDescription('All dispatched OTPs for this number were successfully verified or none exist.')
+            ->emptyStateIcon('heroicon-o-check-badge')
             ->defaultSort('created_at', 'desc')
             ->columns([
                 TextColumn::make('created_at')
@@ -46,9 +56,6 @@ class OtpsRelationManager extends RelationManager
                     ->label('Status')
                     ->badge()
                     ->state(function (Otp $record): string {
-                        if ($record->isVerified()) {
-                            return 'Verified';
-                        }
                         if ($record->isExpired()) {
                             return 'Expired';
                         }
@@ -56,9 +63,6 @@ class OtpsRelationManager extends RelationManager
                         return 'Pending / Unverified';
                     })
                     ->color(function (Otp $record): string {
-                        if ($record->isVerified()) {
-                            return 'success';
-                        }
                         if ($record->isExpired()) {
                             return 'danger';
                         }
@@ -66,9 +70,6 @@ class OtpsRelationManager extends RelationManager
                         return 'warning';
                     })
                     ->icon(function (Otp $record): string {
-                        if ($record->isVerified()) {
-                            return 'heroicon-o-check-badge';
-                        }
                         if ($record->isExpired()) {
                             return 'heroicon-o-x-circle';
                         }
@@ -76,11 +77,10 @@ class OtpsRelationManager extends RelationManager
                         return 'heroicon-o-clock';
                     }),
 
-                TextColumn::make('verified_at')
-                    ->label('Verified At')
+                TextColumn::make('expires_at')
+                    ->label('Expires At')
                     ->dateTime('d M Y, h:i:s A')
                     ->timezone('Asia/Kolkata')
-                    ->placeholder('Not verified')
                     ->sortable(),
 
                 TextColumn::make('attempts')
