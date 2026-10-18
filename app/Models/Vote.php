@@ -56,6 +56,11 @@ class Vote extends Model
         return $this->hasMany(Otp::class, 'phone', 'mobile_number');
     }
 
+    public function sameIpVotes(): HasMany
+    {
+        return $this->hasMany(Vote::class, 'ip_address', 'ip_address');
+    }
+
     /**
      * Scope for a specific mobile number.
      *
@@ -181,6 +186,23 @@ class Vote extends Model
         }
 
         return static::where('ip_address', $this->ip_address)->count();
+    }
+
+    /**
+     * Retrieve all votes submitted from the same IP address.
+     *
+     * @return Collection<int, Vote>
+     */
+    public function getSameIpVotesAttribute(): Collection
+    {
+        if (empty($this->ip_address)) {
+            return new Collection([$this]);
+        }
+
+        return static::where('ip_address', $this->ip_address)
+            ->with(['participant', 'award', 'event'])
+            ->latest('id')
+            ->get();
     }
 
     /**

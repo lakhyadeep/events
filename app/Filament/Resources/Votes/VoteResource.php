@@ -3,7 +3,11 @@
 namespace App\Filament\Resources\Votes;
 
 use App\Filament\Resources\Votes\Pages\ListVotes;
+use App\Filament\Resources\Votes\Pages\ViewVote;
+use App\Filament\Resources\Votes\RelationManagers\OtpsRelationManager;
+use App\Filament\Resources\Votes\RelationManagers\SameIpVotesRelationManager;
 use App\Filament\Resources\Votes\Schemas\VoteForm;
+use App\Filament\Resources\Votes\Schemas\VoteInfolist;
 use App\Filament\Resources\Votes\Tables\VotesTable;
 use App\Models\Vote;
 use BackedEnum;
@@ -33,6 +37,11 @@ class VoteResource extends Resource
         return VoteForm::configure($schema);
     }
 
+    public static function infolist(Schema $schema): Schema
+    {
+        return VoteInfolist::configure($schema);
+    }
+
     public static function table(Table $table): Table
     {
         return VotesTable::configure($table);
@@ -41,7 +50,8 @@ class VoteResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            OtpsRelationManager::class,
+            SameIpVotesRelationManager::class,
         ];
     }
 
@@ -49,6 +59,7 @@ class VoteResource extends Resource
     {
         return [
             'index' => ListVotes::route('/'),
+            'view' => ViewVote::route('/{record}'),
         ];
     }
 }

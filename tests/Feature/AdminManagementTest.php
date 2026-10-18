@@ -8,6 +8,11 @@ use App\Filament\Resources\Events\Pages\CreateEvent;
 use App\Filament\Resources\Participants\Pages\EditParticipant;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Votes\Pages\ListVotes;
+use App\Filament\Resources\Votes\Pages\ViewVote;
+use App\Filament\Resources\Votes\RelationManagers\OtpsRelationManager;
+use App\Filament\Resources\Votes\RelationManagers\SameIpVotesRelationManager;
+use App\Filament\Resources\Votes\Schemas\VoteInfolist;
+use App\Filament\Resources\Votes\VoteResource;
 use App\Http\Resources\ParticipantResource;
 use App\Models\Event;
 use App\Models\Otp;
@@ -17,6 +22,7 @@ use App\Models\User;
 use App\Models\Vote;
 use App\Models\Winner;
 use Database\Seeders\DatabaseSeeder;
+use Filament\Schemas\Schema;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -98,7 +104,7 @@ class AdminManagementTest extends TestCase
 
         $response = $this->actingAs($admin)->get('/admin');
         $response->assertStatus(200);
-        $response->assertSee('Total Verified Votes');
+        $response->assertSee('Today&#039;s Verified Votes', false);
         $response->assertSee('Unique Voters');
         $response->assertSee('Votes Cast Today');
         $response->assertSee('SMS Dispatched Today');
@@ -108,7 +114,7 @@ class AdminManagementTest extends TestCase
         // Test second visit when stats are loaded from cache
         $cachedResponse = $this->actingAs($admin)->get('/admin');
         $cachedResponse->assertStatus(200);
-        $cachedResponse->assertSee('Total Verified Votes');
+        $cachedResponse->assertSee('Today&#039;s Verified Votes', false);
     }
 
     public function test_associate_sponsors_scope_limits_to_five(): void
@@ -425,5 +431,190 @@ class AdminManagementTest extends TestCase
         $this->assertSame(1, $trail['attempts']);
         $this->assertSame('10.0.0.1', $trail['otp_ip']);
         $this->assertCount(1, $trail['recent_otps']);
+    }
+
+    public function test_vote_same_ip_relation_manager_can_bulk_void_votes(): void
+    {
+        $admin = User::where('email', 'admin@dib24x7.com')->first() ?? User::factory()->admin()->create();
+
+        $event = Event::first() ?? Event::factory()->create();
+        $participant = Participant::factory()->create(['event_id' => $event->id]);
+
+        $vote1 = Vote::create([
+            'event_id' => $event->id,
+            'participant_id' => $participant->id,
+            'voter_name' => 'Bulk Keep',
+            'mobile_number' => '9876543301',
+            'ip_address' => '10.50.0.9',
+        ]);
+
+        $vote2 = Vote::create([
+            'event_id' => $event->id,
+            'participant_id' => $participant->id,
+            'voter_name' => 'Bulk Void A',
+            'mobile_number' => '9876543302',
+            'ip_address' => '10.50.0.9',
+        ]);
+
+        $vote3 = Vote::create([
+            'event_id' => $event->id,
+            'participant_id' => $participant->id,
+            'voter_name' => 'Bulk Void B',
+            'mobile_number' => '9876543303',
+            'ip_address' => '10.50.0.9',
+        ]);
+
+        Livewire::actingAs($admin)
+            ->test(SameIpVotesRelationManager::class, [
+                'ownerRecord' => $vote1,
+                'pageClass' => ViewVote::class,
+            ])
+            ->assertCanSeeTableRecords([$vote2, $vote3])
+            ->assertCanNotSeeTableRecords([$vote1])
+            ->assertDontSee('Bulk Keep')
+            ->assertSee('Bulk Void A')
+            ->assertSee('Bulk Void B')
+            ->callTableBulkAction('delete', [$vote2, $vote3], data: ['current_password' => 'password'])
+            ->assertCanNotSeeTableRecords([$vote2, $vote3]);
+
+        $this->assertDatabaseMissing('votes', ['id' => $vote2->id]);
+        $this->assertDatabaseMissing('votes', ['id' => $vote3->id]);
+        $this->assertDatabaseHas('votes', ['id' => $vote1->id]);
+    }
+
+    public function test_vote_infolist_can_be_configured_and_rendered(): void
+    {
+        $schema = new Schema;
+        $configured = VoteInfolist::configure($schema);
+
+        $this->assertInstanceOf(Schema::class, $configured);
+        $this->assertNotEmpty($configured->getComponents());
+    }
+
+    public function test_admin_can_view_vote_infolist_modal(): void
+    {
+        $admin = User::where('email', 'admin@dib24x7.com')->first() ?? User::factory()->admin()->create();
+
+        $event = Event::first() ?? Event::factory()->create();
+        $participant = Participant::factory()->create(['event_id' => $event->id, 'display_name' => 'Puja Committee Alpha']);
+
+        $vote = Vote::create([
+            'event_id' => $event->id,
+            'participant_id' => $participant->id,
+            'voter_name' => 'Dipankar Roy',
+            'mobile_number' => '9876543888',
+            'ip_address' => '192.168.10.15',
+            'user_agent' => 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)',
+        ]);
+
+        Livewire::actingAs($admin)
+            ->test(ListVotes::class)
+            ->assertTableActionExists('view')
+            ->assertTableActionExists('same_ip_votes');
+    }
+
+    public function test_admin_can_access_view_vote_page(): void
+    {
+        $admin = User::where('email', 'admin@dib24x7.com')->first() ?? User::factory()->admin()->create();
+
+        $event = Event::first() ?? Event::factory()->create();
+        $participant = Participant::factory()->create(['event_id' => $event->id, 'display_name' => 'Puja Committee Gamma']);
+
+        $vote = Vote::create([
+            'event_id' => $event->id,
+            'participant_id' => $participant->id,
+            'voter_name' => 'Kalyan Mukherjee',
+            'mobile_number' => '9876543999',
+            'ip_address' => '192.168.10.99',
+            'user_agent' => 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)',
+        ]);
+
+        $url = VoteResource::getUrl('view', ['record' => $vote]);
+
+        $response = $this->actingAs($admin)->get($url);
+        $response->assertStatus(200);
+        $response->assertSee('Kalyan Mukherjee');
+        $response->assertSee('Puja Committee Gamma');
+        $response->assertSee('Cryptographic OTP Verification Trail');
+        $response->assertSee('Integrity &amp; Fraud Check', false);
+
+        Livewire::actingAs($admin)
+            ->test(ViewVote::class, ['record' => $vote->id])
+            ->assertActionExists('blacklist')
+            ->assertActionExists('delete');
+    }
+
+    public function test_vote_otps_relation_manager_renders_audit_trail(): void
+    {
+        $admin = User::where('email', 'admin@dib24x7.com')->first() ?? User::factory()->admin()->create();
+
+        $event = Event::first() ?? Event::factory()->create();
+        $participant = Participant::factory()->create(['event_id' => $event->id]);
+
+        $vote = Vote::create([
+            'event_id' => $event->id,
+            'participant_id' => $participant->id,
+            'voter_name' => 'Rahul Roy',
+            'mobile_number' => '9876543110',
+            'ip_address' => '10.0.0.5',
+        ]);
+
+        $otp = Otp::create([
+            'phone' => '9876543110',
+            'code_hash' => Hash::make('123456'),
+            'purpose' => 'vote_verification',
+            'expires_at' => now()->addMinutes(5),
+            'verified_at' => now(),
+            'attempts' => 0,
+            'ip_address' => '10.0.0.5',
+        ]);
+
+        Livewire::actingAs($admin)
+            ->test(OtpsRelationManager::class, [
+                'ownerRecord' => $vote,
+                'pageClass' => ViewVote::class,
+            ])
+            ->assertCanSeeTableRecords([$otp])
+            ->assertSee('Verified')
+            ->assertSee('10.0.0.5');
+    }
+
+    public function test_vote_same_ip_relation_manager_renders_and_can_void_votes(): void
+    {
+        $admin = User::where('email', 'admin@dib24x7.com')->first() ?? User::factory()->admin()->create();
+
+        $event = Event::first() ?? Event::factory()->create();
+        $participant = Participant::factory()->create(['event_id' => $event->id, 'display_name' => 'Puja Committee Zeta']);
+
+        $vote1 = Vote::create([
+            'event_id' => $event->id,
+            'participant_id' => $participant->id,
+            'voter_name' => 'Same IP First',
+            'mobile_number' => '9876543211',
+            'ip_address' => '192.168.99.1',
+        ]);
+
+        $vote2 = Vote::create([
+            'event_id' => $event->id,
+            'participant_id' => $participant->id,
+            'voter_name' => 'Same IP Second',
+            'mobile_number' => '9876543212',
+            'ip_address' => '192.168.99.1',
+        ]);
+
+        Livewire::actingAs($admin)
+            ->test(SameIpVotesRelationManager::class, [
+                'ownerRecord' => $vote1,
+                'pageClass' => ViewVote::class,
+            ])
+            ->assertCanSeeTableRecords([$vote2])
+            ->assertCanNotSeeTableRecords([$vote1])
+            ->assertDontSee('Same IP First')
+            ->assertSee('Same IP Second')
+            ->callTableAction('delete', $vote2, data: ['current_password' => 'password'])
+            ->assertCanNotSeeTableRecords([$vote2]);
+
+        $this->assertDatabaseMissing('votes', ['id' => $vote2->id]);
+        $this->assertDatabaseHas('votes', ['id' => $vote1->id]);
     }
 }
