@@ -9,6 +9,7 @@ use App\Models\Event;
 use App\Models\Otp;
 use App\Models\OtpSetting;
 use App\Models\Participant;
+use App\Models\Vote;
 use App\Services\Fraud\FraudPreventionService;
 use App\Services\Otp\Drivers\LogSmsDriver;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -223,6 +224,108 @@ class FraudPreventionTest extends TestCase
                 'success' => false,
                 'allowed' => false,
                 'message' => 'Maximum voting limit reached for this device. Multiple votes using different phone numbers on the same device are not permitted.',
+            ]);
+    }
+
+    public function test_ip_time_window_restriction_blocks_excessive_votes_from_same_ip(): void
+    {
+        config([
+            'fraud.ip_restriction_enabled' => true,
+            'fraud.max_votes_per_ip' => 3,
+            'fraud.ip_window_minutes' => 30,
+        ]);
+
+        $testIp = '192.168.10.50';
+
+        // Seed 3 votes from this IP within the 30-minute window
+        for ($i = 1; $i <= 3; $i++) {
+            $vote = Vote::create([
+                'event_id' => $this->event->id,
+                'participant_id' => $this->participant->id,
+                'mobile_number' => "980000001{$i}",
+                'ip_address' => $testIp,
+            ]);
+            $vote->forceFill(['created_at' => now()->subMinutes(5)])->save();
+        }
+
+        // 4th request from same IP for OTP should be blocked
+        $otpResponse = $this->withServerVariables(['REMOTE_ADDR' => $testIp])
+            ->postJson('/api/v1/otp/send', [
+                'phone' => '9800000099',
+                'purpose' => 'voting',
+                'event_id' => $this->event->id,
+                'participant_id' => $this->participant->id,
+            ]);
+
+        $otpResponse->assertStatus(422)
+            ->assertJson([
+                'success' => false,
+                'message' => 'Voting limit reached for this network (3 votes allowed every 30 minutes). Please try again after some time.',
+            ]);
+
+        // 4th request from same IP for eligibility check should be blocked
+        $checkResponse = $this->withServerVariables(['REMOTE_ADDR' => $testIp])
+            ->postJson('/api/v1/votes/check', [
+                'phone' => '9800000099',
+                'event_id' => $this->event->id,
+                'participant_id' => $this->participant->id,
+            ]);
+
+        $checkResponse->assertStatus(422)
+            ->assertJson([
+                'success' => false,
+                'allowed' => false,
+                'message' => 'Voting limit reached for this network (3 votes allowed every 30 minutes). Please try again after some time.',
+            ]);
+
+        // A different IP should NOT be blocked
+        $differentIpResponse = $this->withServerVariables(['REMOTE_ADDR' => '192.168.10.99'])
+            ->postJson('/api/v1/votes/check', [
+                'phone' => '9800000099',
+                'event_id' => $this->event->id,
+                'participant_id' => $this->participant->id,
+            ]);
+
+        $differentIpResponse->assertStatus(200)
+            ->assertJson([
+                'success' => true,
+                'allowed' => true,
+            ]);
+    }
+
+    public function test_ip_restriction_automatically_unblocks_when_time_window_passes(): void
+    {
+        config([
+            'fraud.ip_restriction_enabled' => true,
+            'fraud.max_votes_per_ip' => 3,
+            'fraud.ip_window_minutes' => 30,
+        ]);
+
+        $testIp = '192.168.10.60';
+
+        // Seed 3 votes created 35 minutes ago (outside the 30-minute window)
+        for ($i = 1; $i <= 3; $i++) {
+            $vote = Vote::create([
+                'event_id' => $this->event->id,
+                'participant_id' => $this->participant->id,
+                'mobile_number' => "980000002{$i}",
+                'ip_address' => $testIp,
+            ]);
+            $vote->forceFill(['created_at' => now()->subMinutes(35)])->save();
+        }
+
+        // Check should be ALLOWED because previous votes aged out of the 30-minute window
+        $checkResponse = $this->withServerVariables(['REMOTE_ADDR' => $testIp])
+            ->postJson('/api/v1/votes/check', [
+                'phone' => '9800000077',
+                'event_id' => $this->event->id,
+                'participant_id' => $this->participant->id,
+            ]);
+
+        $checkResponse->assertStatus(200)
+            ->assertJson([
+                'success' => true,
+                'allowed' => true,
             ]);
     }
 }

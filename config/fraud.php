@@ -41,4 +41,20 @@ return [
         '8448192038',
         '9289102938',
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | IP Time-Window Voting Restrictions
+    |--------------------------------------------------------------------------
+    | Limits the number of votes allowed from the same IP address within a
+    | sliding time window. Prevents automated scripts and cyber-café bot farms
+    | while automatically unblocking the IP once the time window expires.
+    */
+    'ip_restriction_enabled' => (bool) env('FRAUD_IP_RESTRICTION_ENABLED', true),
+
+    'max_votes_per_ip' => (int) env('FRAUD_MAX_VOTES_PER_IP', 3),
+
+    'ip_window_minutes' => (int) env('FRAUD_IP_WINDOW_MINUTES', 30),
+
+    'ip_whitelist' => array_filter(array_map('trim', explode(',', (string) env('FRAUD_IP_WHITELIST', '')))),
 ];

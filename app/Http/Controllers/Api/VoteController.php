@@ -79,6 +79,15 @@ class VoteController extends Controller
             ], 422);
         }
 
+        $ipCheck = $this->fraudPreventionService->checkIpVoteLimit($request->ip(), $event->id);
+        if (! $ipCheck['allowed']) {
+            return response()->json([
+                'success' => false,
+                'allowed' => false,
+                'message' => $ipCheck['message'],
+            ], 422);
+        }
+
         $participantId = ! empty($validated['participant_id']) ? (int) $validated['participant_id'] : null;
         $awardId = ! empty($validated['award_id'])
             ? (int) $validated['award_id']
@@ -191,6 +200,14 @@ class VoteController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => $deviceCheck['message'],
+            ], 422);
+        }
+
+        $ipCheck = $this->fraudPreventionService->checkIpVoteLimit($request->ip(), $event->id);
+        if (! $ipCheck['allowed']) {
+            return response()->json([
+                'success' => false,
+                'message' => $ipCheck['message'],
             ], 422);
         }
 

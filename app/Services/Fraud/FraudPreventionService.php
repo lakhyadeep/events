@@ -3,6 +3,7 @@
 namespace App\Services\Fraud;
 
 use App\Models\OtpSetting;
+use App\Models\Vote;
 use Illuminate\Support\Facades\Cache;
 
 class FraudPreventionService
@@ -140,5 +141,52 @@ class FraudPreventionService
             $usedPhones[] = $cleanPhone;
             Cache::put($cacheKey, $usedPhones, now()->addDays(30));
         }
+    }
+
+    /**
+     * Check if an IP address has exceeded the maximum allowed votes within a sliding time window.
+     *
+     * @return array{allowed: bool, message?: string}
+     */
+    public function checkIpVoteLimit(?string $ipAddress, ?int $eventId = null): array
+    {
+        if (empty($ipAddress) || ! config('fraud.ip_restriction_enabled', true)) {
+            return ['allowed' => true];
+        }
+
+        // Whitelisted IPs
+        $whitelist = config('fraud.ip_whitelist', []);
+        if (is_string($whitelist)) {
+            $whitelist = array_filter(array_map('trim', explode(',', $whitelist)));
+        }
+        if (in_array($ipAddress, (array) $whitelist, true)) {
+            return ['allowed' => true];
+        }
+
+        $maxVotes = (int) config('fraud.max_votes_per_ip', 3);
+        $windowMinutes = (int) config('fraud.ip_window_minutes', 30);
+
+        if ($maxVotes <= 0 || $windowMinutes <= 0) {
+            return ['allowed' => true];
+        }
+
+        $query = Vote::query()
+            ->where('ip_address', $ipAddress)
+            ->where('created_at', '>=', now()->subMinutes($windowMinutes));
+
+        if ($eventId) {
+            $query->where('event_id', $eventId);
+        }
+
+        $recentCount = $query->count();
+
+        if ($recentCount >= $maxVotes) {
+            return [
+                'allowed' => false,
+                'message' => "Voting limit reached for this network ({$maxVotes} votes allowed every {$windowMinutes} minutes). Please try again after some time.",
+            ];
+        }
+
+        return ['allowed' => true];
     }
 }
