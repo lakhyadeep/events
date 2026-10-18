@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Models\Otp;
 use App\Models\PageView;
 use App\Models\UserActivity;
 use App\Models\Vote;
@@ -166,10 +167,6 @@ class PageWiseFunnelWidget extends TableWidget
         $voteViews = (clone $viewsQuery)->whereIn('page_type', ['vote', 'vote_screen'])->count();
         $voteVisitors = (clone $viewsQuery)->whereIn('page_type', ['vote', 'vote_screen'])->distinct('visitor_id')->count('visitor_id');
 
-        // 4. Vote Initiated (OTP Requested / Form Submitted)
-        $voteInitiated = (clone $activityQuery)->action('vote_initiated')->count();
-        $voteInitiatedVisitors = (clone $activityQuery)->action('vote_initiated')->distinct('visitor_id')->count('visitor_id');
-
         // 5. Vote Verified (OTP Verified & Cast)
         $voteVerifiedAct = (clone $activityQuery)->action('vote_verified')->count();
         $officialVotes = Vote::query()->when($this->eventId, fn ($q) => $q->where('event_id', $this->eventId))
@@ -180,6 +177,18 @@ class PageWiseFunnelWidget extends TableWidget
             $voteVerifiedVisitors = Vote::query()->when($this->eventId, fn ($q) => $q->where('event_id', $this->eventId))
                 ->whereBetween('created_at', [$startDate, $endDate])->distinct('mobile_number')->count('mobile_number');
         }
+
+        // 4. Vote Initiated (OTP Requested / Form Submitted)
+        $voteInitiatedAct = (clone $activityQuery)->action('vote_initiated')->count();
+        $officialOtps = Otp::query()->where('purpose', 'voting')
+            ->whereBetween('created_at', [$startDate, $endDate])->count();
+        // A vote cannot be verified without having been initiated:
+        $voteInitiated = max($voteInitiatedAct, $officialOtps, $voteVerified);
+
+        $voteInitiatedVisitors = (clone $activityQuery)->action('vote_initiated')->distinct('visitor_id')->count('visitor_id');
+        $officialOtpPhones = Otp::query()->where('purpose', 'voting')
+            ->whereBetween('created_at', [$startDate, $endDate])->distinct('phone')->count('phone');
+        $voteInitiatedVisitors = max($voteInitiatedVisitors, $officialOtpPhones, $voteVerifiedVisitors);
 
         // 6. Vote Success Screen
         $voteSuccessViews = (clone $viewsQuery)->where('page_type', 'vote_success')->count();

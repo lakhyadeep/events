@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Models\Otp;
 use App\Models\PageView;
 use App\Models\UserActivity;
 use App\Models\Vote;
@@ -88,13 +89,6 @@ class AnalyticsStatsOverview extends StatsOverviewWidget
             ->whereBetween('created_at', [$prevStartDate, $prevEndDate])->count();
         $voteScreenTrend = $this->calculatePercentageChange($voteScreenViews, $prevVoteScreenViews);
 
-        // 4. Votes Initiated (OTP Requested / Vote Clicked)
-        $voteInitiated = (clone $activityQuery)->action('vote_initiated')
-            ->whereBetween('created_at', [$startDate, $endDate])->count();
-        $prevVoteInitiated = (clone $activityQuery)->action('vote_initiated')
-            ->whereBetween('created_at', [$prevStartDate, $prevEndDate])->count();
-        $voteInitiatedTrend = $this->calculatePercentageChange($voteInitiated, $prevVoteInitiated);
-
         // 5. Votes Verified (OTP Verified & Vote Cast Atomically)
         $voteVerified = (clone $activityQuery)->action('vote_verified')
             ->whereBetween('created_at', [$startDate, $endDate])->count();
@@ -108,6 +102,20 @@ class AnalyticsStatsOverview extends StatsOverviewWidget
             ->whereBetween('created_at', [$prevStartDate, $prevEndDate])->count();
         $prevEffectiveVerified = max($prevVoteVerified, $prevOfficialVotes);
         $voteVerifiedTrend = $this->calculatePercentageChange($effectiveVerified, $prevEffectiveVerified);
+
+        // 4. Votes Initiated (OTP Requested / Vote Clicked)
+        $voteInitiated = (clone $activityQuery)->action('vote_initiated')
+            ->whereBetween('created_at', [$startDate, $endDate])->count();
+        $officialOtps = Otp::query()->where('purpose', 'voting')
+            ->whereBetween('created_at', [$startDate, $endDate])->count();
+        $effectiveInitiated = max($voteInitiated, $officialOtps, $effectiveVerified);
+
+        $prevVoteInitiated = (clone $activityQuery)->action('vote_initiated')
+            ->whereBetween('created_at', [$prevStartDate, $prevEndDate])->count();
+        $prevOfficialOtps = Otp::query()->where('purpose', 'voting')
+            ->whereBetween('created_at', [$prevStartDate, $prevEndDate])->count();
+        $prevEffectiveInitiated = max($prevVoteInitiated, $prevOfficialOtps, $prevEffectiveVerified);
+        $voteInitiatedTrend = $this->calculatePercentageChange($effectiveInitiated, $prevEffectiveInitiated);
 
         // 6. Vote Success Screen Views
         $voteSuccessViews = (clone $viewsQuery)->where('page_type', 'vote_success')
@@ -135,11 +143,11 @@ class AnalyticsStatsOverview extends StatsOverviewWidget
                 ->color($voteScreenTrend['color'])
                 ->chart([1, 4, 9, 15, 24, max(1, $voteScreenViews)]),
 
-            Stat::make('Votes Initiated', number_format($voteInitiated))
+            Stat::make('Votes Initiated', number_format($effectiveInitiated))
                 ->description($voteInitiatedTrend['text'].' OTPs requested')
                 ->descriptionIcon('heroicon-m-device-phone-mobile')
                 ->color('amber')
-                ->chart([1, 3, 7, 12, 20, max(1, $voteInitiated)]),
+                ->chart([1, 3, 7, 12, 20, max(1, $effectiveInitiated)]),
 
             Stat::make('Votes Verified', number_format($effectiveVerified))
                 ->description($voteVerifiedTrend['text'].' verified votes')

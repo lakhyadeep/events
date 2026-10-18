@@ -64,7 +64,7 @@ class TopPujasTableWidget extends TableWidget
 
                 TextColumn::make('vote_clicks')
                     ->label('Votes Initiated')
-                    ->state(fn (Participant $record): int => $this->getVoteClicks($record->id))
+                    ->state(fn (Participant $record): int => max($this->getVoteClicks($record->id), (int) ($record->votes_count ?? 0)))
                     ->icon('heroicon-m-device-phone-mobile')
                     ->badge()
                     ->color('amber'),
