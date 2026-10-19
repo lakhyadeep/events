@@ -50,7 +50,7 @@ class VoteResource extends Resource
     public static function getRelations(): array
     {
         return [
-            OtpsRelationManager::class,
+                // OtpsRelationManager::class,
             SameIpVotesRelationManager::class,
         ];
     }
