@@ -17,31 +17,70 @@ class Dashboard extends BaseDashboard
 {
     use HasFiltersForm;
 
+    /**
+     * @var array<string, mixed> | null
+     */
+    public ?array $filterData = [];
+
     public function getMaxContentWidth(): Width|string|null
     {
         return Width::Full;
     }
 
-    /**
-     * @return array<Action>
-     */
-    protected function getHeaderActions(): array
+    public function mount(): void
     {
-        return [
-            Action::make('clearFilters')
-                ->label('Reset Filters')
-                ->icon('heroicon-m-arrow-path')
-                ->color('gray')
-                ->action(function (): void {
-                    $this->filters = null;
-                    $this->getFiltersForm()->fill([]);
-                }),
-        ];
+        $this->mountHasFilters();
+
+        if ($this->filters) {
+            $this->getFiltersForm()->fill($this->filters);
+        }
+    }
+
+    public function applyFilters(): void
+    {
+        $this->filters = $this->getFiltersForm()->getState();
+
+        if ($this->persistsFiltersInSession()) {
+            session()->put(
+                $this->getFiltersSessionKey(),
+                $this->filters,
+            );
+        }
+    }
+
+    public function resetFilters(): void
+    {
+        $this->filters = null;
+        $this->getFiltersForm()->fill([]);
+
+        if ($this->persistsFiltersInSession()) {
+            session()->forget($this->getFiltersSessionKey());
+        }
+    }
+
+    public function applyFiltersAction(): Action
+    {
+        return Action::make('applyFilters')
+            ->label('Apply Filters')
+            ->icon('heroicon-m-funnel')
+            ->color('primary')
+            ->action(fn () => $this->applyFilters());
+    }
+
+    public function clearFiltersAction(): Action
+    {
+        return Action::make('clearFilters')
+            ->label('Reset Filters')
+            ->icon('heroicon-m-arrow-path')
+            ->color('gray')
+            ->action(fn () => $this->resetFilters());
     }
 
     public function filtersForm(Schema $schema): Schema
     {
         return $schema
+            ->live(condition: false)
+            ->statePath('filterData')
             ->columns([
                 'default' => 1,
                 'sm' => 1,
@@ -57,14 +96,8 @@ class Dashboard extends BaseDashboard
                     ->collapsible()
                     ->columnSpanFull()
                     ->headerActions([
-                        Action::make('clearFilters')
-                            ->label('Reset Filters')
-                            ->icon('heroicon-m-arrow-path')
-                            ->color('gray')
-                            ->action(function (): void {
-                                $this->filters = null;
-                                $this->getFiltersForm()->fill([]);
-                            }),
+                        $this->applyFiltersAction(),
+                        $this->clearFiltersAction(),
                     ])
                     ->schema([
                         Select::make('rangePreset')
@@ -135,8 +168,7 @@ class Dashboard extends BaseDashboard
                             ->prefixIcon('heroicon-m-calendar')
                             ->native(false)
                             ->seconds(false)
-                            ->live()
-                            ->afterStateUpdated(fn (Set $set) => $set('rangePreset', null)),
+                            ->live(condition: false),
 
                         DateTimePicker::make('endDate')
                             ->label('End Date & Time')
@@ -145,8 +177,7 @@ class Dashboard extends BaseDashboard
                             ->native(false)
                             ->seconds(false)
                             ->minDate(fn (Get $get) => $get('startDate'))
-                            ->live()
-                            ->afterStateUpdated(fn (Set $set) => $set('rangePreset', null)),
+                            ->live(condition: false),
                     ])
                     ->columns([
                         'default' => 1,

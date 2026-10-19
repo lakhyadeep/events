@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Filament\Pages\Analytics;
+use App\Filament\Widgets\PageWiseFunnelWidget;
 use App\Models\Event;
 use App\Models\PageView;
 use App\Models\Participant;
@@ -119,12 +120,94 @@ class AnalyticsTrackingTest extends TestCase
         $admin = User::first() ?? User::factory()->create();
         $this->actingAs($admin);
 
-        Livewire::test(Analytics::class)
+        $component = Livewire::test(Analytics::class)
             ->assertSuccessful()
-            ->set('period', 'today')
-            ->assertSet('period', 'today')
-            ->set('period', '30days')
-            ->assertSet('period', '30days');
+            ->assertSee('Audience &amp; Telemetry Filters', false)
+            ->assertSee('Event Scope')
+            ->assertSee('Quick Range Preset')
+            ->assertSee('Start Date &amp; Time', false)
+            ->assertSee('End Date &amp; Time', false)
+            ->set('filterData.rangePreset', 'last_30_mins');
+
+        $this->assertNotNull($component->get('filterData.startDate'));
+        $this->assertNotNull($component->get('filterData.endDate'));
+
+        $component->set('filterData.rangePreset', 'last_4_hours');
+        $this->assertNotNull($component->get('filterData.startDate'));
+        $this->assertNotNull($component->get('filterData.endDate'));
+        // Verify filters property does not update yet (queries do not run until applyFilters)
+        $this->assertEquals('last_7_days', $component->get('filters.rangePreset'));
+
+        $activeEventId = Event::active()->latest('year')->value('id') ?? Event::latest('year')->value('id');
+        if ($activeEventId) {
+            $this->assertEquals((string) $activeEventId, (string) $component->get('filterData.eventId'));
+        }
+
+        $event = Event::first();
+        if ($event) {
+            $component->set('filterData.eventId', $event->id)
+                ->assertSet('filterData.eventId', (string) $event->id);
+        }
+
+        $component->callAction('applyFilters')
+            ->assertHasNoErrors()
+            ->assertSet('filters.rangePreset', 'last_4_hours');
+
+        $component->callAction('clearFilters')
+            ->assertSet('filterData.startDate', null)
+            ->assertSet('filterData.endDate', null)
+            ->assertSet('filters.startDate', null)
+            ->assertSet('filters.endDate', null);
+    }
+
+    public function test_page_wise_funnel_widget_handles_hours_and_minutes_and_reacts_to_page_filters(): void
+    {
+        $admin = User::first() ?? User::factory()->create();
+        $this->actingAs($admin);
+
+        // 1. Default (Last 7 Days, Global)
+        Livewire::test(PageWiseFunnelWidget::class)
+            ->assertSuccessful()
+            ->assertSee('Last 7 Days')
+            ->assertSee('Global Scope');
+
+        // 2. Preset: last_hour
+        Livewire::test(PageWiseFunnelWidget::class, [
+            'pageFilters' => [
+                'rangePreset' => 'last_hour',
+                'eventId' => null,
+            ],
+        ])->assertSuccessful()
+            ->assertSee('Last 1 Hour')
+            ->assertSee('Global Scope');
+
+        // 3. Preset: last_30_mins
+        Livewire::test(PageWiseFunnelWidget::class, [
+            'pageFilters' => [
+                'rangePreset' => 'last_30_mins',
+                'eventId' => null,
+            ],
+        ])->assertSuccessful()
+            ->assertSee('Last 30 Minutes')
+            ->assertSee('Global Scope');
+
+        // 4. Custom Event Scope
+        Livewire::test(PageWiseFunnelWidget::class, [
+            'pageFilters' => [
+                'rangePreset' => 'last_7_days',
+                'eventId' => 999,
+            ],
+        ])->assertSuccessful()
+            ->assertSee('Event #999');
+
+        // 5. Custom Date Range
+        Livewire::test(PageWiseFunnelWidget::class, [
+            'pageFilters' => [
+                'startDate' => now()->subHours(3)->toDateTimeString(),
+                'endDate' => now()->toDateTimeString(),
+            ],
+        ])->assertSuccessful()
+            ->assertSee('Stage-to-stage transition rates & drop-off analysis');
     }
 
     public function test_prune_command_deletes_records_older_than_days(): void

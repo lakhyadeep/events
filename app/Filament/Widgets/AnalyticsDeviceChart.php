@@ -3,13 +3,18 @@
 namespace App\Filament\Widgets;
 
 use App\Models\PageView;
+use Carbon\Carbon;
 use Filament\Widgets\ChartWidget;
+use Filament\Widgets\Concerns\InteractsWithPageFilters;
+use Livewire\Attributes\On;
 
 class AnalyticsDeviceChart extends ChartWidget
 {
+    use InteractsWithPageFilters;
+
     public ?int $eventId = null;
 
-    public string $period = '7days';
+    public string $period = 'last_7_days';
 
     protected ?string $heading = 'Audience Devices & Form Factors';
 
@@ -22,18 +27,60 @@ class AnalyticsDeviceChart extends ChartWidget
         'lg' => 1,
     ];
 
+    #[On('analytics-filter-updated')]
+    public function updateFilters(?int $eventId, string $period): void
+    {
+        $this->eventId = $eventId ?: null;
+        $this->period = $period;
+        $this->updateChartData();
+    }
+
+    public function updatedPageFilters(): void
+    {
+        $this->updateChartData();
+    }
+
+    protected function getActiveEventId(): ?int
+    {
+        $id = $this->pageFilters['eventId'] ?? $this->eventId ?? null;
+
+        return $id ? (int) $id : null;
+    }
+
     /**
      * Resolve date bounds for current period.
      */
     protected function getDateRange(): array
     {
-        $now = now();
+        $startDate = ! empty($this->pageFilters['startDate'] ?? null)
+            ? rescue(fn () => Carbon::parse($this->pageFilters['startDate']), null, false)
+            : null;
 
-        return match ($this->period) {
+        $endDate = ! empty($this->pageFilters['endDate'] ?? null)
+            ? rescue(fn () => Carbon::parse($this->pageFilters['endDate']), null, false)
+            : null;
+
+        if ($startDate || $endDate) {
+            return [
+                $startDate ?? now()->subDays(7)->startOfDay(),
+                $endDate ?? now(),
+            ];
+        }
+
+        $now = now();
+        $preset = $this->pageFilters['rangePreset'] ?? $this->period ?? 'last_7_days';
+
+        return match ($preset) {
+            'last_30_mins', '30m', '30mins' => [$now->clone()->subMinutes(30), $now],
+            'last_hour', '1h', '1hour' => [$now->clone()->subHour(), $now],
+            'last_4_hours', '4h', '4hours' => [$now->clone()->subHours(4), $now],
             'today' => [today()->startOfDay(), $now],
             'yesterday' => [today()->subDay()->startOfDay(), today()->subDay()->endOfDay()],
-            '30days' => [now()->subDays(30)->startOfDay(), $now],
-            'all' => [now()->subYears(2)->startOfDay(), $now],
+            'last_24_hours', '24h', '24hours' => [$now->clone()->subHours(24), $now],
+            'last_7_days', '7days' => [now()->subDays(7)->startOfDay(), $now],
+            'last_30_days', '30days' => [now()->subDays(30)->startOfDay(), $now],
+            'this_month' => [now()->startOfMonth(), $now],
+            'all_time', 'all' => [now()->subYears(2)->startOfDay(), $now],
             default => [now()->subDays(7)->startOfDay(), $now],
         };
     }
@@ -41,9 +88,10 @@ class AnalyticsDeviceChart extends ChartWidget
     protected function getData(): array
     {
         [$startDate, $endDate] = $this->getDateRange();
+        $eventId = $this->getActiveEventId();
 
         $query = PageView::query()
-            ->forEvent($this->eventId)
+            ->forEvent($eventId)
             ->whereBetween('created_at', [$startDate, $endDate]);
 
         $mobileCount = (clone $query)->where('device_type', 'mobile')->count();

@@ -300,26 +300,26 @@ class VotesTable
                     ->tooltip('View all votes submitted from this IP address')
                     ->visible(fn (Vote $record): bool => ! empty($record->ip_address) && $record->same_ip_votes_count > 1)
                     ->url(fn (Vote $record): string => VoteResource::getUrl('view', ['record' => $record])),
-                Action::make('blacklist')
-                    ->label('Blacklist Number')
-                    ->icon('heroicon-o-no-symbol')
-                    ->color('danger')
-                    ->requiresConfirmation()
-                    ->modalHeading('Blacklist Mobile Number')
-                    ->modalDescription('Block this number from ever receiving OTPs or submitting votes in the future.')
-                    ->action(function (Vote $record): void {
-                        $cached = (array) Cache::get('fraud_disposable_blacklist', []);
-                        if (! in_array($record->mobile_number, $cached, true)) {
-                            $cached[] = $record->mobile_number;
-                            Cache::put('fraud_disposable_blacklist', $cached, now()->addYears(1));
-                        }
+                // Action::make('blacklist')
+                //     ->label('Blacklist Number')
+                //     ->icon('heroicon-o-no-symbol')
+                //     ->color('danger')
+                //     ->requiresConfirmation()
+                //     ->modalHeading('Blacklist Mobile Number')
+                //     ->modalDescription('Block this number from ever receiving OTPs or submitting votes in the future.')
+                //     ->action(function (Vote $record): void {
+                //         $cached = (array) Cache::get('fraud_disposable_blacklist', []);
+                //         if (! in_array($record->mobile_number, $cached, true)) {
+                //             $cached[] = $record->mobile_number;
+                //             Cache::put('fraud_disposable_blacklist', $cached, now()->addYears(1));
+                //         }
 
-                        Notification::make()
-                            ->title('Number Blacklisted')
-                            ->body("Mobile number +91 {$record->mobile_number} has been blocked from voting.")
-                            ->danger()
-                            ->send();
-                    }),
+                //         Notification::make()
+                //             ->title('Number Blacklisted')
+                //             ->body("Mobile number +91 {$record->mobile_number} has been blocked from voting.")
+                //             ->danger()
+                //             ->send();
+                //     }),
                 DeleteAction::make()
                     ->label('Void Vote')
                     ->modalHeading('Void Vote')

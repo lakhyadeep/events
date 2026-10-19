@@ -7,27 +7,82 @@ use App\Models\PageView;
 use App\Models\UserActivity;
 use App\Models\Vote;
 use Carbon\Carbon;
+use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Livewire\Attributes\On;
 
 class AnalyticsStatsOverview extends StatsOverviewWidget
 {
+    use InteractsWithPageFilters;
+
     public ?int $eventId = null;
 
-    public string $period = '7days';
+    public string $period = 'last_7_days';
 
     protected static bool $isLazy = false;
 
+    #[On('analytics-filter-updated')]
+    public function updateFilters(?int $eventId, string $period): void
+    {
+        $this->eventId = $eventId ?: null;
+        $this->period = $period;
+    }
+
+    protected function getActiveEventId(): ?int
+    {
+        $id = $this->pageFilters['eventId'] ?? $this->eventId ?? null;
+
+        return $id ? (int) $id : null;
+    }
+
     /**
-     * Resolve date bounds for the current active filter period.
+     * Resolve date bounds for current and previous periods.
      *
      * @return array{0: Carbon, 1: Carbon, 2: Carbon, 3: Carbon}
      */
     protected function getDateRanges(): array
     {
-        $now = now();
+        $startDate = ! empty($this->pageFilters['startDate'] ?? null)
+            ? rescue(fn () => Carbon::parse($this->pageFilters['startDate']), null, false)
+            : null;
 
-        return match ($this->period) {
+        $endDate = ! empty($this->pageFilters['endDate'] ?? null)
+            ? rescue(fn () => Carbon::parse($this->pageFilters['endDate']), null, false)
+            : null;
+
+        if ($startDate || $endDate) {
+            $start = $startDate ?? now()->subDays(7)->startOfDay();
+            $end = $endDate ?? now();
+            $diffSeconds = max(1, (int) $end->diffInSeconds($start));
+            $prevEnd = $start->clone()->subSecond();
+            $prevStart = $prevEnd->clone()->subSeconds($diffSeconds);
+
+            return [$start, $end, $prevStart, $prevEnd];
+        }
+
+        $now = now();
+        $preset = $this->pageFilters['rangePreset'] ?? $this->period ?? 'last_7_days';
+
+        return match ($preset) {
+            'last_30_mins', '30m', '30mins' => [
+                $now->clone()->subMinutes(30),
+                $now,
+                $now->clone()->subMinutes(60),
+                $now->clone()->subMinutes(30),
+            ],
+            'last_hour', '1h', '1hour' => [
+                $now->clone()->subHour(),
+                $now,
+                $now->clone()->subHours(2),
+                $now->clone()->subHour(),
+            ],
+            'last_4_hours', '4h', '4hours' => [
+                $now->clone()->subHours(4),
+                $now,
+                $now->clone()->subHours(8),
+                $now->clone()->subHours(4),
+            ],
             'today' => [
                 today()->startOfDay(),
                 $now,
@@ -40,19 +95,37 @@ class AnalyticsStatsOverview extends StatsOverviewWidget
                 today()->subDays(2)->startOfDay(),
                 today()->subDays(2)->endOfDay(),
             ],
-            '30days' => [
+            'last_24_hours', '24h', '24hours' => [
+                $now->clone()->subHours(24),
+                $now,
+                $now->clone()->subHours(48),
+                $now->clone()->subHours(24),
+            ],
+            'last_7_days', '7days' => [
+                now()->subDays(7)->startOfDay(),
+                $now,
+                now()->subDays(14)->startOfDay(),
+                now()->subDays(7)->startOfDay(),
+            ],
+            'last_30_days', '30days' => [
                 now()->subDays(30)->startOfDay(),
                 $now,
                 now()->subDays(60)->startOfDay(),
                 now()->subDays(30)->startOfDay(),
             ],
-            'all' => [
+            'this_month' => [
+                now()->startOfMonth(),
+                $now,
+                now()->subMonth()->startOfMonth(),
+                now()->subMonth()->endOfMonth(),
+            ],
+            'all_time', 'all' => [
                 now()->subYears(5)->startOfDay(),
                 $now,
                 now()->subYears(10)->startOfDay(),
                 now()->subYears(5)->startOfDay(),
             ],
-            default => [ // 7days
+            default => [
                 now()->subDays(7)->startOfDay(),
                 $now,
                 now()->subDays(14)->startOfDay(),
@@ -64,9 +137,10 @@ class AnalyticsStatsOverview extends StatsOverviewWidget
     protected function getStats(): array
     {
         [$startDate, $endDate, $prevStartDate, $prevEndDate] = $this->getDateRanges();
+        $eventId = $this->getActiveEventId();
 
-        $viewsQuery = PageView::query()->forEvent($this->eventId);
-        $activityQuery = UserActivity::query()->forEvent($this->eventId);
+        $viewsQuery = PageView::query()->forEvent($eventId);
+        $activityQuery = UserActivity::query()->forEvent($eventId);
 
         // 1. Homepage Views
         $homepageViews = (clone $viewsQuery)->whereIn('page_type', ['homepage', 'home', 'landing'])
@@ -92,13 +166,13 @@ class AnalyticsStatsOverview extends StatsOverviewWidget
         // 5. Votes Verified (OTP Verified & Vote Cast Atomically)
         $voteVerified = (clone $activityQuery)->action('vote_verified')
             ->whereBetween('created_at', [$startDate, $endDate])->count();
-        $officialVotes = Vote::query()->when($this->eventId, fn ($q) => $q->where('event_id', $this->eventId))
+        $officialVotes = Vote::query()->when($eventId, fn ($q) => $q->where('event_id', $eventId))
             ->whereBetween('created_at', [$startDate, $endDate])->count();
         $effectiveVerified = max($voteVerified, $officialVotes);
 
         $prevVoteVerified = (clone $activityQuery)->action('vote_verified')
             ->whereBetween('created_at', [$prevStartDate, $prevEndDate])->count();
-        $prevOfficialVotes = Vote::query()->when($this->eventId, fn ($q) => $q->where('event_id', $this->eventId))
+        $prevOfficialVotes = Vote::query()->when($eventId, fn ($q) => $q->where('event_id', $eventId))
             ->whereBetween('created_at', [$prevStartDate, $prevEndDate])->count();
         $prevEffectiveVerified = max($prevVoteVerified, $prevOfficialVotes);
         $voteVerifiedTrend = $this->calculatePercentageChange($effectiveVerified, $prevEffectiveVerified);
@@ -209,10 +283,11 @@ class AnalyticsStatsOverview extends StatsOverviewWidget
         $daysCount = max(2, min(7, (int) $startDate->diffInDays($endDate) + 1));
         $data = [];
 
+        $eventId = $this->getActiveEventId();
         for ($i = $daysCount - 1; $i >= 0; $i--) {
             $day = (clone $endDate)->subDays($i);
             $count = $modelClass::query()
-                ->when($this->eventId, fn ($q) => $q->where('event_id', $this->eventId))
+                ->when($eventId, fn ($q) => $q->where('event_id', $eventId))
                 ->whereDate('created_at', $day)
                 ->count();
             $data[] = $count;

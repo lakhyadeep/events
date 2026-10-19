@@ -9,13 +9,17 @@ use App\Models\Vote;
 use Carbon\Carbon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\TableWidget;
+use Livewire\Attributes\On;
 
 class PageWiseFunnelWidget extends TableWidget
 {
+    use InteractsWithPageFilters;
+
     public ?int $eventId = null;
 
-    public string $period = '7days';
+    public string $period = 'last_7_days';
 
     protected static ?int $sort = 3;
 
@@ -23,14 +27,36 @@ class PageWiseFunnelWidget extends TableWidget
 
     protected int|string|array $columnSpan = 'full';
 
+    #[On('analytics-filter-updated')]
+    public function updateFilters(?int $eventId, string $period): void
+    {
+        $this->eventId = $eventId ?: null;
+        $this->period = $period;
+        $this->resetTable();
+    }
+
+    public function updatedPageFilters(): void
+    {
+        $this->resetTable();
+    }
+
+    protected function getActiveEventId(): ?int
+    {
+        $id = $this->pageFilters['eventId'] ?? $this->eventId ?? null;
+
+        return $id ? (int) $id : null;
+    }
+
     public function table(Table $table): Table
     {
         return $table
             ->heading('Page-Wise Tracking & Voting Conversion Funnel')
             ->description(function (): string {
                 $summary = $this->getSummaryMetrics();
+                $eventId = $this->getActiveEventId();
+                $scope = $eventId ? 'Event #'.$eventId : 'Global Scope';
 
-                return "Stage-to-stage transition rates & drop-off analysis • {$summary['overallConversion']}% overall conversion ({$summary['totalVotes']} verified votes) • {$summary['periodLabel']}";
+                return "Stage-to-stage transition rates & drop-off analysis • {$summary['overallConversion']}% overall conversion ({$summary['totalVotes']} verified votes) • {$summary['periodLabel']} • {$scope}";
             })
             ->records(fn (): array => $this->getFunnelData())
             ->paginated(false)
@@ -110,18 +136,43 @@ class PageWiseFunnelWidget extends TableWidget
         $homeVisitors = $funnelData[0]['visitors'] ?? 0;
         $voteVerified = $funnelData[4]['views'] ?? 0;
 
+        $preset = $this->pageFilters['rangePreset'] ?? $this->period ?? 'last_7_days';
+
         $periodLabels = [
+            'last_30_mins' => 'Last 30 Minutes',
+            'last_hour' => 'Last 1 Hour',
+            'last_4_hours' => 'Last 4 Hours',
             'today' => 'Today',
             'yesterday' => 'Yesterday',
+            'last_24_hours' => 'Last 24 Hours',
+            'last_7_days' => 'Last 7 Days',
+            'last_30_days' => 'Last 30 Days',
+            'this_month' => 'This Month',
+            'all_time' => 'All Time',
+            // Aliases
+            '30m' => 'Last 30 Minutes',
+            '1h' => 'Last 1 Hour',
+            '4h' => 'Last 4 Hours',
+            '24h' => 'Last 24 Hours',
             '7days' => 'Last 7 Days',
             '30days' => 'Last 30 Days',
             'all' => 'All Time',
         ];
 
+        $startDate = $this->pageFilters['startDate'] ?? null;
+        $endDate = $this->pageFilters['endDate'] ?? null;
+        if (! empty($startDate) && ! empty($endDate)) {
+            $label = Carbon::parse($startDate)->format('M d, H:i').' - '.Carbon::parse($endDate)->format('M d, H:i');
+        } elseif (! empty($startDate)) {
+            $label = 'From '.Carbon::parse($startDate)->format('M d, H:i');
+        } else {
+            $label = $periodLabels[$preset] ?? 'Selected Period';
+        }
+
         return [
             'overallConversion' => $homeVisitors > 0 ? round(($voteVerified / $homeVisitors) * 100, 1) : 0,
             'totalVotes' => number_format($voteVerified),
-            'periodLabel' => $periodLabels[$this->period] ?? 'Selected Period',
+            'periodLabel' => $label,
         ];
     }
 
@@ -132,13 +183,35 @@ class PageWiseFunnelWidget extends TableWidget
      */
     protected function getDateRanges(): array
     {
-        $now = now();
+        $startDate = ! empty($this->pageFilters['startDate'] ?? null)
+            ? rescue(fn () => Carbon::parse($this->pageFilters['startDate']), null, false)
+            : null;
 
-        return match ($this->period) {
+        $endDate = ! empty($this->pageFilters['endDate'] ?? null)
+            ? rescue(fn () => Carbon::parse($this->pageFilters['endDate']), null, false)
+            : null;
+
+        if ($startDate || $endDate) {
+            return [
+                $startDate ?? now()->subDays(7)->startOfDay(),
+                $endDate ?? now(),
+            ];
+        }
+
+        $now = now();
+        $preset = $this->pageFilters['rangePreset'] ?? $this->period ?? 'last_7_days';
+
+        return match ($preset) {
+            'last_30_mins', '30m', '30mins' => [$now->clone()->subMinutes(30), $now],
+            'last_hour', '1h', '1hour' => [$now->clone()->subHour(), $now],
+            'last_4_hours', '4h', '4hours' => [$now->clone()->subHours(4), $now],
             'today' => [today()->startOfDay(), $now],
             'yesterday' => [today()->subDay()->startOfDay(), today()->subDay()->endOfDay()],
-            '30days' => [now()->subDays(30)->startOfDay(), $now],
-            'all' => [now()->subYears(5)->startOfDay(), $now],
+            'last_24_hours', '24h', '24hours' => [$now->clone()->subHours(24), $now],
+            'last_7_days', '7days' => [now()->subDays(7)->startOfDay(), $now],
+            'last_30_days', '30days' => [now()->subDays(30)->startOfDay(), $now],
+            'this_month' => [now()->startOfMonth(), $now],
+            'all_time', 'all' => [now()->subYears(5)->startOfDay(), $now],
             default => [now()->subDays(7)->startOfDay(), $now],
         };
     }
@@ -151,9 +224,10 @@ class PageWiseFunnelWidget extends TableWidget
     public function getFunnelData(): array
     {
         [$startDate, $endDate] = $this->getDateRanges();
+        $eventId = $this->getActiveEventId();
 
-        $viewsQuery = PageView::query()->forEvent($this->eventId)->whereBetween('created_at', [$startDate, $endDate]);
-        $activityQuery = UserActivity::query()->forEvent($this->eventId)->whereBetween('created_at', [$startDate, $endDate]);
+        $viewsQuery = PageView::query()->forEvent($eventId)->whereBetween('created_at', [$startDate, $endDate]);
+        $activityQuery = UserActivity::query()->forEvent($eventId)->whereBetween('created_at', [$startDate, $endDate]);
 
         // 1. Homepage
         $homeViews = (clone $viewsQuery)->whereIn('page_type', ['homepage', 'home', 'landing'])->count();
@@ -169,12 +243,12 @@ class PageWiseFunnelWidget extends TableWidget
 
         // 5. Vote Verified (OTP Verified & Cast)
         $voteVerifiedAct = (clone $activityQuery)->action('vote_verified')->count();
-        $officialVotes = Vote::query()->when($this->eventId, fn ($q) => $q->where('event_id', $this->eventId))
+        $officialVotes = Vote::query()->when($eventId, fn ($q) => $q->where('event_id', $eventId))
             ->whereBetween('created_at', [$startDate, $endDate])->count();
         $voteVerified = max($voteVerifiedAct, $officialVotes);
         $voteVerifiedVisitors = (clone $activityQuery)->action('vote_verified')->distinct('visitor_id')->count('visitor_id');
         if ($voteVerifiedVisitors === 0 && $officialVotes > 0) {
-            $voteVerifiedVisitors = Vote::query()->when($this->eventId, fn ($q) => $q->where('event_id', $this->eventId))
+            $voteVerifiedVisitors = Vote::query()->when($eventId, fn ($q) => $q->where('event_id', $eventId))
                 ->whereBetween('created_at', [$startDate, $endDate])->distinct('mobile_number')->count('mobile_number');
         }
 

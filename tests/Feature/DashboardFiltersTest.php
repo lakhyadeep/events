@@ -52,10 +52,14 @@ class DashboardFiltersTest extends TestCase
         $this->actingAs($this->admin);
 
         Livewire::test(Dashboard::class)
-            ->set('filters.startDate', '2026-10-18 10:00:00')
-            ->set('filters.endDate', '2026-10-18 18:30:00')
-            ->assertSet('filters.startDate', '2026-10-18 10:00:00')
-            ->assertSet('filters.endDate', '2026-10-18 18:30:00')
+            ->set('filterData.startDate', '2026-10-18 10:00')
+            ->set('filterData.endDate', '2026-10-18 18:30')
+            ->assertSet('filterData.startDate', '2026-10-18 10:00')
+            ->assertSet('filterData.endDate', '2026-10-18 18:30')
+            ->assertSet('filters', null)
+            ->callAction('applyFilters')
+            ->assertSet('filters.startDate', '2026-10-18 10:00')
+            ->assertSet('filters.endDate', '2026-10-18 18:30')
             ->assertHasNoErrors();
     }
 
@@ -64,28 +68,35 @@ class DashboardFiltersTest extends TestCase
         $this->actingAs($this->admin);
 
         $component = Livewire::test(Dashboard::class)
-            ->set('filters.rangePreset', 'today');
+            ->set('filterData.rangePreset', 'today');
 
-        $startDate = $component->get('filters.startDate');
-        $endDate = $component->get('filters.endDate');
+        $startDate = $component->get('filterData.startDate');
+        $endDate = $component->get('filterData.endDate');
 
         $this->assertNotNull($startDate);
         $this->assertNotNull($endDate);
         $this->assertStringContainsString(now()->format('Y-m-d'), $startDate);
         $this->assertStringContainsString(now()->format('Y-m-d'), $endDate);
+        // Ensure applied filters remains null (widgets don't re-query) until applyFilters is called
+        $this->assertNull($component->get('filters'));
 
         // Test 30 minutes preset
-        $component->set('filters.rangePreset', 'last_30_mins');
-        $this->assertNotNull($component->get('filters.startDate'));
-        $this->assertNotNull($component->get('filters.endDate'));
+        $component->set('filterData.rangePreset', 'last_30_mins');
+        $this->assertNotNull($component->get('filterData.startDate'));
+        $this->assertNotNull($component->get('filterData.endDate'));
 
         // Test 1 hour preset
-        $component->set('filters.rangePreset', 'last_hour');
-        $this->assertNotNull($component->get('filters.startDate'));
-        $this->assertNotNull($component->get('filters.endDate'));
+        $component->set('filterData.rangePreset', 'last_hour');
+        $this->assertNotNull($component->get('filterData.startDate'));
+        $this->assertNotNull($component->get('filterData.endDate'));
 
         // Test 4 hours preset
-        $component->set('filters.rangePreset', 'last_4_hours');
+        $component->set('filterData.rangePreset', 'last_4_hours');
+        $this->assertNotNull($component->get('filterData.startDate'));
+        $this->assertNotNull($component->get('filterData.endDate'));
+
+        // Apply filters and verify applied filters are now updated
+        $component->callAction('applyFilters');
         $this->assertNotNull($component->get('filters.startDate'));
         $this->assertNotNull($component->get('filters.endDate'));
     }
@@ -95,11 +106,28 @@ class DashboardFiltersTest extends TestCase
         $this->actingAs($this->admin);
 
         Livewire::test(Dashboard::class)
-            ->set('filters.startDate', '2026-10-18 09:00:00')
-            ->set('filters.endDate', '2026-10-18 21:00:00')
+            ->set('filterData.startDate', '2026-10-18 09:00')
+            ->set('filterData.endDate', '2026-10-18 21:00')
+            ->callAction('applyFilters')
+            ->assertSet('filters.startDate', '2026-10-18 09:00')
+            ->assertSet('filters.endDate', '2026-10-18 21:00')
             ->callAction('clearFilters')
-            ->assertSet('filters.startDate', null)
-            ->assertSet('filters.endDate', null);
+            ->assertSet('filterData.startDate', null)
+            ->assertSet('filterData.endDate', null)
+            ->assertSet('filters', null);
+    }
+
+    public function test_dashboard_apply_filters_action_triggers_filters(): void
+    {
+        $this->actingAs($this->admin);
+
+        Livewire::test(Dashboard::class)
+            ->set('filterData.startDate', '2026-10-18 09:00')
+            ->set('filterData.endDate', '2026-10-18 21:00')
+            ->assertSet('filters', null)
+            ->callAction('applyFilters')
+            ->assertSet('filters.startDate', '2026-10-18 09:00')
+            ->assertSet('filters.endDate', '2026-10-18 21:00');
     }
 
     public function test_voting_stats_widget_adapts_to_page_filters(): void
