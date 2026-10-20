@@ -2,10 +2,11 @@
     @php
         $winnersByAward = $publishedWinners->groupBy('award_id');
 
-        $getRankValue = fn($w) => $w?->rank_order instanceof \BackedEnum ? $w->rank_order->value : (string) $w?->rank_order;
-        $isRank1st = fn($w) => in_array($getRankValue($w), ['1st', 'First', 'Gold'], true);
-        $isRank2nd = fn($w) => in_array($getRankValue($w), ['2nd', 'Second', 'Silver'], true);
-        $isRank3rd = fn($w) => in_array($getRankValue($w), ['3rd', 'Third', 'Bronze'], true);
+        $getRankValue = fn($w) => $w?->rank_order instanceof \BackedEnum ? $w->rank_order->value : (string) ($w?->rank_order ?? '');
+        $normalizeRank = fn($w) => strtolower(trim($getRankValue($w)));
+        $isRank1st = fn($w) => in_array($normalizeRank($w), ['1st', 'first', 'gold', 'champion', '1'], true);
+        $isRank2nd = fn($w) => in_array($normalizeRank($w), ['2nd', 'second', 'silver', 'runner up', 'runner-up', '1st runner up', '1st runner-up', '2'], true);
+        $isRank3rd = fn($w) => in_array($normalizeRank($w), ['3rd', 'third', 'bronze', '2nd runner up', '2nd runner-up', 'second runner up', '3'], true);
 
         $resolveLoc = function ($p) {
             if (!$p)
@@ -57,16 +58,15 @@
                 <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold text-uppercase mb-3 shadow-sm">
                     OFFICIAL ANNOUNCEMENT • DIBRUGARH DURGOTSAV {{ $event->year ?? date('Y') }}
                 </span>
-                <h2 class="display-6 fw-bold mb-2 text-white">
-                    🏆 People's Favorite Awards - Voting Live
+                <h2 class="display-6 fw-bold mb-2 text-yellow">
+                    🏆 Winner Declared
                     <i class="bi bi-arrow-right-circle-fill text-warning ms-1 click-arrow-icon" aria-hidden="true"></i>
                 </h2>
-                <p class="lead text-white-50 mx-auto mb-4" style="max-width: 780px; font-size: 1.05rem;">
-                    Select the puja you wish to vote for and select the best thing you liked about the selected puja. You
-                    cannot vote for any other puja once you vote for a particular puja. So choose the puja accordingly.
-                    <br><br>
-                    (Voting Live - 17th October 12 noon to 20th October 12 noon)
+                <p class="lead text-warning mx-auto mb-4" style="max-width: 780px; font-size: 2.05rem;">
+                    Thanks for Your participation
+
                 </p>
+                <p>(Dibrugarh Durgostav 2026)</p>
 
 
                 <!-- Key Stats Bar -->
@@ -118,6 +118,9 @@
                                 <div class="pinnacle-ribbon-badge">
                                     <i class="bi bi-stars text-warning me-1"></i>
                                     <span>{{$fixedPinnacleAward->display_name}}</span>
+                                    @if (!empty($isPreview) && $fixedPinnacleWinner->status === 'draft')
+                                        <span class="badge bg-dark text-warning ms-1" style="font-size: 0.65rem;">DRAFT</span>
+                                    @endif
                                     <i class="bi bi-stars text-warning ms-1"></i>
                                 </div>
 
@@ -127,15 +130,15 @@
                                         <div class="winner-img-wrap h-100">
                                             <img src="{{ $pImg }}" alt="{{ $pPart?->display_name ?: $pPart?->name }}">
                                             <!-- <span class="winner-rank-badge badge-gold shadow-sm">
-                                                                                                                                                <i class="bi bi-stars text-danger me-1"></i> {{ $pRankLabel ?: '' }}
-                                                                                                                                            </span> -->
+                                                                                                                                                                                                                                                                <i class="bi bi-stars text-danger me-1"></i> {{ $pRankLabel ?: '' }}
+                                                                                                                                                                                                                                                            </span> -->
                                             <div class="winner-img-overlay d-flex justify-content-between align-items-end">
                                                 <!-- <span class="winner-vote-pill text-warning">
-                                                                                                                                                                            <i class="bi bi-patch-check-fill me-1"></i> Jury Certified
-                                                                                                                                                                        </span> -->
+                                                                                                                                                                                                                                                                                            <i class="bi bi-patch-check-fill me-1"></i> Jury Certified
+                                                                                                                                                                                                                                                                                        </span> -->
                                                 <!-- <span class="badge bg-warning text-dark fw-bold">
-                                                                                                                                                                            <i class="bi bi-trophy-fill me-1"></i>
-                                                                                                                                                                        </span> -->
+                                                                                                                                                                                                                                                                                            <i class="bi bi-trophy-fill me-1"></i>
+                                                                                                                                                                                                                                                                                        </span> -->
                                             </div>
                                         </div>
                                     </div>
@@ -184,9 +187,9 @@
                                                 </div>
                                                 <div>
                                                     <!-- <div class="crown-badge-pill mb-1 d-inline-flex align-items-center">
-                                                                                                                                                                                                                            <i class="bi bi-stars text-warning me-1"></i>MAHA PURASKAR •
-                                                                                                                                                                                                                            GRAND CHAMPION
-                                                                                                                                                                                                                        </div> -->
+                                                                                                                                                                                                                                                                                                                                            <i class="bi bi-stars text-warning me-1"></i>MAHA PURASKAR •
+                                                                                                                                                                                                                                                                                                                                            GRAND CHAMPION
+                                                                                                                                                                                                                                                                                                                                        </div> -->
                                                     <h4 class="fw-bold mb-1 text-dark"
                                                         style="font-size: clamp(1.25rem, 2.5vw, 1.5rem);">
                                                         {{ $pPart?->display_name ?: $pPart?->name }}
@@ -229,32 +232,29 @@
             @foreach ($otherAwards as $awardId => $awardWinners)
                 @php
                     $award = $awardWinners->first()?->award;
-                    if (!$award)
+                    if (!$award) {
                         continue;
+                    }
 
-                    $claimedIds = [];
-                    $goldWinner = $awardWinners->first($isRank1st);
-                    if ($goldWinner)
-                        $claimedIds[] = $goldWinner->id;
+                    $goldWinners = $awardWinners->filter($isRank1st)->values();
+                    $silverWinners = $awardWinners->filter($isRank2nd)->values();
+                    $bronzeWinners = $awardWinners->filter($isRank3rd)->values();
 
-                    $silverWinner = $awardWinners->first(fn($w) => !in_array($w->id, $claimedIds) && $isRank2nd($w));
-                    if ($silverWinner)
-                        $claimedIds[] = $silverWinner->id;
-
-                    $bronzeWinner = $awardWinners->first(fn($w) => !in_array($w->id, $claimedIds) && $isRank3rd($w));
-                    if ($bronzeWinner)
-                        $claimedIds[] = $bronzeWinner->id;
+                    $claimedIds = $goldWinners->pluck('id')
+                        ->merge($silverWinners->pluck('id'))
+                        ->merge($bronzeWinners->pluck('id'))
+                        ->all();
 
                     $unassigned = $awardWinners->reject(fn($w) => in_array($w->id, $claimedIds))->values();
 
-                    if (!$goldWinner && $unassigned->isNotEmpty()) {
-                        $goldWinner = $unassigned->shift();
+                    if ($goldWinners->isEmpty() && $unassigned->isNotEmpty()) {
+                        $goldWinners = collect([$unassigned->shift()]);
                     }
-                    if (!$silverWinner && $unassigned->isNotEmpty()) {
-                        $silverWinner = $unassigned->shift();
+                    if ($silverWinners->isEmpty() && $unassigned->isNotEmpty()) {
+                        $silverWinners = collect([$unassigned->shift()]);
                     }
-                    if (!$bronzeWinner && $unassigned->isNotEmpty()) {
-                        $bronzeWinner = $unassigned->shift();
+                    if ($bronzeWinners->isEmpty() && $unassigned->isNotEmpty()) {
+                        $bronzeWinners = collect([$unassigned->shift()]);
                     }
                     $remainingWinners = $unassigned;
 
@@ -299,26 +299,29 @@
                     </div>
 
                     <div class="row g-4 justify-content-center">
-                        @if ($goldWinner)
+                        @foreach ($goldWinners as $goldWinner)
                             @php
                                 $gPart = $goldWinner->participant;
                                 $gRankLabel = $goldWinner->rank_order instanceof \App\Enums\WinnerRank
                                     ? $goldWinner->rank_order->label()
-                                    : ($goldWinner->rank_order ?: '');
+                                    : ($goldWinner->rank_order ?: '1st Place • Champion');
                             @endphp
                             <!-- 1st Place Gold Winner -->
                             <div class="col-12 col-md-6 col-lg-4">
                                 <div class="winner-podium-card winner-gold h-100">
                                     <span class="winner-rank-badge badge-gold">
                                         <i class="bi bi-trophy-fill me-1"></i> {{ $gRankLabel }}
+                                        @if (!empty($isPreview) && $goldWinner->status === 'draft')
+                                            <span class="badge bg-dark text-warning ms-1" style="font-size: 0.65rem;">DRAFT</span>
+                                        @endif
                                     </span>
                                     <div class="winner-img-wrap">
                                         <img src="{{ $resolveImg($gPart) }}" alt="{{ $gPart?->display_name ?: $gPart?->name }}">
                                         <div class="winner-img-overlay d-flex justify-content-between align-items-end">
                                             <!-- <span class="winner-vote-pill text-warning">
-                                                                                                                                                                        <i class="bi bi-fire me-1"></i>
-                                                                                                                                                                        {{ $gPart?->votes_count ? number_format($gPart->votes_count) . ' Votes' : 'Champion' }}
-                                                                                                                                                                    </span> -->
+                                                                                                                                                                                                                                                                                                                                                  <i class="bi bi-fire me-1"></i>
+                                                                                                                                                                                                                                                                                                                                                  {{ $gPart?->votes_count ? number_format($gPart->votes_count) . ' Votes' : 'Champion' }}
+                                                                                                                                                                                                                                                                                                                                              </span> -->
                                             <!-- <span class="badge bg-warning text-dark fw-bold">GOLD MEDAL</span> -->
                                         </div>
                                     </div>
@@ -342,9 +345,9 @@
                                     </div>
                                 </div>
                             </div>
-                        @endif
+                        @endforeach
 
-                        @if ($silverWinner)
+                        @foreach ($silverWinners as $silverWinner)
                             @php
                                 $sPart = $silverWinner->participant;
                                 $sRankLabel = $silverWinner->rank_order instanceof \App\Enums\WinnerRank
@@ -356,15 +359,18 @@
                                 <div class="winner-podium-card winner-silver h-100">
                                     <span class="winner-rank-badge badge-silver">
                                         <i class="bi bi-award-fill me-1"></i> {{ $sRankLabel }}
+                                        @if (!empty($isPreview) && $silverWinner->status === 'draft')
+                                            <span class="badge bg-dark text-warning ms-1" style="font-size: 0.65rem;">DRAFT</span>
+                                        @endif
                                     </span>
                                     <div class="winner-img-wrap">
                                         <img src="{{ $resolveImg($sPart, 'image_1') }}"
                                             alt="{{ $sPart?->display_name ?: $sPart?->name }}">
                                         <div class="winner-img-overlay d-flex justify-content-between align-items-end">
                                             <!-- <span class="winner-vote-pill text-light">
-                                                                                                                                                            <i class="bi bi-hand-thumbs-up me-1"></i>
-                                                                                                                                                            {{ $sPart?->votes_count ? number_format($sPart->votes_count) . ' Votes' : 'Runner-Up' }}
-                                                                                                                                                        </span> -->
+                                                                                                                                                                                                                                                                                                                                      <i class="bi bi-hand-thumbs-up me-1"></i>
+                                                                                                                                                                                                                                                                                                                                      {{ $sPart?->votes_count ? number_format($sPart->votes_count) . ' Votes' : 'Runner-Up' }}
+                                                                                                                                                                                                                                                                                                                                  </span> -->
                                             <!-- <span class="badge bg-secondary text-white fw-bold">SILVER MEDAL</span> -->
                                         </div>
                                     </div>
@@ -391,29 +397,32 @@
                                     </div>
                                 </div>
                             </div>
-                        @endif
+                        @endforeach
 
-                        @if ($bronzeWinner)
+                        @foreach ($bronzeWinners as $bronzeWinner)
                             @php
                                 $bPart = $bronzeWinner->participant;
                                 $bRankLabel = $bronzeWinner->rank_order instanceof \App\Enums\WinnerRank
                                     ? $bronzeWinner->rank_order->label()
-                                    : ($bronzeWinner->rank_order ?: '');
+                                    : ($bronzeWinner->rank_order ?: '3rd Place • 2nd Runner-Up');
                             @endphp
                             <!-- 3rd Place Bronze Runner-up -->
                             <div class="col-12 col-md-6 col-lg-4">
                                 <div class="winner-podium-card winner-bronze h-100">
                                     <span class="winner-rank-badge badge-bronze">
                                         <i class="bi bi-shield-fill me-1"></i> {{ $bRankLabel }}
+                                        @if (!empty($isPreview) && $bronzeWinner->status === 'draft')
+                                            <span class="badge bg-dark text-warning ms-1" style="font-size: 0.65rem;">DRAFT</span>
+                                        @endif
                                     </span>
                                     <div class="winner-img-wrap">
                                         <img src="{{ $resolveImg($bPart, 'image_2') }}"
                                             alt="{{ $bPart?->display_name ?: $bPart?->name }}">
                                         <div class="winner-img-overlay d-flex justify-content-between align-items-end">
                                             <!-- <span class="winner-vote-pill text-light">
-                                                                                                                                    <i class="bi bi-hand-thumbs-up me-1"></i>
-                                                                                                                                    {{ $bPart?->votes_count ? number_format($bPart->votes_count) . ' Votes' : '2nd Runner-Up' }}
-                                                                                                                                </span> -->
+                                                                                                                                                                                                                                                                                                             <i class="bi bi-hand-thumbs-up me-1"></i>
+                                                                                                                                                                                                                                                                                                             {{ $bPart?->votes_count ? number_format($bPart->votes_count) . ' Votes' : '2nd Runner-Up' }}
+                                                                                                                                                                                                                                                                                                         </span> -->
                                             <!-- <span class="badge bg-danger bg-opacity-75 text-white fw-bold">BRONZE MEDAL</span> -->
                                         </div>
                                     </div>
@@ -439,7 +448,7 @@
                                     </div>
                                 </div>
                             </div>
-                        @endif
+                        @endforeach
 
                         @foreach ($remainingWinners as $remWinner)
                             @php
@@ -455,6 +464,9 @@
                                     <span class="winner-rank-badge {{ $hasExplicitRank ? 'badge-bronze' : 'badge-gold' }}">
                                         <i class="bi {{ $hasExplicitRank ? 'bi-star-fill' : 'bi-trophy-fill' }} me-1"></i>
                                         {{ $rRankLabel }}
+                                        @if (!empty($isPreview) && $remWinner->status === 'draft')
+                                            <span class="badge bg-dark text-warning ms-1" style="font-size: 0.65rem;">DRAFT</span>
+                                        @endif
                                     </span>
                                     <div class="winner-img-wrap">
                                         <img src="{{ $resolveImg($rPart) }}" alt="{{ $rPart?->display_name ?: $rPart?->name }}">

@@ -16,8 +16,12 @@ class EventMicrositeController extends Controller
     /**
      * Display the event microsite.
      */
-    public function show(Event $event): View
+    public function show(Event $event, bool $isPreview = false): View
     {
+        $isPreview = $isPreview
+            || request()->boolean('preview')
+            || in_array(request()->get('preview'), ['1', 'awards', 'draft', 'true'], true);
+
         $event->loadMissing([
             'banners' => fn ($q) => $q->where('is_active', true)->orderBy('sort_order'),
             'sponsors' => fn ($q) => $q->where('is_active', true)->orderBy('slot_order'),
@@ -40,9 +44,10 @@ class EventMicrositeController extends Controller
         $otherSponsors = $event->sponsors
             ->whereNotIn('sponsor_type', [SponsorType::PresentingPartner, SponsorType::AssociateSponsor]);
 
-        // Published winners
-        $publishedWinners = $event->winners
-            ->where('status', 'published');
+        // Published winners (in preview mode, include draft winners as well)
+        $publishedWinners = $isPreview
+            ? $event->winners
+            : $event->winners->where('status', 'published');
 
         // Approved participants with zones for showcase
         $participants = $event->participants()
@@ -61,8 +66,17 @@ class EventMicrositeController extends Controller
             'otherSponsors',
             'publishedWinners',
             'participants',
-            'zones'
+            'zones',
+            'isPreview'
         ));
+    }
+
+    /**
+     * Preview the full event microsite with draft and published awards.
+     */
+    public function previewAwards(Event $event): View
+    {
+        return $this->show($event, true);
     }
 
     /**
