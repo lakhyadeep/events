@@ -113,12 +113,14 @@ class VotingLeaderboardWidget extends TableWidget
                             return '<span class="text-xs text-zinc-400 dark:text-zinc-500 font-normal">0 category votes</span>';
                         }
 
-                        return $counts->map(function ($item) {
+                        $badges = $counts->map(function ($item) {
                             $label = e($item['display_name']);
                             $count = (int) $item['votes_count'];
 
-                            return "<span class=\"inline-flex items-center gap-1 rounded-md bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-900/50 px-2 py-0.5 text-xs font-semibold text-amber-900 dark:text-amber-200 me-1 mb-1 shadow-xs\">{$label}: <strong class=\"text-rose-600 dark:text-rose-400 font-extrabold\">{$count}</strong></span>";
-                        })->implode('');
+                            return "<div><span class=\"inline-flex items-center gap-1.5 rounded-md bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-900/50 px-2 py-0.5 text-xs font-semibold text-amber-900 dark:text-amber-200 shadow-xs\"><span>{$label}:</span> <strong class=\"text-rose-600 dark:text-rose-400 font-extrabold\">{$count}</strong></span></div>";
+                        })->implode('<div class="h-1"></div>');
+
+                        return "<div class=\"flex flex-col py-1\">{$badges}</div>";
                     }),
             ])
             ->paginated(false);
