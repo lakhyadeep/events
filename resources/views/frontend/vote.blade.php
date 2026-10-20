@@ -9,6 +9,9 @@
     $canonicalUrl = $selectedParticipant && $selectedParticipant->slug
         ? route('events.vote', ['event' => $event->slug, 'participant' => $selectedParticipant->slug])
         : url('/'.$event->slug.'/vote');
+    $otpDigits = (int) ($otpConfig['length'] ?? 4);
+    if ($otpDigits < 4) $otpDigits = 4;
+    if ($otpDigits > 8) $otpDigits = 8;
 @endphp
 <x-layouts.microsite
     :event="$event"
@@ -335,6 +338,7 @@
     @include('frontend.partials.footer')
 
     <!-- OTP Verification Modal -->
+    @if (isset($event) && $event->isVotingOpen())
     <div class="modal fade" id="otpModal" tabindex="-1" aria-labelledby="otpModalLabel" aria-hidden="true"
         data-bs-backdrop="static">
         <div class="modal-dialog modal-dialog-centered">
@@ -408,5 +412,6 @@
             </div>
         </div>
     </div>
+    @endif
 
 </x-layouts.microsite>

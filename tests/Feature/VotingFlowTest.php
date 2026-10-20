@@ -356,6 +356,10 @@ class VotingFlowTest extends TestCase
         $directoryResponse = $this->get('/'.$event->slug.'/all-pujas');
         $directoryResponse->assertStatus(200);
         $directoryResponse->assertSee('Voting is currently closed for this event.');
+
+        $voteResponse = $this->get('/'.$event->slug.'/vote/'.$participant->slug);
+        $voteResponse->assertStatus(200);
+        $voteResponse->assertSee('Voting is Closed');
     }
 
     public function test_cannot_vote_when_countdown_deadline_has_passed(): void
