@@ -14,7 +14,7 @@ class VotingLeaderboardWidget extends TableWidget
 {
     use InteractsWithPageFilters;
 
-    protected static ?int $sort = 3;
+    protected static ?int $sort = 4;
 
     protected static bool $isLazy = false;
 
@@ -103,6 +103,23 @@ class VotingLeaderboardWidget extends TableWidget
                     ->weight('bold')
                     ->icon('heroicon-m-hand-thumb-up')
                     ->formatStateUsing(fn ($state) => number_format((int) $state).' votes'),
+
+                TextColumn::make('award_breakdown')
+                    ->label('Award Category Breakdown')
+                    ->html()
+                    ->state(function (Participant $record) use ($startDate, $endDate): string {
+                        $counts = $record->getVoteCountsByAward($startDate, $endDate)->where('votes_count', '>', 0);
+                        if ($counts->isEmpty()) {
+                            return '<span class="text-xs text-zinc-400 dark:text-zinc-500 font-normal">0 category votes</span>';
+                        }
+
+                        return $counts->map(function ($item) {
+                            $label = e($item['display_name']);
+                            $count = (int) $item['votes_count'];
+
+                            return "<span class=\"inline-flex items-center gap-1 rounded-md bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-900/50 px-2 py-0.5 text-xs font-semibold text-amber-900 dark:text-amber-200 me-1 mb-1 shadow-xs\">{$label}: <strong class=\"text-rose-600 dark:text-rose-400 font-extrabold\">{$count}</strong></span>";
+                        })->implode('');
+                    }),
             ])
             ->paginated(false);
     }

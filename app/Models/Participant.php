@@ -4,12 +4,14 @@ namespace App\Models;
 
 use App\Enums\RegistrationStatus;
 use App\Models\Concerns\ResolvesMediaUrl;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 class Participant extends Model
@@ -191,5 +193,74 @@ class Participant extends Model
     public function votes(): HasMany
     {
         return $this->hasMany(Vote::class);
+    }
+
+    /**
+     * Get vote counts for this participant grouped by award / category.
+     *
+     * @return Collection<int, array{
+     *     award_id: ?int,
+     *     name: string,
+     *     display_name: string,
+     *     category: string,
+     *     votes_count: int,
+     *     percentage: float
+     * }>
+     */
+    public function getVoteCountsByAward(?Carbon $startDate = null, ?Carbon $endDate = null): Collection
+    {
+        $votesQuery = $this->votes()
+            ->when($startDate, fn ($q) => $q->where('created_at', '>=', $startDate))
+            ->when($endDate, fn ($q) => $q->where('created_at', '<=', $endDate));
+
+        $countsByAward = (clone $votesQuery)
+            ->selectRaw('award_id, count(*) as count')
+            ->groupBy('award_id')
+            ->pluck('count', 'award_id')
+            ->all();
+
+        $awards = Award::query()
+            ->when($this->event_id, fn ($q) => $q->where('event_id', $this->event_id))
+            ->where('is_active', true)
+            ->where('is_voting_allowed', true)
+            ->where('name', 'not like', '%Best Puja%')
+            ->orderBy('sort_order')
+            ->get();
+
+        $includedAwardIds = $awards->pluck('id')->all();
+        $totalCategoryVotes = 0;
+        foreach ($includedAwardIds as $awardId) {
+            $totalCategoryVotes += (int) ($countsByAward[$awardId] ?? 0);
+        }
+
+        $breakdown = $awards->map(function (Award $award) use ($countsByAward, $totalCategoryVotes) {
+            $count = (int) ($countsByAward[$award->id] ?? 0);
+            $percentage = $totalCategoryVotes > 0 ? round(($count / $totalCategoryVotes) * 100, 1) : 0.0;
+
+            return [
+                'award_id' => $award->id,
+                'name' => $award->name,
+                'display_name' => $award->display_name ?: $award->name,
+                'category' => $award->category ?: 'General',
+                'votes_count' => $count,
+                'percentage' => $percentage,
+            ];
+        });
+
+        // Check if there are votes with award_id = null
+        $uncategorizedCount = (int) ($countsByAward[''] ?? $countsByAward[null] ?? 0);
+        if ($uncategorizedCount > 0) {
+            $percentage = $totalVotes > 0 ? round(($uncategorizedCount / $totalVotes) * 100, 1) : 0.0;
+            $breakdown->push([
+                'award_id' => null,
+                'name' => 'General / Overall',
+                'display_name' => 'General / Overall',
+                'category' => 'Uncategorized',
+                'votes_count' => $uncategorizedCount,
+                'percentage' => $percentage,
+            ]);
+        }
+
+        return $breakdown;
     }
 }

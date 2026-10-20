@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Services\Fraud\FraudPreventionService;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -72,6 +73,27 @@ class Vote extends Model
         $clean = preg_replace('/[^0-9]/', '', $mobile) ?? '';
 
         return $query->where('mobile_number', $clean);
+    }
+
+    /**
+     * Get vote counts grouped by participant and award.
+     *
+     * @param  array<int>  $participantIds
+     * @return Collection<int, Vote>
+     */
+    public static function getCountsByParticipantAndAward(array $participantIds, ?Carbon $startDate = null, ?Carbon $endDate = null): Collection
+    {
+        if (empty($participantIds)) {
+            return new Collection;
+        }
+
+        return static::query()
+            ->whereIn('participant_id', $participantIds)
+            ->when($startDate, fn ($q) => $q->where('created_at', '>=', $startDate))
+            ->when($endDate, fn ($q) => $q->where('created_at', '<=', $endDate))
+            ->selectRaw('participant_id, award_id, count(*) as votes_count')
+            ->groupBy('participant_id', 'award_id')
+            ->get();
     }
 
     /**
