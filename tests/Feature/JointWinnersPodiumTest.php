@@ -228,4 +228,71 @@ class JointWinnersPodiumTest extends TestCase
         $this->assertLessThan($pos3rdA, $pos2nd);
         $this->assertLessThan($pos3rdB, $pos2nd);
     }
+
+    public function test_trophy_ring_icons_match_award_category_across_all_ranks(): void
+    {
+        $event = Event::factory()->active()->create([
+            'slug' => 'test-category-trophy-icons',
+        ]);
+
+        $pratimaAward = Award::factory()->create([
+            'event_id' => $event->id,
+            'name' => 'Best Pratima',
+            'display_name' => 'Best Pratima Award',
+            'category' => 'Art & Sculpture',
+            'is_voting_allowed' => true,
+            'is_active' => true,
+        ]);
+
+        $pandalAward = Award::factory()->create([
+            'event_id' => $event->id,
+            'name' => 'Best Pandal',
+            'display_name' => 'Best Pandal Award',
+            'category' => 'Designs and Sustainability',
+            'is_voting_allowed' => true,
+            'is_active' => true,
+        ]);
+
+        $themeAward = Award::factory()->create([
+            'event_id' => $event->id,
+            'name' => 'Best Theme',
+            'display_name' => 'Best Theme Award',
+            'category' => 'Social Message',
+            'is_voting_allowed' => true,
+            'is_active' => true,
+        ]);
+
+        foreach ([$pratimaAward, $pandalAward, $themeAward] as $award) {
+            foreach ([WinnerRank::First, WinnerRank::Second, WinnerRank::Third] as $rank) {
+                $p = Participant::factory()->approved()->create([
+                    'event_id' => $event->id,
+                    'name' => $award->name.' '.$rank->value,
+                    'display_name' => $award->name.' '.$rank->value,
+                ]);
+
+                Winner::create([
+                    'event_id' => $event->id,
+                    'award_id' => $award->id,
+                    'participant_id' => $p->id,
+                    'year' => $event->year,
+                    'rank_order' => $rank,
+                    'status' => 'published',
+                ]);
+            }
+        }
+
+        $response = $this->get('/'.$event->slug);
+        $response->assertStatus(200);
+
+        $content = $response->getContent();
+
+        // 3 ranks * 1 award = 3 flower icons for Best Pratima
+        $this->assertGreaterThanOrEqual(3, substr_count($content, 'bi bi-flower1'));
+
+        // 3 ranks * 1 award = 3 bank icons for Best Pandal
+        $this->assertGreaterThanOrEqual(3, substr_count($content, 'bi bi-bank'));
+
+        // 3 ranks * 1 award = 3 brush icons for Best Theme
+        $this->assertGreaterThanOrEqual(3, substr_count($content, 'bi bi-brush'));
+    }
 }

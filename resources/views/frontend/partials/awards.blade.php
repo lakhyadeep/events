@@ -1,4 +1,4 @@
-@if ($event->awards && $event->awards->where('is_active', true)->isNotEmpty())
+@if (isset($publishedWinners) && $publishedWinners->isEmpty())
 <!-- Vote for the Best — Sharad Samman 2026 Section -->
 <section class="pujas-voting-section" id="pujas" style="border-bottom: 2px solid rgba(255, 204, 0, 0.5);">
     <!-- Embedded Awards to be Presented with slightly darker background -->

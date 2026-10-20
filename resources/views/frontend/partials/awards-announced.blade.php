@@ -43,7 +43,7 @@
     @endphp
 
     <!-- Official Awards Announced / Winners Showcase Section -->
-    <section class="awards-announced-section py-5" id="awards-announced">
+    <section class="awards-announced-section py-5" id="awards-announced" style="border-top: none;">
         <div class="container py-3">
             <!-- Section Header Box (Clickable redirect to All Pujas) -->
             <a href="{{ isset($event) && $event->slug ? route('events.all-pujas', ['event' => $event->slug]) : route('home') }}"
@@ -130,15 +130,15 @@
                                         <div class="winner-img-wrap h-100">
                                             <img src="{{ $pImg }}" alt="{{ $pPart?->display_name ?: $pPart?->name }}">
                                             <!-- <span class="winner-rank-badge badge-gold shadow-sm">
-                                                                                                                                                                                                                                                                <i class="bi bi-stars text-danger me-1"></i> {{ $pRankLabel ?: '' }}
-                                                                                                                                                                                                                                                            </span> -->
+                                                                                                                                                                                                                                                                                <i class="bi bi-stars text-danger me-1"></i> {{ $pRankLabel ?: '' }}
+                                                                                                                                                                                                                                                                            </span> -->
                                             <div class="winner-img-overlay d-flex justify-content-between align-items-end">
                                                 <!-- <span class="winner-vote-pill text-warning">
-                                                                                                                                                                                                                                                                                            <i class="bi bi-patch-check-fill me-1"></i> Jury Certified
-                                                                                                                                                                                                                                                                                        </span> -->
+                                                                                                                                                                                                                                                                                                            <i class="bi bi-patch-check-fill me-1"></i> Jury Certified
+                                                                                                                                                                                                                                                                                                        </span> -->
                                                 <!-- <span class="badge bg-warning text-dark fw-bold">
-                                                                                                                                                                                                                                                                                            <i class="bi bi-trophy-fill me-1"></i>
-                                                                                                                                                                                                                                                                                        </span> -->
+                                                                                                                                                                                                                                                                                                            <i class="bi bi-trophy-fill me-1"></i>
+                                                                                                                                                                                                                                                                                                        </span> -->
                                             </div>
                                         </div>
                                     </div>
@@ -187,9 +187,9 @@
                                                 </div>
                                                 <div>
                                                     <!-- <div class="crown-badge-pill mb-1 d-inline-flex align-items-center">
-                                                                                                                                                                                                                                                                                                                                            <i class="bi bi-stars text-warning me-1"></i>MAHA PURASKAR •
-                                                                                                                                                                                                                                                                                                                                            GRAND CHAMPION
-                                                                                                                                                                                                                                                                                                                                        </div> -->
+                                                                                                                                                                                                                                                                                                                                                            <i class="bi bi-stars text-warning me-1"></i>MAHA PURASKAR •
+                                                                                                                                                                                                                                                                                                                                                            GRAND CHAMPION
+                                                                                                                                                                                                                                                                                                                                                        </div> -->
                                                     <h4 class="fw-bold mb-1 text-dark"
                                                         style="font-size: clamp(1.25rem, 2.5vw, 1.5rem);">
                                                         {{ $pPart?->display_name ?: $pPart?->name }}
@@ -258,32 +258,32 @@
                     }
                     $remainingWinners = $unassigned;
 
-                    $awardText = strtolower(($award->name ?? '') . ' ' . ($award->display_name ?? '') . ' ' . ($award->category ?? ''));
-                    if (str_contains($awardText, 'light') || str_contains($awardText, 'aalok') || str_contains($awardText, 'illumination')) {
-                        $categoryIcon = 'bi-brightness-high-fill text-warning';
-                        $categoryBorder = 'border-warning border-opacity-50';
-                        $ringIconGold = 'bi-lightbulb-fill';
-                        $ringIconSilver = 'bi-brightness-high';
-                        $ringIconBronze = 'bi-sun';
-                    } elseif (str_contains($awardText, 'idol') || str_contains($awardText, 'pratima')) {
+                    $awardTitle = strtolower(($award->name ?? '') . ' ' . ($award->display_name ?? ''));
+                    $awardCat = strtolower($award->category ?? '');
+                    if (str_contains($awardTitle, 'pratima') || str_contains($awardTitle, 'pritama') || str_contains($awardTitle, 'idol') || str_contains($awardCat, 'pratima') || str_contains($awardCat, 'sculpture')) {
+                        $ringIcon = 'bi-flower1';
                         $categoryIcon = 'bi-flower1 text-warning';
                         $categoryBorder = 'border-warning border-opacity-50';
-                        $ringIconGold = 'bi-flower1';
-                        $ringIconSilver = 'bi-palette';
-                        $ringIconBronze = 'bi-brush';
-                    } elseif (str_contains($awardText, 'pandal') || str_contains($awardText, 'mandap') || str_contains($awardText, 'eco')) {
-                        $categoryIcon = 'bi-palette-fill text-primary';
-                        $categoryBorder = 'border-primary border-opacity-25';
-                        $ringIconGold = 'bi-bank';
-                        $ringIconSilver = 'bi-palette';
-                        $ringIconBronze = 'bi-shield-check';
+                    } elseif (str_contains($awardTitle, 'pandal') || str_contains($awardTitle, 'mandap') || str_contains($awardCat, 'pandal') || str_contains($awardCat, 'mandap')) {
+                        $ringIcon = 'bi-bank';
+                        $categoryIcon = 'bi-bank text-warning';
+                        $categoryBorder = 'border-warning border-opacity-50';
+                    } elseif (str_contains($awardTitle, 'theme') || str_contains($awardCat, 'theme') || str_contains($awardTitle, 'concept') || str_contains($awardCat, 'concept') || str_contains($awardTitle, 'artistry')) {
+                        $ringIcon = 'bi-brush';
+                        $categoryIcon = 'bi-brush text-warning';
+                        $categoryBorder = 'border-warning border-opacity-50';
+                    } elseif (str_contains($awardTitle, 'light') || str_contains($awardTitle, 'aalok') || str_contains($awardTitle, 'illumination') || str_contains($awardCat, 'light') || str_contains($awardCat, 'illumination')) {
+                        $ringIcon = 'bi-lightbulb-fill';
+                        $categoryIcon = 'bi-brightness-high-fill text-warning';
+                        $categoryBorder = 'border-warning border-opacity-50';
                     } else {
+                        $ringIcon = 'bi-trophy-fill';
                         $categoryIcon = 'bi-star-fill text-warning';
-                        $categoryBorder = 'border-danger border-opacity-25';
-                        $ringIconGold = 'bi-trophy-fill';
-                        $ringIconSilver = 'bi-award';
-                        $ringIconBronze = 'bi-star';
+                        $categoryBorder = 'border-warning border-opacity-50';
                     }
+                    $ringIconGold = $ringIcon;
+                    $ringIconSilver = $ringIcon;
+                    $ringIconBronze = $ringIcon;
                 @endphp
 
                 <div class="mb-5">
@@ -319,9 +319,9 @@
                                         <img src="{{ $resolveImg($gPart) }}" alt="{{ $gPart?->display_name ?: $gPart?->name }}">
                                         <div class="winner-img-overlay d-flex justify-content-between align-items-end">
                                             <!-- <span class="winner-vote-pill text-warning">
-                                                                                                                                                                                                                                                                                                                                                  <i class="bi bi-fire me-1"></i>
-                                                                                                                                                                                                                                                                                                                                                  {{ $gPart?->votes_count ? number_format($gPart->votes_count) . ' Votes' : 'Champion' }}
-                                                                                                                                                                                                                                                                                                                                              </span> -->
+                                                                                                                                                                                                                                                                                                                                                                          <i class="bi bi-fire me-1"></i>
+                                                                                                                                                                                                                                                                                                                                                                          {{ $gPart?->votes_count ? number_format($gPart->votes_count) . ' Votes' : 'Champion' }}
+                                                                                                                                                                                                                                                                                                                                                                      </span> -->
                                             <!-- <span class="badge bg-warning text-dark fw-bold">GOLD MEDAL</span> -->
                                         </div>
                                     </div>
@@ -368,15 +368,15 @@
                                             alt="{{ $sPart?->display_name ?: $sPart?->name }}">
                                         <div class="winner-img-overlay d-flex justify-content-between align-items-end">
                                             <!-- <span class="winner-vote-pill text-light">
-                                                                                                                                                                                                                                                                                                                                      <i class="bi bi-hand-thumbs-up me-1"></i>
-                                                                                                                                                                                                                                                                                                                                      {{ $sPart?->votes_count ? number_format($sPart->votes_count) . ' Votes' : 'Runner-Up' }}
-                                                                                                                                                                                                                                                                                                                                  </span> -->
+                                                                                                                                                                                                                                                                                                                                                              <i class="bi bi-hand-thumbs-up me-1"></i>
+                                                                                                                                                                                                                                                                                                                                                              {{ $sPart?->votes_count ? number_format($sPart->votes_count) . ' Votes' : 'Runner-Up' }}
+                                                                                                                                                                                                                                                                                                                                                          </span> -->
                                             <!-- <span class="badge bg-secondary text-white fw-bold">SILVER MEDAL</span> -->
                                         </div>
                                     </div>
                                     <div class="p-3 text-center">
                                         <div class="mb-2">
-                                            <div class="winner-trophy-ring ring-silver mx-auto">
+                                            <div class="winner-trophy-ring ring-gold mx-auto">
                                                 <i class="bi {{ $ringIconSilver }}"></i>
                                             </div>
                                         </div>
@@ -389,9 +389,9 @@
                                         </p>
 
                                         @if($sPart?->puja_theme)
-                                            <div class="p-2 rounded bg-light text-muted small fw-medium">
-                                                <i class="bi bi-check-circle-fill text-secondary me-1"></i>
-                                                {{ $sPart?->puja_theme ? 'Theme: ' . $sPart->puja_theme : ' ' }}
+                                            <div class="p-2 rounded bg-warning bg-opacity-10 text-dark small fw-medium">
+                                                <i class="bi bi-award-fill text-warning me-1"></i>
+                                                {{ 'Theme: ' . $sPart->puja_theme }}
                                             </div>
                                         @endif
                                     </div>
@@ -420,15 +420,15 @@
                                             alt="{{ $bPart?->display_name ?: $bPart?->name }}">
                                         <div class="winner-img-overlay d-flex justify-content-between align-items-end">
                                             <!-- <span class="winner-vote-pill text-light">
-                                                                                                                                                                                                                                                                                                             <i class="bi bi-hand-thumbs-up me-1"></i>
-                                                                                                                                                                                                                                                                                                             {{ $bPart?->votes_count ? number_format($bPart->votes_count) . ' Votes' : '2nd Runner-Up' }}
-                                                                                                                                                                                                                                                                                                         </span> -->
+                                                                                                                                                                                                                                                                                                                                      <i class="bi bi-hand-thumbs-up me-1"></i>
+                                                                                                                                                                                                                                                                                                                                      {{ $bPart?->votes_count ? number_format($bPart->votes_count) . ' Votes' : '2nd Runner-Up' }}
+                                                                                                                                                                                                                                                                                                                                  </span> -->
                                             <!-- <span class="badge bg-danger bg-opacity-75 text-white fw-bold">BRONZE MEDAL</span> -->
                                         </div>
                                     </div>
                                     <div class="p-3 text-center">
                                         <div class="mb-2">
-                                            <div class="winner-trophy-ring ring-bronze mx-auto">
+                                            <div class="winner-trophy-ring ring-gold mx-auto">
                                                 <i class="bi {{ $ringIconBronze }}"></i>
                                             </div>
                                         </div>
@@ -440,9 +440,9 @@
                                             <x-gmap-button :participant="$bPart" :location="$resolveLoc($bPart)" />
                                         </p>
                                         @if($bPart?->puja_theme)
-                                            <div class="p-2 rounded bg-light text-muted small fw-medium">
-                                                <i class="bi bi-check-circle-fill text-secondary me-1"></i>
-                                                {{ $bPart?->puja_theme ? 'Theme: ' . $bPart->puja_theme : ' ' }}
+                                            <div class="p-2 rounded bg-warning bg-opacity-10 text-dark small fw-medium">
+                                                <i class="bi bi-award-fill text-warning me-1"></i>
+                                                {{ 'Theme: ' . $bPart->puja_theme }}
                                             </div>
                                         @endif
                                     </div>
@@ -483,8 +483,8 @@
                                     </div>
                                     <div class="p-3 text-center">
                                         <div class="mb-2">
-                                            <div class="winner-trophy-ring ring-bronze mx-auto">
-                                                <i class="bi bi-star"></i>
+                                            <div class="winner-trophy-ring ring-gold mx-auto">
+                                                <i class="bi {{ $ringIcon }}"></i>
                                             </div>
                                         </div>
                                         <h4 class="fw-bold mb-1 text-dark">{{ $rPart?->display_name ?: $rPart?->name }}</h4>
@@ -494,8 +494,8 @@
                                                     class="bi bi-geo-alt-fill text-danger me-1"></i>{{ $resolveLoc($rPart) }}</span>
                                             <x-gmap-button :participant="$rPart" :location="$resolveLoc($rPart)" />
                                         </p>
-                                        <div class="p-2 rounded bg-light text-muted small fw-medium">
-
+                                        <div class="p-2 rounded bg-warning bg-opacity-10 text-dark small fw-medium">
+                                            <i class="bi bi-award-fill text-warning me-1"></i>
                                             {{ $rPart?->puja_theme ? 'Theme: ' . $rPart->puja_theme : ($award->description ?: '') }}
                                         </div>
                                     </div>
